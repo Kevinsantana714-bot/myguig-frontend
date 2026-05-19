@@ -1797,17 +1797,40 @@ function applyUserToUI(user){
   _currentUserId         = user.id    || null;
   userProfile.nome       = user.name  || userProfile.nome;
   userProfile.email      = user.email || userProfile.email;
-  if(user.bio       != null) userProfile.bio       = user.bio;
-  if(user.instagram != null) userProfile.instagram = user.instagram;
-  if(user.cidade    != null) userProfile.cidade    = user.cidade;
+
+  // Servidor é a fonte de verdade — usa dados do servidor quando disponíveis
+  if(user.bio        != null) userProfile.bio        = user.bio;
+  if(user.instagram  != null) userProfile.instagram  = user.instagram;
+  if(user.cidade     != null) userProfile.cidade     = user.cidade;
   if(user.cache_minimo != null) userProfile.cache_minimo = parseFloat(user.cache_minimo) || 0;
-  if(user.estilos   != null){
+  if(user.estilos    != null){
     try{ userProfile.estilos = typeof user.estilos==='string' ? JSON.parse(user.estilos) : user.estilos; }
     catch(e){ userProfile.estilos = []; }
   }
+  // Novos campos
+  if(user.phone      != null && user.phone !== '') userProfile.tel = user.phone;
+  if(user.avatar_url != null && user.avatar_url !== '') userProfile.imgPerfil = user.avatar_url;
+
   saveProfile();
   syncSidebar();
   renderPerfil();
+
+  // ── Sincronização única: se o servidor tem bio/instagram vazios mas localStorage tem dados,
+  //    envia esses dados para o servidor (recupera utilizadores antigos)
+  var serverIsEmpty = !user.bio && !user.instagram && !user.cidade && !(user.cache_minimo > 0) && !user.avatar_url && !user.phone;
+  var localHasData  = !!(userProfile.bio || userProfile.instagram || userProfile.cidade || userProfile.cache_minimo > 0 || userProfile.imgPerfil || userProfile.tel);
+  if(serverIsEmpty && localHasData){
+    apiCall('PUT', '/auth/profile', {
+      name:         userProfile.nome,
+      bio:          userProfile.bio          || null,
+      instagram:    userProfile.instagram    || null,
+      cidade:       userProfile.cidade       || null,
+      cache_minimo: userProfile.cache_minimo || 0,
+      estilos:      userProfile.estilos      || [],
+      phone:        userProfile.tel          || null,
+      avatar_url:   userProfile.imgPerfil    || null,
+    }).catch(function(){});
+  }
 }
 
 /* ── Verifica token ao carregar ── */
@@ -2440,19 +2463,30 @@ async function salvarPerfil(){
       instagram:    userProfile.instagram    || null,
       cidade:       userProfile.cidade       || null,
       cache_minimo: userProfile.cache_minimo || 0,
-      estilos:      userProfile.estilos      || []
+      estilos:      userProfile.estilos      || [],
+      phone:        userProfile.tel          || null,
     });
     showToast('✓ Perfil atualizado!', 'success');
   } catch(e) {
-    showToast('✓ Perfil salvo localmente', 'success');
+    showToast('Perfil guardado localmente.', 'info');
   }
 }
 function handleAvatarUpload(evt){
   var f=evt.target.files[0];if(!f) return;
   if(f.size>5*1024*1024){showToast('Imagem muito grande (máx. 5 MB)','info');return;}
   var r=new FileReader();
-  r.onload=function(e){userProfile.imgPerfil=e.target.result;saveProfile();renderPerfil();syncSidebar();showToast('✓ Foto de perfil atualizada!','success');};
-  r.readAsDataURL(f);evt.target.value='';
+  r.onload=function(e){
+    var dataUrl = e.target.result;
+    userProfile.imgPerfil = dataUrl;
+    saveProfile();
+    renderPerfil();
+    syncSidebar();
+    showToast('✓ Foto de perfil atualizada!','success');
+    // Sincroniza com o servidor
+    apiCall('PUT', '/auth/profile', { avatar_url: dataUrl }).catch(function(){});
+  };
+  r.readAsDataURL(f);
+  evt.target.value='';
 }
 function handleCapaUpload(evt){
   var f=evt.target.files[0];if(!f) return;
