@@ -1056,8 +1056,6 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 
       <!-- PROPOSTAS -->
       <div class="view" id="view-propostas">
-        <div class="page-title">Propostas recebidas</div>
-        <div class="page-sub">Gerencie, negocie e confirme seus compromissos musicais</div>
         <div class="sync-hint"><div class="sync-dot"></div>Estado global ativo &#8212; Propostas e Agenda compartilham a mesma lista de dados</div>
         <div class="filters">
           <button class="filter-chip active" onclick="setFilter('all',this)">Todas</button>
@@ -1071,14 +1069,12 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 
       <!-- AGENDA -->
       <div class="view" id="view-agenda">
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:3px">
-          <div style="font-size:22px;font-weight:700;color:#fff">Agenda</div>
+        <div style="display:flex;align-items:center;justify-content:flex-end;margin-bottom:16px">
           <button class="add-event-btn" onclick="openAddEventModal()">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 2v12M2 8h12"/></svg>
             Adicionar Evento
           </button>
         </div>
-        <div style="font-size:13px;color:#666;margin-bottom:16px">Ensaios, shows e compromissos confirmados</div>
         <div class="ganhos-row">
           <div class="faturamento-widget">
             <div class="fat-label">Total do Mês</div>
@@ -1109,7 +1105,6 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
       </div>
 
       <div class="view" id="view-descobrir">
-        <div class="page-title" style="margin-bottom:16px">Descobrir músicos</div>
         <div class="disc-search-bar">
           <span class="disc-search-icon">&#128269;</span>
           <input type="text" id="disc-search" placeholder="Buscar por nome ou bio…" oninput="debouncedDiscSearch()">
@@ -1129,8 +1124,6 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 
       <!-- MENSAGENS -->
       <div class="view" id="view-mensagens">
-        <div class="page-title" style="margin-bottom:4px">Mensagens</div>
-        <div class="page-sub" style="margin-bottom:18px">As tuas conversas com contratantes e músicos</div>
         <div class="conv-toolbar">
           <div style="font-size:13px;color:#555" id="conv-select-count"></div>
           <div class="conv-toolbar-actions">
@@ -1143,9 +1136,6 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 
       <!-- CONFIGURAÇÕES -->
       <div class="view" id="view-configuracoes">
-        <div class="page-title" style="margin-bottom:4px">Configurações</div>
-        <div class="page-sub" style="margin-bottom:22px">Personalize a tua experiência no MyGUIg</div>
-
         <!-- 1. Preferências de exibição -->
         <div class="cfg-section">
           <div class="cfg-section-title">Preferências de exibição</div>
