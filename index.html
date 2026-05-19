@@ -1233,6 +1233,12 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
             </button>
           </div>
 
+          <!-- Aviso foto local (aparece só quando base64 antigo ainda não foi migrado) -->
+          <div id="prf-avatar-local-warn" style="display:none;margin:8px 0 0;padding:8px 12px;background:#1a1006;border:1px solid #7c3f00;border-radius:8px;font-size:12px;color:#fb923c;align-items:center;gap:8px">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#fb923c" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            A tua foto ainda não está visível para outros. Faz upload novamente para a tornares pública.
+          </div>
+
           <div class="prf-identity">
             <div class="prf-name" id="prf-nome-display">Pedro Alves</div>
             <div style="margin-top:5px">
@@ -1815,9 +1821,7 @@ function applyUserToUI(user){
   syncSidebar();
   renderPerfil();
 
-  // ── Sincronização única: se o servidor tem campos de texto vazios mas localStorage tem dados,
-  //    envia esses dados para o servidor (recupera utilizadores com dados só em localStorage)
-  //    Nota: NÃO envia avatar_url — fotos são agora geridas exclusivamente pelo Cloudinary
+  // ── Sincronização única: campos de texto localStorage → servidor ──
   var serverIsEmpty = !user.bio && !user.instagram && !user.cidade && !(user.cache_minimo > 0) && !user.phone;
   var localHasText  = !!(userProfile.bio || userProfile.instagram || userProfile.cidade || userProfile.cache_minimo > 0 || userProfile.tel);
   if(serverIsEmpty && localHasText){
@@ -1830,6 +1834,53 @@ function applyUserToUI(user){
       estilos:      userProfile.estilos      || [],
       phone:        userProfile.tel          || null,
     }).catch(function(){});
+  }
+
+  // ── Migração de avatar base64 → Cloudinary ──
+  // Se o servidor não tem avatar_url mas o localStorage tem uma foto em base64 (formato antigo),
+  // re-envia para Cloudinary silenciosamente para que fique visível para outros utilizadores.
+  if(!user.avatar_url && userProfile.imgPerfil && userProfile.imgPerfil.startsWith('data:')){
+    _migrateBase64Avatar(userProfile.imgPerfil);
+  }
+}
+
+// Converte data URL base64 → Blob → envia para POST /api/users/avatar
+async function _migrateBase64Avatar(dataUrl){
+  try {
+    // Converte base64 para Blob
+    var parts  = dataUrl.split(',');
+    var mime   = (parts[0].match(/:(.*?);/) || [])[1] || 'image/jpeg';
+    var binary = atob(parts[1]);
+    var bytes  = new Uint8Array(binary.length);
+    for(var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    var blob   = new Blob([bytes], { type: mime });
+
+    // Limita a 5 MB — base64 antigas podem ser grandes
+    if(blob.size > 5 * 1024 * 1024){
+      console.warn('[migração] foto local demasiado grande para upload automático:', blob.size);
+      return;
+    }
+
+    var ext      = mime.split('/')[1] || 'jpg';
+    var formData = new FormData();
+    formData.append('avatar', blob, 'avatar.' + ext);
+
+    var res  = await fetch(API + '/api/users/avatar', {
+      method:  'POST',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      body:    formData,
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'upload falhou');
+
+    // Actualiza localStorage com a URL Cloudinary (substitui o base64)
+    userProfile.imgPerfil = data.avatar_url;
+    saveProfile();
+    syncSidebar();
+    renderPerfil();
+    console.info('[migração] foto migrada para Cloudinary:', data.avatar_url.slice(0, 60));
+  } catch(e){
+    console.warn('[migração] não foi possível migrar foto local:', e.message);
   }
 }
 
@@ -2410,8 +2461,15 @@ function syncSidebar(){
 function renderPerfil(){
   var av=document.getElementById('prf-avatar-el');
   if(av){
-    if(userProfile.imgPerfil){av.innerHTML='<img src="'+userProfile.imgPerfil+'" style="width:100%;height:100%;object-fit:cover">';av.style.background='none';}
+    if(userProfile.imgPerfil){av.innerHTML='<img src="'+userProfile.imgPerfil+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';av.style.background='none';}
     else{av.innerHTML=getInitials(userProfile.nome);av.style.background='#6A3DE8';}
+  }
+
+  // Aviso: foto apenas local (base64 antigo) — migração em progresso ou falhou
+  var migEl = document.getElementById('prf-avatar-local-warn');
+  if(migEl){
+    var isBase64 = userProfile.imgPerfil && userProfile.imgPerfil.startsWith('data:');
+    migEl.style.display = isBase64 ? 'flex' : 'none';
   }
   var ci=document.getElementById('prf-cover-img');
   if(ci){if(userProfile.imgCapa){ci.src=userProfile.imgCapa;ci.style.display='block';}else{ci.style.display='none';}}
