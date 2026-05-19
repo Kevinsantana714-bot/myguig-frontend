@@ -2374,11 +2374,7 @@ function showDayEvents(year,month,day){
 function cancelEventClick(id, isManual){
   if(isManual){
     if(!confirm('Remover este evento manual?')) return;
-    manualEvents=manualEvents.filter(function(e){ return String(e.id)!==String(id); });
-    _selectedCalDay=null;
-    document.getElementById('agenda-day-detail').style.display='none';
-    renderCalendar();
-    showToast('Evento removido','info');
+    removeManualEvent(id);
   } else {
     _cancelEventTarget={id:id, manual:false};
     document.getElementById('cancel-event-modal').classList.add('open');
@@ -2418,7 +2414,7 @@ function navigate(viewId,el){
   // Botão voltar — só aparece na view do músico
   var backBtn=document.getElementById('btn-topbar-back');
   if(backBtn) backBtn.style.display = viewId==='musico-perfil' ? 'inline-flex' : 'none';
-  if(viewId==='agenda')       { loadAndRenderProposals(false).then(renderCalendar); }
+  if(viewId==='agenda')       { loadManualEvents().then(function(){ loadAndRenderProposals(false).then(renderCalendar); }); }
   if(viewId==='inicio')       renderHome();
   if(viewId==='perfil')       renderPerfil();
   if(viewId==='descobrir')    loadMusicians(false);
@@ -2616,6 +2612,45 @@ function openAddEventModal(){
 }
 function closeAddEventModal(){document.getElementById('add-event-modal').classList.remove('open');_editingEventId=null;}
 
+// Converte linha do servidor para o formato interno usado pelo calendário/lista
+function normalizeManualEvent(row){
+  var dateStr=(row.date||'').toString().substring(0,10);
+  var parts=dateStr.split('-');
+  var ano=parseInt(parts[0])||new Date().getFullYear();
+  var mes=parseInt(parts[1])-1||0;
+  var dia=parseInt(parts[2])||1;
+  var MS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var dataStr=String(dia)+' '+MS[mes];
+  var inicio=row.time_start||'';
+  var termino=row.time_end||'';
+  var horarioStr='A definir';
+  if(inicio){var hP=inicio.split(':');horarioStr=hP[0]+'h'+(hP[1]||'00');if(termino){var tP=termino.split(':');horarioStr+=' — '+tP[0]+'h'+(tP[1]||'00');}}
+  var nome=row.title||'Evento';
+  var cache=parseFloat(row.value)||0;
+  var initials=nome.split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase()||'ME';
+  var colorIdx=(row.id||0)%COLORS_MANUAL.length;
+  var descricao=row.description||'Evento externo adicionado manualmente.';
+  return {
+    id:row.id,initials:initials,color:COLORS_MANUAL[colorIdx],name:'(Manual)',
+    evento:nome,data:dataStr,dia:dia,mes:mes,ano:ano,horario:horarioStr,
+    local:row.location||'Local não informado',cache:cache,cacheStr:fmtCache(cache),
+    status:'confirmed',estilos:['Manual'],
+    repertorio:descricao.substring(0,40)+(descricao.length>40?'…':''),
+    metodo:'Evento cadastrado manualmente.',
+    descricao:descricao,
+    time_start:inicio,time_end:termino,
+    manual:true
+  };
+}
+
+// Carrega eventos manuais do servidor e actualiza manualEvents[]
+async function loadManualEvents(){
+  try {
+    var data=await apiCall('GET','/api/events');
+    manualEvents=(data.data||[]).map(normalizeManualEvent);
+  } catch(e){ console.warn('[loadManualEvents]',e.message); }
+}
+
 function editManualEvent(id){
   var ev=manualEvents.find(function(e){return e.id===id;});
   if(!ev) return;
@@ -2624,22 +2659,27 @@ function editManualEvent(id){
   document.getElementById('ae-nome').value=ev.evento||'';
   document.getElementById('ae-data').value=ev.ano+'-'+pad(ev.mes+1)+'-'+pad(ev.dia);
   document.getElementById('ae-cache').value=ev.cache||'';
-  document.getElementById('ae-local').value=ev.local||'';
-  document.getElementById('ae-descricao').value=ev.descricao||'';
-  document.getElementById('ae-inicio').value='';
-  document.getElementById('ae-termino').value='';
-  ['ae-nome','ae-data'].forEach(function(id){document.getElementById(id).classList.remove('error');});
+  document.getElementById('ae-local').value=(ev.local==='Local não informado'?'':ev.local)||'';
+  document.getElementById('ae-descricao').value=(ev.descricao==='Evento externo adicionado manualmente.'?'':ev.descricao)||'';
+  document.getElementById('ae-inicio').value=ev.time_start||'';
+  document.getElementById('ae-termino').value=ev.time_end||'';
+  ['ae-nome','ae-data'].forEach(function(fid){document.getElementById(fid).classList.remove('error');});
   document.getElementById('add-event-modal').classList.add('open');
   setTimeout(function(){document.getElementById('ae-nome').focus();},80);
 }
 
-function removeManualEvent(id){
-  manualEvents=manualEvents.filter(function(e){return e.id!==id;});
+async function removeManualEvent(id){
+  try {
+    await apiCall('DELETE','/api/events/'+id);
+  } catch(e){ console.warn('[removeManualEvent] API error:',e.message); }
+  manualEvents=manualEvents.filter(function(e){return String(e.id)!==String(id);});
+  _selectedCalDay=null;
+  document.getElementById('agenda-day-detail').style.display='none';
   renderCalendar();renderHome();
   showToast('Evento removido','info');
 }
 
-function saveManualEvent(){
+async function saveManualEvent(){
   var nome=document.getElementById('ae-nome').value.trim();
   var dataVal=document.getElementById('ae-data').value;
   var inicio=document.getElementById('ae-inicio').value;
@@ -2650,47 +2690,30 @@ function saveManualEvent(){
   if(!nome){document.getElementById('ae-nome').classList.add('error');valid=false;}
   if(!dataVal){document.getElementById('ae-data').classList.add('error');valid=false;}
   if(!valid){showToast('Preencha os campos obrigatórios (*)','info');return;}
-  var parts=dataVal.split('-');
-  var ano=parseInt(parts[0]);var mes=parseInt(parts[1])-1;var dia=parseInt(parts[2]);
   var cache=parseFloat(document.getElementById('ae-cache').value)||0;
-  var MS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
-  var dataStr=String(dia)+' '+MS[mes];
-  var horarioStr='A definir';
-  if(inicio){var hParts=inicio.split(':');horarioStr=hParts[0]+'h'+hParts[1];if(termino){var tParts=termino.split(':');horarioStr+=' — '+tParts[0]+'h'+tParts[1];}}
-
-  if(_editingEventId){
-    var idx=manualEvents.findIndex(function(e){return e.id===_editingEventId;});
-    if(idx>-1){
-      var existing=manualEvents[idx];
-      manualEvents[idx]=Object.assign({},existing,{
-        evento:nome,data:dataStr,dia:dia,mes:mes,ano:ano,
-        local:local||'Local não informado',cache:cache,cacheStr:fmtCache(cache),
-        descricao:descricao||'Evento externo adicionado manualmente.',
-        repertorio:descricao?descricao.substring(0,40)+(descricao.length>40?'…':''):'Sem detalhes',
-        horario:horarioStr,
-      });
-    }
-    closeAddEventModal();renderCalendar();renderHome();
-    showToast('✓ Evento atualizado!','success');
-    return;
-  }
-
-  var newId=Date.now()+(Math.floor(Math.random()*1000));
-  var colorIdx=manualEvents.length%COLORS_MANUAL.length;
-  var initials=nome.split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase()||'ME';
-  var newEvent={
-    id:newId,initials:initials,color:COLORS_MANUAL[colorIdx],name:'(Manual)',
-    evento:nome,data:dataStr,dia:dia,mes:mes,ano:ano,horario:horarioStr,
-    local:local||'Local não informado',cache:cache,cacheStr:fmtCache(cache),
-    status:'confirmed',estilos:['Manual'],
-    repertorio:descricao?descricao.substring(0,40)+(descricao.length>40?'…':''):'Sem detalhes',
-    metodo:'Evento cadastrado manualmente.',
-    descricao:descricao||'Evento externo adicionado manualmente.',
-    manual:true
+  var payload={
+    title:nome,date:dataVal,
+    time_start:inicio||null,time_end:termino||null,
+    location:local||null,value:cache,description:descricao||null
   };
-  manualEvents.push(newEvent);
-  closeAddEventModal();renderCalendar();renderHome();
-  showToast('✓ Evento "'+nome+'" adicionado à agenda!','success');
+  try {
+    var resp;
+    if(_editingEventId){
+      resp=await apiCall('PUT','/api/events/'+_editingEventId,payload);
+      var updated=normalizeManualEvent(resp.event);
+      var idx=manualEvents.findIndex(function(e){return String(e.id)===String(_editingEventId);});
+      if(idx>-1) manualEvents[idx]=updated; else manualEvents.push(updated);
+      closeAddEventModal();renderCalendar();renderHome();
+      showToast('✓ Evento atualizado!','success');
+    } else {
+      resp=await apiCall('POST','/api/events',payload);
+      manualEvents.push(normalizeManualEvent(resp.event));
+      closeAddEventModal();renderCalendar();renderHome();
+      showToast('✓ Evento "'+nome+'" adicionado à agenda!','success');
+    }
+  } catch(e){
+    showToast('Erro ao guardar evento: '+e.message,'info');
+  }
 }
 
 
