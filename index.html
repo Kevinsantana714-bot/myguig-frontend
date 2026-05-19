@@ -1497,10 +1497,14 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
           <input class="form-input" id="ep-tel" type="text" placeholder="(11) 9xxxx-xxxx">
         </div>
       </div>
-      <div class="form-row single">
+      <div class="form-row">
         <div class="form-group">
           <label class="form-label">Instagram</label>
           <input class="form-input" id="ep-instagram" type="text" placeholder="@seu_usuario">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cachê mínimo (€)</label>
+          <input class="form-input" id="ep-cache" type="number" min="0" step="0.01" placeholder="Ex: 150">
         </div>
       </div>
       <div class="modal-add-actions">
@@ -2482,21 +2486,45 @@ function renderPerfil(){
   var el=document.getElementById('prf-email-display');if(el) el.textContent=userProfile.email||'—';
   var tl=document.getElementById('prf-tel-display');if(tl) tl.textContent=userProfile.tel||'—';
   var ig=document.getElementById('prf-instagram-display');if(ig) ig.textContent=userProfile.instagram||'—';
-  var all=allProposals();
-  var conf=all.filter(function(p){return p.status==='confirmed';});
-  var pend=all.filter(function(p){return p.status==='pending'||p.status==='negotiating';}).length;
-  var sr=document.getElementById('prf-stats-row');
-  if(sr) sr.innerHTML=
-    '<div class="prf-stat"><div class="prf-stat-num">'+conf.length+'</div><div class="prf-stat-lbl">Shows confirmados</div></div>'+
-    '<div class="prf-stat"><div class="prf-stat-num">'+pend+'</div><div class="prf-stat-lbl">Propostas ativas</div></div>';
+  // Mostra valores locais como placeholder enquanto a API responde
+  var all  = allProposals();
+  var conf = all.filter(function(p){return p.status==='confirmed';}).length;
+  var pend = all.filter(function(p){return p.status==='pending'||p.status==='negotiating';}).length;
+  _renderProfileStats(conf, pend);
+  // Actualiza com valores reais da API (assíncrono)
+  loadProfileStats();
+}
+
+function _renderProfileStats(confirmed, pending){
+  var sr = document.getElementById('prf-stats-row');
+  if(!sr) return;
+  sr.innerHTML =
+    '<div class="prf-stat"><div class="prf-stat-num">'+confirmed+'</div><div class="prf-stat-lbl">Shows confirmados</div></div>'+
+    '<div class="prf-stat"><div class="prf-stat-num">'+pending+'</div><div class="prf-stat-lbl">Propostas ativas</div></div>';
+}
+
+async function loadProfileStats(){
+  try {
+    // Usa pagination.total para obter contagens reais sem transferir dados desnecessários
+    var confRes = await apiCall('GET', '/api/proposals?status=confirmed&limit=1&page=1');
+    var pendRes = await apiCall('GET', '/api/proposals?status=pending&limit=1&page=1');
+    var negRes  = await apiCall('GET', '/api/proposals?status=negotiating&limit=1&page=1');
+    _renderProfileStats(
+      confRes.pagination.total,
+      pendRes.pagination.total + negRes.pagination.total
+    );
+  } catch(e){
+    // Mantém os valores locais já exibidos — sem apagar nada
+  }
 }
 
 function openEditPerfil(){
-  document.getElementById('ep-nome').value=userProfile.nome||'';
-  document.getElementById('ep-bio').value=userProfile.bio||'';
-  document.getElementById('ep-email').value=userProfile.email||'';
-  document.getElementById('ep-tel').value=userProfile.tel||'';
-  document.getElementById('ep-instagram').value=userProfile.instagram||'';
+  document.getElementById('ep-nome').value      = userProfile.nome      || '';
+  document.getElementById('ep-bio').value       = userProfile.bio       || '';
+  document.getElementById('ep-email').value     = userProfile.email     || '';
+  document.getElementById('ep-tel').value       = userProfile.tel       || '';
+  document.getElementById('ep-instagram').value = userProfile.instagram || '';
+  document.getElementById('ep-cache').value     = userProfile.cache_minimo > 0 ? userProfile.cache_minimo : '';
   document.getElementById('ep-nome').classList.remove('error');
   document.getElementById('edit-perfil-modal').classList.add('open');
   setTimeout(function(){document.getElementById('ep-nome').focus();},80);
@@ -2505,11 +2533,13 @@ function closeEditPerfil(){document.getElementById('edit-perfil-modal').classLis
 async function salvarPerfil(){
   var nome=document.getElementById('ep-nome').value.trim();
   if(!nome){document.getElementById('ep-nome').classList.add('error');showToast('O nome é obrigatório','info');return;}
-  userProfile.nome      = nome;
-  userProfile.bio       = document.getElementById('ep-bio').value.trim();
-  userProfile.email     = document.getElementById('ep-email').value.trim();
-  userProfile.tel       = document.getElementById('ep-tel').value.trim();
-  userProfile.instagram = document.getElementById('ep-instagram').value.trim();
+  userProfile.nome         = nome;
+  userProfile.bio          = document.getElementById('ep-bio').value.trim();
+  userProfile.email        = document.getElementById('ep-email').value.trim();
+  userProfile.tel          = document.getElementById('ep-tel').value.trim();
+  userProfile.instagram    = document.getElementById('ep-instagram').value.trim();
+  var cacheVal = parseFloat(document.getElementById('ep-cache').value);
+  userProfile.cache_minimo = isNaN(cacheVal) || cacheVal < 0 ? 0 : cacheVal;
   saveProfile();
   closeEditPerfil();
   renderPerfil();
@@ -2520,7 +2550,7 @@ async function salvarPerfil(){
       bio:          userProfile.bio          || null,
       instagram:    userProfile.instagram    || null,
       cidade:       userProfile.cidade       || null,
-      cache_minimo: userProfile.cache_minimo || 0,
+      cache_minimo: userProfile.cache_minimo,
       estilos:      userProfile.estilos      || [],
       phone:        userProfile.tel          || null,
     });
