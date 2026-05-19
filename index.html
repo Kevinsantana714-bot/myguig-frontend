@@ -1815,11 +1815,12 @@ function applyUserToUI(user){
   syncSidebar();
   renderPerfil();
 
-  // ── Sincronização única: se o servidor tem bio/instagram vazios mas localStorage tem dados,
-  //    envia esses dados para o servidor (recupera utilizadores antigos)
-  var serverIsEmpty = !user.bio && !user.instagram && !user.cidade && !(user.cache_minimo > 0) && !user.avatar_url && !user.phone;
-  var localHasData  = !!(userProfile.bio || userProfile.instagram || userProfile.cidade || userProfile.cache_minimo > 0 || userProfile.imgPerfil || userProfile.tel);
-  if(serverIsEmpty && localHasData){
+  // ── Sincronização única: se o servidor tem campos de texto vazios mas localStorage tem dados,
+  //    envia esses dados para o servidor (recupera utilizadores com dados só em localStorage)
+  //    Nota: NÃO envia avatar_url — fotos são agora geridas exclusivamente pelo Cloudinary
+  var serverIsEmpty = !user.bio && !user.instagram && !user.cidade && !(user.cache_minimo > 0) && !user.phone;
+  var localHasText  = !!(userProfile.bio || userProfile.instagram || userProfile.cidade || userProfile.cache_minimo > 0 || userProfile.tel);
+  if(serverIsEmpty && localHasText){
     apiCall('PUT', '/auth/profile', {
       name:         userProfile.nome,
       bio:          userProfile.bio          || null,
@@ -1828,7 +1829,6 @@ function applyUserToUI(user){
       cache_minimo: userProfile.cache_minimo || 0,
       estilos:      userProfile.estilos      || [],
       phone:        userProfile.tel          || null,
-      avatar_url:   userProfile.imgPerfil    || null,
     }).catch(function(){});
   }
 }
@@ -2380,12 +2380,12 @@ function showToast(msg,type){
 /* ── PERFIL ── */
 var LS_PRF='myguig_profile';
 var PRF_DEFAULT={
-  nome:'Pedro Alves',
-  bio:'Músico profissional com mais de 10 anos de experiência em shows, casamentos e eventos corporativos. Violonista, guitarrista e arranjador. Adoro criar atmosferas únicas para cada tipo de evento.',
-  email:'pedro@email.com',
-  tel:'(11) 91234-5678',
-  instagram:'@pedroalvesmusica',
-  imgPerfil:null,
+  nome:'',
+  bio:'',
+  email:'',
+  tel:'',
+  instagram:'',
+  imgPerfil:null,  // URL Cloudinary (string) ou null — NÃO guardar base64 aqui
   imgCapa:null
 };
 function loadProfile(){
@@ -2471,22 +2471,36 @@ async function salvarPerfil(){
     showToast('Perfil guardado localmente.', 'info');
   }
 }
-function handleAvatarUpload(evt){
-  var f=evt.target.files[0];if(!f) return;
-  if(f.size>5*1024*1024){showToast('Imagem muito grande (máx. 5 MB)','info');return;}
-  var r=new FileReader();
-  r.onload=function(e){
-    var dataUrl = e.target.result;
-    userProfile.imgPerfil = dataUrl;
+async function handleAvatarUpload(evt){
+  var f = evt.target.files[0];
+  evt.target.value = '';
+  if(!f) return;
+  if(f.size > 5*1024*1024){ showToast('Imagem muito grande (máx. 5 MB)','info'); return; }
+
+  showToast('A enviar foto…','info');
+
+  try {
+    var formData = new FormData();
+    formData.append('avatar', f);
+
+    var res = await fetch(API + '/api/users/avatar', {
+      method:  'POST',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      // Sem Content-Type — o browser define automaticamente com o boundary
+      body: formData,
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Erro no upload');
+
+    // Guarda URL Cloudinary (nunca base64)
+    userProfile.imgPerfil = data.avatar_url;
     saveProfile();
     renderPerfil();
     syncSidebar();
     showToast('✓ Foto de perfil atualizada!','success');
-    // Sincroniza com o servidor
-    apiCall('PUT', '/auth/profile', { avatar_url: dataUrl }).catch(function(){});
-  };
-  r.readAsDataURL(f);
-  evt.target.value='';
+  } catch(e) {
+    showToast('Erro ao enviar foto: '+e.message,'info');
+  }
 }
 function handleCapaUpload(evt){
   var f=evt.target.files[0];if(!f) return;
