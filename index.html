@@ -387,27 +387,41 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 #more-drawer-overlay.open{display:block}
 #more-drawer{
   display:none;position:fixed;left:0;right:0;bottom:0;
-  background:#111;border-radius:18px 18px 0 0;
+  background:#1a1a1a;border-radius:16px 16px 0 0;
   z-index:191;
-  transform:translateY(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);
+  transform:translateY(100%);transition:transform .25s ease-out;
   padding-bottom:env(safe-area-inset-bottom,0px);
+  box-shadow:0 -4px 32px rgba(0,0,0,.6);
 }
 #more-drawer.open{transform:translateY(0)}
-.more-drawer-handle{width:36px;height:4px;background:#2a2a2a;border-radius:2px;margin:12px auto 2px}
-.more-drawer-title{font-size:12px;font-weight:700;color:#444;letter-spacing:.08em;text-transform:uppercase;padding:6px 20px 10px}
-.more-drawer-list{display:flex;flex-direction:column;padding-bottom:calc(58px + 8px)}
+.more-drawer-handle{width:40px;height:4px;background:#333;border-radius:2px;margin:14px auto 4px}
+.more-drawer-title{font-size:11px;font-weight:700;color:#555;letter-spacing:.08em;text-transform:uppercase;padding:6px 20px 8px}
+.more-drawer-list{display:flex;flex-direction:column}
 .more-drawer-item{
-  display:flex;align-items:center;gap:14px;
-  padding:15px 20px;color:#ccc;font-size:14px;font-weight:500;
-  cursor:pointer;transition:background .15s;
-  border-top:1px solid #1a1a1a;
+  display:flex;align-items:center;gap:16px;
+  padding:16px 22px;color:#ccc;font-size:15px;font-weight:500;
+  cursor:pointer;transition:background .12s;
+  border-top:1px solid #222;position:relative;
 }
 .more-drawer-item:first-child{border-top:none}
-.more-drawer-item:hover,.more-drawer-item:active{background:#1a1a1a;color:#fff}
-.more-drawer-item .nav-icon{width:20px;height:20px;opacity:.7;flex-shrink:0}
-.more-drawer-item:hover .nav-icon,.more-drawer-item:active .nav-icon{opacity:1}
+.more-drawer-item:active{background:#252525}
+.more-drawer-item .nav-icon{width:22px;height:22px;opacity:.65;flex-shrink:0}
 .more-drawer-logout{color:#f87171}
-.more-drawer-logout:hover,.more-drawer-logout:active{background:#2a0a0a;color:#f87171}
+.more-drawer-logout:active{background:#2a0a0a;color:#f87171}
+.more-drawer-close{
+  display:flex;align-items:center;justify-content:center;
+  margin:10px 20px calc(58px + 12px);
+  padding:13px;background:#252525;border:none;border-radius:12px;
+  color:#888;font-size:14px;font-weight:600;cursor:pointer;
+  font-family:inherit;transition:background .12s;width:calc(100% - 40px);
+}
+.more-drawer-close:active{background:#2e2e2e;color:#fff}
+.more-drawer-msg-badge{
+  margin-left:auto;background:#6A3DE8;color:#fff;
+  font-size:10px;font-weight:700;min-width:18px;height:18px;
+  border-radius:9px;display:flex;align-items:center;justify-content:center;
+  padding:0 4px;
+}
 
 /* ══════════════════════════════════════════
    VIEW: CONFIGURAÇÕES
@@ -695,18 +709,18 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
     margin-left: 0;
   }
 
-  /* Mostra apenas 5 itens no bottom nav */
+  /* Bottom nav: apenas 4 itens visíveis */
   #nav-agenda    { display: none !important; }
+  #nav-mensagens { display: none !important; }  /* vai para o sheet */
   .sb-section:last-of-type { display: none !important; }   /* esconde Perfil/Config/Sair da sidebar */
   #nav-mais      { display: flex !important; }
   .nav-logout    { display: none !important; }
 
-  /* Ordem: Início · Descobrir · Propostas · Mensagens · Mais */
+  /* Ordem: Início · Descobrir · Propostas · Mais */
   #nav-inicio    { order: 1; }
   #nav-descobrir { order: 2; }
   #nav-propostas { order: 3; }
-  #nav-mensagens { order: 4; }
-  #nav-mais      { order: 5; }
+  #nav-mais      { order: 4; }
 
   /* Drawer habilitado em mobile (display gerido por JS via .open) */
   #more-drawer          { display: block; }
@@ -2827,6 +2841,8 @@ async function loadConversations(){
     var totalUnread=convs.reduce(function(acc,c){return acc+(c.unread_count||0);},0);
     var badge=document.getElementById('msg-badge');
     if(badge){ badge.textContent=totalUnread; badge.style.display=totalUnread>0?'flex':'none'; }
+    var badgeDrawer=document.getElementById('msg-badge-drawer');
+    if(badgeDrawer){ badgeDrawer.textContent=totalUnread; badgeDrawer.style.display=totalUnread>0?'flex':'none'; }
 
     if(!convs.length){
       list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon">💬</div>Nenhuma conversa ainda.<br><span style="font-size:12px;color:#333">Envia uma proposta a um músico para começar.</span></div>';
@@ -3008,6 +3024,11 @@ document.getElementById('login-senha').addEventListener('input',function(){this.
   <div class="more-drawer-handle"></div>
   <div class="more-drawer-title">Menu</div>
   <div class="more-drawer-list">
+    <div class="more-drawer-item" onclick="navigate('mensagens',document.getElementById('nav-mais'));closeMoreDrawer()">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3H2a1 1 0 00-1 1v7a1 1 0 001 1h3v2.5l3-2.5h6a1 1 0 001-1V4a1 1 0 00-1-1z"/></svg>
+      Mensagens
+      <span class="more-drawer-msg-badge" id="msg-badge-drawer" style="display:none">0</span>
+    </div>
     <div class="more-drawer-item" onclick="navigate('agenda',document.getElementById('nav-mais'));closeMoreDrawer()">
       <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="1.5"/><path d="M5 1v4M11 1v4M1 7h14"/></svg>
       Agenda
@@ -3025,6 +3046,7 @@ document.getElementById('login-senha').addEventListener('input',function(){this.
       Sair
     </div>
   </div>
+  <button class="more-drawer-close" onclick="closeMoreDrawer()">Fechar</button>
 </div>
 </body>
 </html>
