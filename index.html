@@ -1998,15 +1998,32 @@ function _escHtml(s){
 
 async function markNotifRead(id, el){
   var notif = _homeNotifs.find(function(n){ return n.id === id; });
-  if(!notif || notif.read === 1) return;
-  notif.read = 1;
+  if(!notif) return;
+
+  // Remoção optimista imediata do DOM
   if(el){
-    el.classList.remove('unread');
-    var dot = el.querySelector('.hn-dot');
-    if(dot) dot.classList.add('read');
+    el.style.transition = 'opacity .2s, transform .2s';
+    el.style.opacity    = '0';
+    el.style.transform  = 'translateX(12px)';
+    setTimeout(function(){
+      if(el.parentNode) el.parentNode.removeChild(el);
+      // Mostra empty state se a lista ficar vazia
+      var container = document.getElementById('home-backend-notifs');
+      if(container && !container.querySelector('.hn-card')){
+        container.innerHTML = '<div class="hn-empty">Sem notificações.</div>';
+      }
+    }, 200);
   }
+
+  // Remove do array local e atualiza badge
+  _homeNotifs = _homeNotifs.filter(function(n){ return n.id !== id; });
   _updateNotifBadge();
-  try { await apiCall('PATCH', '/api/notifications/'+id+'/read'); } catch(e){}
+
+  // API: PATCH lida → DELETE
+  try {
+    await apiCall('PATCH', '/api/notifications/'+id+'/read');
+    await apiCall('DELETE', '/api/notifications/'+id);
+  } catch(e){ /* silencioso — DOM já foi atualizado */ }
 }
 
 function renderHome(){
