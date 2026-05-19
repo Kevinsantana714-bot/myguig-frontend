@@ -658,7 +658,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
     width: 100% !important;
     min-width: unset !important;
     max-width: unset !important;
-    height: 58px;
+    height: 60px;
     flex-direction: row;
     align-items: stretch;
     position: fixed;
@@ -672,7 +672,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   /* Oculta elementos da sidebar que não servem no bottom nav */
   .sb-top, .sb-divider, .sb-footer, .sb-section-label { display: none !important; }
 
-  /* Cada secção ocupa espaço igual em linha */
+  /* Cada secção visível ocupa a largura toda */
   .sb-section {
     display: flex;
     flex-direction: row;
@@ -680,56 +680,58 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
     padding: 0;
     margin: 0;
     height: 100%;
+    justify-content: space-around;
   }
 
-  /* Cada item de nav: ícone em cima, sem texto */
-  .nav-item {
-    flex: 1;
+  /* Esconde toda a secção Conta (Perfil/Config/Sair) */
+  #sb-section-conta { display: none !important; }
+
+  /* Esconde TODOS os nav-item por defeito — só mostramos os 4 explícitos */
+  .nav-item { display: none !important; }
+
+  /* Mostra exatamente os 4 itens da bottom nav */
+  #nav-inicio    { display: flex !important; order: 1; flex: 1; }
+  #nav-descobrir { display: flex !important; order: 2; flex: 1; }
+  #nav-propostas { display: flex !important; order: 3; flex: 1; }
+  #nav-mais      { display: flex !important; order: 4; flex: 1; }
+
+  /* Layout de cada item: ícone em cima, label em baixo, centrado */
+  #nav-inicio, #nav-descobrir, #nav-propostas, #nav-mais {
     flex-direction: column;
     justify-content: center;
     align-items: center;
     gap: 3px;
-    padding: 6px 2px;
+    padding: 6px 4px;
     border-radius: 0;
     font-size: 9px;
     text-align: center;
     position: relative;
-    overflow: hidden;
     white-space: nowrap;
-    text-overflow: ellipsis;
+    overflow: visible;
   }
-  .nav-icon { width: 18px; height: 18px; opacity: .7; }
+  .nav-icon { width: 20px; height: 20px; opacity: .65; }
   .nav-item.active .nav-icon { opacity: 1; }
 
-  /* Badge de propostas no bottom nav */
+  /* Badge no bottom nav */
   .nav-badge {
     position: absolute;
-    top: 6px;
-    right: calc(50% - 18px);
+    top: 5px;
+    right: calc(50% - 20px);
     margin-left: 0;
+    font-size: 9px;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 3px;
   }
 
-  /* Bottom nav: apenas 4 itens visíveis */
-  #nav-agenda    { display: none !important; }
-  #nav-mensagens { display: none !important; }  /* vai para o sheet */
-  .sb-section:last-of-type { display: none !important; }   /* esconde Perfil/Config/Sair da sidebar */
-  #nav-mais      { display: flex !important; }
-  .nav-logout    { display: none !important; }
-
-  /* Ordem: Início · Descobrir · Propostas · Mais */
-  #nav-inicio    { order: 1; }
-  #nav-descobrir { order: 2; }
-  #nav-propostas { order: 3; }
-  #nav-mais      { order: 4; }
-
-  /* Drawer habilitado em mobile (display gerido por JS via .open) */
+  /* Drawer habilitado em mobile */
   #more-drawer          { display: block; }
   #more-drawer-overlay  { display: none; }
 
   /* ── Main area ── */
   .main {
     min-height: 100vh;
-    padding-bottom: 58px;
+    padding-bottom: 60px;
   }
 
   /* ── Topbar ── */
@@ -801,7 +803,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   .toast {
     left: 16px;
     right: 16px;
-    bottom: 70px;
+    bottom: 72px;
     max-width: unset;
     text-align: center;
   }
@@ -992,7 +994,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
       </div>
     </div>
     <div class="sb-divider"></div>
-    <div class="sb-section">
+    <div class="sb-section" id="sb-section-conta">
       <div class="sb-section-label">Conta</div>
       <div class="nav-item" id="nav-perfil" onclick="navigate('perfil',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
