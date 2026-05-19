@@ -653,7 +653,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   /* ── Layout principal ── */
   .dash { flex-direction: column; }
 
-  /* ── Sidebar → barra de navegação inferior ── */
+  /* ── Sidebar → bottom nav estilo Instagram ── */
   .sidebar {
     width: 100% !important;
     min-width: unset !important;
@@ -664,15 +664,16 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
     position: fixed;
     bottom: 0; left: 0; right: 0;
     border-right: none;
-    border-top: 1px solid #1e1e1e;
+    border-top: 1px solid #222;
     z-index: 50;
-    background: #0a0a0a;
+    background: #111;
   }
 
-  /* Oculta elementos da sidebar que não servem no bottom nav */
+  /* Esconde tudo que não é nav */
   .sb-top, .sb-divider, .sb-footer, .sb-section-label { display: none !important; }
+  #sb-section-conta { display: none !important; }
 
-  /* Cada secção visível ocupa a largura toda */
+  /* A secção principal ocupa 100% */
   .sb-section {
     display: flex;
     flex-direction: row;
@@ -681,47 +682,51 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
     margin: 0;
     height: 100%;
     justify-content: space-around;
+    align-items: stretch;
   }
 
-  /* Esconde toda a secção Conta (Perfil/Config/Sair) */
-  #sb-section-conta { display: none !important; }
-
-  /* Esconde TODOS os nav-item por defeito — só mostramos os 4 explícitos */
+  /* Esconde TODOS os nav-item por defeito */
   .nav-item { display: none !important; }
 
-  /* Mostra exatamente os 4 itens da bottom nav */
+  /* Mostra exactamente os 5 ícones */
   #nav-inicio    { display: flex !important; order: 1; flex: 1; }
-  #nav-descobrir { display: flex !important; order: 2; flex: 1; }
+  #nav-agenda    { display: flex !important; order: 2; flex: 1; }
   #nav-propostas { display: flex !important; order: 3; flex: 1; }
-  #nav-mais      { display: flex !important; order: 4; flex: 1; }
+  #nav-descobrir { display: flex !important; order: 4; flex: 1; }
+  #nav-mais      { display: flex !important; order: 5; flex: 1; }
 
-  /* Layout de cada item: ícone em cima, label em baixo, centrado */
-  #nav-inicio, #nav-descobrir, #nav-propostas, #nav-mais {
+  /* Cada item: ícone centrado, sem texto */
+  #nav-inicio, #nav-agenda, #nav-propostas, #nav-descobrir, #nav-mais {
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 3px;
-    padding: 6px 4px;
+    padding: 0;
     border-radius: 0;
-    font-size: 9px;
-    text-align: center;
+    font-size: 0;          /* esconde texto/labels */
     position: relative;
-    white-space: nowrap;
-    overflow: visible;
+    color: #666;
+    background: transparent !important;
   }
-  .nav-icon { width: 20px; height: 20px; opacity: .65; }
+
+  /* Ícone: 26px, cor padrão #666 */
+  .nav-icon { width: 26px; height: 26px; opacity: 1; color: inherit; stroke: currentColor; }
+
+  /* Item activo: ícone branco, sem fundo */
+  .nav-item.active { color: #fff !important; background: transparent !important; }
   .nav-item.active .nav-icon { opacity: 1; }
 
-  /* Badge no bottom nav */
+  /* Badge de Propostas — bolinha roxa */
   .nav-badge {
     position: absolute;
-    top: 5px;
-    right: calc(50% - 20px);
+    top: 8px;
+    right: calc(50% - 22px);
     margin-left: 0;
     font-size: 9px;
-    min-width: 16px;
-    height: 16px;
+    min-width: 15px;
+    height: 15px;
     padding: 0 3px;
+    border-radius: 8px;
+    line-height: 15px;
   }
 
   /* Drawer habilitado em mobile */
