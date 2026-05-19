@@ -1,0 +1,2925 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MyGUIg</title>
+<style>
+/* ══════════════════════════════════════════
+   BASE
+══════════════════════════════════════════ */
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;font-size:14px;color:#fff}
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px}
+
+/* ══════════════════════════════════════════
+   TELA DE LOGIN
+══════════════════════════════════════════ */
+#login-screen{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:100vh;
+  background:#000;
+  padding:2rem 1rem;
+}
+.login-box{
+  width:100%;
+  max-width:400px;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+}
+.login-logo{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:28px;
+}
+.login-logo-icon{
+  width:42px;height:42px;
+  border-radius:10px;
+  background:#7B52F0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:#fff;
+}
+.login-logo-text{font-size:22px;font-weight:600;color:#fff}
+.login-logo-text em{color:#a78bfa;font-style:normal}
+.login-title{font-size:22px;font-weight:700;color:#fff;text-align:center;margin-bottom:8px}
+.login-sub{font-size:14px;color:#888;text-align:center;line-height:1.6;margin-bottom:32px}
+.login-fields{width:100%;display:flex;flex-direction:column;gap:16px}
+.login-field{display:flex;flex-direction:column;gap:6px}
+.login-label{font-size:13px;color:#bbb;font-weight:500}
+.login-input{
+  width:100%;padding:14px 16px;
+  background:#1a1a1a;
+  border:1px solid #2e2e2e;
+  border-radius:10px;
+  color:#fff;font-size:14px;
+  outline:none;font-family:inherit;
+  transition:border-color .15s;
+}
+.login-input:focus{border-color:#7B52F0}
+.login-input::placeholder{color:#555}
+.login-input.error{border-color:#f87171}
+.login-error-msg{
+  font-size:12px;color:#f87171;
+  text-align:center;
+  min-height:18px;
+  margin-top:-4px;
+}
+.btn-login{
+  width:100%;padding:15px;
+  background:#7B52F0;border:none;
+  border-radius:10px;
+  color:#fff;font-size:15px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+  transition:background .15s, transform .1s;
+  margin-top:4px;
+}
+.btn-login:hover{background:#6940e0}
+.btn-login:active{transform:scale(.98)}
+.login-divider{
+  display:flex;align-items:center;gap:12px;
+  margin:4px 0;width:100%;
+}
+.login-divider-line{flex:1;height:1px;background:#2a2a2a}
+.login-divider-txt{font-size:13px;color:#555}
+.btn-register{
+  width:100%;padding:15px;
+  background:transparent;
+  border:1px solid #2e2e2e;
+  border-radius:10px;
+  color:#ccc;font-size:15px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+  transition:all .15s;
+}
+.btn-register:hover{border-color:#555;color:#fff}
+.login-terms{font-size:12px;color:#555;text-align:center;margin-top:4px}
+.login-terms a{color:#a78bfa;text-decoration:underline;cursor:pointer}
+
+/* Animação de entrada */
+@keyframes fadeInUp{
+  from{opacity:0;transform:translateY(16px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.login-box{animation:fadeInUp .35s ease both}
+
+/* ══════════════════════════════════════════
+   DASHBOARD (v13 original, sem alterações)
+══════════════════════════════════════════ */
+#main-app{display:none}
+
+.dash{display:flex;min-height:100vh;height:100%;background:#000;font-size:14px;color:#fff;position:relative}
+.sidebar{width:240px;min-width:240px;max-width:240px;flex-shrink:0;background:#0a0a0a;border-right:1px solid #1e1e1e;display:flex;flex-direction:column}
+.sb-top{padding:20px 16px 16px}
+.sb-logo{display:flex;align-items:center;gap:10px;margin-bottom:18px}
+.sb-logo-icon{width:32px;height:32px;border-radius:8px;background:#6A3DE8;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;color:#fff}
+.sb-logo-text{font-size:16px;font-weight:600;color:#fff}
+.sb-logo-text span{color:#8B5CF6}
+.profile-btn{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;margin-bottom:3px;transition:background .15s}
+.profile-btn.active{background:rgba(106,61,232,0.2)}
+.profile-btn:hover:not(.active){background:#1a1a1a}
+.profile-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.profile-label{font-size:13px;color:#ccc}
+.profile-btn.active .profile-label{color:#fff;font-weight:500}
+.sb-divider{height:1px;background:#1e1e1e;margin:10px 16px}
+.sb-section{padding:0 10px;margin-bottom:4px}
+.sb-section-label{font-size:11px;color:#555;letter-spacing:.6px;padding:0 6px;margin-bottom:5px;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:8px;cursor:pointer;color:#888;transition:background .15s,color .15s}
+.nav-item.active{background:#1a1a1a;color:#fff}
+.nav-item:hover:not(.active){background:#141414;color:#ccc}
+.nav-icon{width:16px;height:16px;flex-shrink:0;opacity:.7}
+.nav-item.active .nav-icon{opacity:1}
+.nav-badge{margin-left:auto;background:#6A3DE8;color:#fff;font-size:11px;font-weight:600;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.sb-footer{margin-top:auto;padding:14px 16px;border-top:1px solid #1e1e1e;display:flex;align-items:center;gap:10px}
+.footer-avatar{width:36px;height:36px;border-radius:50%;background:#6A3DE8;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0}
+.footer-name{font-size:13px;font-weight:500;color:#fff}
+.footer-status{font-size:11px;color:#8B5CF6;margin-top:1px}
+.main{flex:1;background:#000;display:flex;flex-direction:column;min-width:0;min-height:100vh}
+.topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid #1a1a1a;flex-shrink:0}
+.topbar-title{font-size:16px;font-weight:500;color:#fff}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.skeleton-card{height:120px;border-radius:12px;background:#111;margin-bottom:12px;animation:pulse 1.4s ease-in-out infinite}
+.content{padding:0;overflow:auto;flex:1;display:flex;justify-content:center}
+.view{display:none;width:100%;max-width:1080px;padding:28px 32px;align-self:flex-start}.view.active{display:block}
+
+/* ── PROPOSTAS ── */
+.page-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:4px}
+.page-sub{font-size:13px;color:#666;margin-bottom:18px}
+.filters{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.filter-chip{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:500;cursor:pointer;border:1px solid #2a2a2a;color:#888;background:transparent;font-family:inherit;transition:all .15s}
+.filter-chip.active{background:#6A3DE8;border-color:#6A3DE8;color:#fff}
+.filter-chip:hover:not(.active){border-color:#555;color:#ccc}
+.prop-card{background:#121212;border:1px solid #1e1e1e;border-radius:12px;padding:18px;margin-bottom:12px;transition:border-color .2s}
+.prop-card.status-confirmed{border-left:3px solid #4ade80}
+.prop-card.status-declined{opacity:.5}
+.prop-card.status-negotiating{border-left:3px solid #818cf8}
+.prop-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:14px}
+.prop-avatar{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:700;color:#fff;flex-shrink:0}
+.prop-meta{flex:1;min-width:0}
+.prop-contratante{font-size:14px;font-weight:600;color:#fff;margin-bottom:2px}
+.prop-evento{font-size:12px;color:#888}
+.prop-badge{font-size:11px;font-weight:500;padding:4px 10px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+.badge-pending{background:#2a1e0a;color:#fbbf24}
+.badge-negotiating{background:#1a1f3a;color:#818cf8}
+.badge-confirmed{background:#0a2a16;color:#4ade80}
+.badge-declined{background:#2a0a0a;color:#f87171}
+.prop-details{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px;padding:12px;background:#0a0a0a;border-radius:8px;border:1px solid #1e1e1e}
+.detail-label{font-size:11px;color:#555;margin-bottom:2px}
+.detail-val{font-size:13px;color:#ccc;font-weight:500}
+.detail-val.green{color:#4ade80}
+.info-extra{background:#0d1117;border:1px solid #1e2a1e;border-radius:8px;padding:12px;margin-bottom:12px}
+.info-extra-title{font-size:11px;color:#4ade80;letter-spacing:.5px;text-transform:uppercase;margin-bottom:10px;font-weight:600}
+.info-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:8px}
+.info-item-label{font-size:11px;color:#555;margin-bottom:2px}
+.info-item-val{font-size:12px;color:#aaa}
+.info-desc{font-size:12px;color:#888;line-height:1.6;border-top:1px solid #1e1e1e;padding-top:8px;margin-top:4px}
+.tags-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:4px}
+.style-tag{font-size:11px;background:#1e1535;color:#a78bfa;padding:2px 8px;border-radius:20px}
+.prop-actions{display:flex;gap:8px;flex-wrap:wrap}
+.btn{padding:8px 16px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;border:1px solid transparent}
+.btn-accept{background:#16532a;color:#4ade80;border-color:#1e6b35}
+.btn-accept:hover{background:#1e6b35}
+.btn-decline{background:transparent;color:#f87171;border-color:#4a1515}
+.btn-decline:hover{background:#2a0a0a}
+.btn-negotiate{background:#1e1535;color:#a78bfa;border-color:#2e1f55}
+.btn-negotiate:hover{background:#2e1f55}
+.counter-box{margin-top:12px;padding:14px;background:#0d0d1a;border:1px solid #2e1f55;border-radius:10px;display:none}
+.counter-box.open{display:block}
+.counter-title{font-size:13px;font-weight:600;color:#a78bfa;margin-bottom:10px}
+.counter-row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.counter-field{flex:1;min-width:120px}
+.counter-label{font-size:11px;color:#666;margin-bottom:4px}
+.counter-input,.counter-textarea{width:100%;background:#111;border:1px solid #2a2a2a;color:#fff;font-size:13px;padding:8px 10px;border-radius:7px;outline:none;font-family:inherit;transition:border-color .15s}
+.counter-input:focus,.counter-textarea:focus{border-color:#6A3DE8}
+.counter-textarea{resize:none}
+.counter-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:8px}
+.btn-send{background:#6A3DE8;color:#fff;border:none;border-radius:7px;padding:8px 18px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-send:hover{background:#5a2dd8}
+.btn-cancel-sm{background:transparent;color:#666;border:1px solid #2a2a2a;border-radius:7px;padding:8px 14px;font-size:12px;cursor:pointer;font-family:inherit}
+.status-msg{font-size:12px;color:#666;font-style:italic;padding:6px 0}
+.sync-hint{font-size:12px;color:#555;background:#0a0a0a;border:1px solid #1e1e1e;border-radius:8px;padding:10px 14px;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.sync-dot{width:6px;height:6px;border-radius:50%;background:#4ade80;flex-shrink:0}
+
+/* ── AGENDA — Widgets de faturamento ── */
+.ganhos-row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;max-width:660px}
+.faturamento-widget{background:#0d0d0d;border:1px solid #2e1f55;border-radius:12px;padding:16px 20px;flex:1;min-width:180px;display:flex;flex-direction:column;justify-content:center}
+.faturamento-widget.anual{border-color:#1e3352}
+.fat-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.fat-value{font-size:24px;font-weight:700;color:#4ade80;margin-bottom:2px}
+.fat-sub{font-size:11px;color:#555}
+
+/* ── AGENDA ── */
+.cal-wrap{background:#121212;border:1px solid #1e1e1e;border-radius:12px;padding:20px;margin-bottom:14px}
+.cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.cal-nav-btn{width:36px;height:36px;border-radius:8px;background:#1e1e1e;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;cursor:pointer;color:#888;font-size:18px;transition:all .15s;user-select:none}
+.cal-nav-btn:hover{background:#2a2a2a;color:#fff}
+.cal-month{font-size:16px;font-weight:600;color:#fff}
+.cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
+.cal-dow{text-align:center;font-size:12px;color:#555;padding:4px 0 10px;font-weight:500}
+.cal-day{text-align:center;padding:7px 4px;border-radius:8px;font-size:13px;color:#666;cursor:pointer;transition:all .15s;min-height:34px;display:flex;align-items:center;justify-content:center}
+.cal-day:hover:not(.cal-empty):not(.cal-confirmed):not(.cal-pending){background:#1e1e1e;color:#ccc}
+.cal-empty{cursor:default}
+.cal-confirmed{background:#1a3326;color:#4ade80;font-weight:600}
+.cal-pending{background:#2e2510;color:#fbbf24;font-weight:600}
+.cal-legend{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:#888}
+.legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.events-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:10px}
+.event-card{background:#121212;border:1px solid #1e1e1e;border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;transition:border-color .15s}
+.event-card:hover{border-color:#333}
+.event-day-badge{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
+.event-day-green{background:#1a3326;color:#4ade80}
+.event-day-amber{background:#2e2510;color:#fbbf24}
+.event-info{flex:1;min-width:0}
+.event-name{font-size:13px;font-weight:500;color:#fff;margin-bottom:2px}
+.event-meta{font-size:12px;color:#666}
+.empty-events{text-align:center;padding:30px;color:#444;font-size:13px}
+
+/* ── HOME ── */
+.next-show-card{background:#121212;border:1px solid #1e1e1e;border-radius:12px;padding:20px;margin-bottom:20px;display:flex;align-items:center;gap:20px;transition:border-color .15s;max-width:800px}
+.next-show-card:hover{border-color:#2a2a2a}
+.next-show-date{background:#1e1535;border-radius:10px;padding:12px 18px;text-align:center;flex-shrink:0;min-width:64px}
+.next-show-day{font-size:30px;font-weight:700;color:#a78bfa;line-height:1}
+.next-show-month{font-size:11px;color:#7c5cbf;text-transform:uppercase;letter-spacing:.5px;margin-top:3px}
+.next-show-body{flex:1;min-width:0}
+.next-show-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.next-show-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.next-show-meta{display:flex;gap:14px;flex-wrap:wrap}
+.nsm-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#888}
+.home-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;max-width:800px}
+.home-stat{background:#121212;border:1px solid #1e1e1e;border-radius:10px;padding:14px 16px;transition:border-color .15s}
+.home-stat:hover{border-color:#2a2a2a}
+.home-stat-label{font-size:11px;color:#555;margin-bottom:5px}
+.home-stat-num{font-size:24px;font-weight:700;color:#fff;line-height:1;margin-bottom:4px}
+.home-stat-hint{font-size:11px}
+.notif-section-title{font-size:14px;font-weight:600;color:#fff;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.notif-blink{width:7px;height:7px;border-radius:50%;background:#fbbf24;flex-shrink:0;animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
+.notif-card{background:#121212;border:1px solid #2a1e0a;border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:border-color .15s}
+.notif-card:hover{border-color:#4a3010}
+.notif-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0}
+.notif-body{flex:1;min-width:0}
+.notif-headline{font-size:11px;color:#fbbf24;font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:4px}
+.notif-name{font-size:13px;font-weight:500;color:#fff;margin-bottom:2px}
+.notif-detail{font-size:12px;color:#666}
+.btn-ver{background:#6A3DE8;color:#fff;border:none;border-radius:7px;padding:7px 14px;font-size:12px;font-weight:500;cursor:pointer;font-family:inherit;transition:background .15s;white-space:nowrap;flex-shrink:0}
+.empty-home{background:#0d0d0d;border:1px dashed #222;border-radius:12px;padding:28px 20px;text-align:center;margin-bottom:20px}
+.empty-home-icon{font-size:28px;opacity:.25;margin-bottom:8px}
+.empty-home-text{font-size:14px;color:#555;margin-bottom:4px}
+.empty-home-sub{font-size:12px;color:#383838}
+
+/* ── MODAIS ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:100;align-items:center;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:#141414;border:1px solid #2a2a2a;border-radius:12px;padding:24px;width:100%;max-width:360px;margin:16px}
+.modal-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:6px}
+.modal-sub{font-size:13px;color:#666;margin-bottom:16px}
+.reason-list{display:flex;flex-direction:column;gap:8px;margin-bottom:16px}
+.reason-option{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:8px;border:1px solid #2a2a2a;cursor:pointer;transition:all .15s;color:#aaa;font-size:13px}
+.reason-option:hover,.reason-option.selected{border-color:#6A3DE8;background:#1a1025;color:#fff}
+.reason-radio{width:14px;height:14px;border-radius:50%;border:2px solid #444;flex-shrink:0;transition:all .15s}
+.reason-option.selected .reason-radio{border-color:#6A3DE8;background:#6A3DE8}
+.modal-actions{display:flex;gap:8px;justify-content:flex-end}
+.btn-modal-confirm{background:#c0392b;color:#fff;border:none;border-radius:7px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-modal-cancel{background:transparent;color:#888;border:1px solid #2a2a2a;border-radius:7px;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit}
+.toast{position:fixed;bottom:20px;right:20px;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:500;z-index:200;opacity:0;transition:opacity .3s;pointer-events:none;max-width:300px}
+.toast.show{opacity:1}
+.toast-success{background:#16532a;color:#4ade80;border:1px solid #1e6b35}
+.toast-info{background:#1a1f3a;color:#818cf8;border:1px solid #2e3a6e}
+
+/* ── MODAL AGENDAMENTO MANUAL ── */
+.modal-add{background:#161616;border:1px solid #2e1f55;border-radius:14px;padding:26px;width:100%;max-width:500px;margin:16px;max-height:90vh;overflow-y:auto}
+.modal-add::-webkit-scrollbar{width:4px}
+.modal-add::-webkit-scrollbar-thumb{background:#2e1f55;border-radius:2px}
+.modal-add-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.modal-add-title{font-size:16px;font-weight:700;color:#fff}
+.modal-add-sub{font-size:12px;color:#555;margin-bottom:20px}
+.modal-close-btn{width:28px;height:28px;border-radius:6px;background:#1e1e1e;border:1px solid #2a2a2a;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:all .15s;flex-shrink:0}
+.modal-close-btn:hover{background:#2a2a2a;color:#fff}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+.form-row.single{grid-template-columns:1fr}
+.form-group{display:flex;flex-direction:column;gap:5px}
+.form-label{font-size:11px;color:#666;font-weight:500;letter-spacing:.3px;text-transform:uppercase}
+.form-label span{color:#f87171;margin-left:2px}
+.form-input,.form-textarea,.form-select{background:#0e0e0e;border:1px solid #2a2a2a;color:#fff;font-size:13px;padding:9px 12px;border-radius:8px;outline:none;font-family:inherit;transition:border-color .15s;width:100%}
+.form-input:focus,.form-textarea:focus,.form-select:focus{border-color:#6A3DE8;background:#0d0a1a}
+.form-input::placeholder,.form-textarea::placeholder{color:#444}
+.form-input.error,.form-textarea.error{border-color:#f87171}
+.form-textarea{resize:vertical;min-height:72px}
+.form-select option{background:#161616}
+.modal-add-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid #1e1e1e}
+.btn-add-confirm{background:#6A3DE8;color:#fff;border:none;border-radius:8px;padding:10px 22px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-add-confirm:hover{background:#5a2dd8}
+.btn-add-cancel{background:transparent;color:#777;border:1px solid #2a2a2a;border-radius:8px;padding:10px 16px;font-size:13px;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-add-cancel:hover{border-color:#444;color:#aaa}
+.add-event-btn{display:flex;align-items:center;gap:8px;background:#6A3DE8;color:#fff;border:none;border-radius:9px;padding:9px 18px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;margin-bottom:20px}
+.add-event-btn:hover{background:#5a2dd8;transform:translateY(-1px);box-shadow:0 4px 16px rgba(106,61,232,0.35)}
+.add-event-btn svg{flex-shrink:0}
+
+/* ── PERFIL ── */
+.prf-wrap{max-width:740px}
+.prf-cover{position:relative;height:180px;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#1a1035 0%,#0e0e1a 50%,#1a2535 100%);border:1px solid #2a2a2a;margin-bottom:0;flex-shrink:0}
+.prf-cover-img{width:100%;height:100%;object-fit:cover;display:block}
+.prf-cover-gradient{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,0.6) 100%);pointer-events:none}
+.prf-cover-cam{width:36px;height:36px;border-radius:9px;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.prf-cover-cam:hover{background:rgba(106,61,232,0.85)}
+.prf-header-row{display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-top:-48px;padding:0 4px;position:relative;z-index:3}
+.prf-avatar-wrap{position:relative;display:inline-block;flex-shrink:0}
+.prf-avatar{width:96px;height:96px;border-radius:50%;border:4px solid #000;background:#6A3DE8;display:flex;align-items:center;justify-content:center;font-size:30px;font-weight:700;color:#fff;overflow:hidden;flex-shrink:0}
+.prf-avatar img{width:100%;height:100%;object-fit:cover}
+.prf-avatar-cam{position:absolute;bottom:3px;right:3px;width:26px;height:26px;border-radius:50%;background:#6A3DE8;border:2px solid #000;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s}
+.prf-avatar-cam:hover{background:#5a2dd8}
+.prf-edit-btn{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid #2e1f55;color:#a78bfa;border-radius:9px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;margin-bottom:4px}
+.prf-edit-btn:hover{background:#1e1535;border-color:#6A3DE8;color:#c4b5fd}
+.prf-identity{padding:14px 4px 0}
+.prf-name{font-size:22px;font-weight:700;color:#fff;line-height:1.2;margin-bottom:5px}
+.prf-role{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:#a78bfa;background:#1e1535;border:1px solid #2e1f55;border-radius:20px;padding:3px 11px;font-weight:500}
+.prf-bio-card{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:12px;padding:18px 20px;margin-top:18px;margin-bottom:14px}
+.prf-bio-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:8px}
+.prf-bio-text{font-size:13px;color:#aaa;line-height:1.75;white-space:pre-wrap;word-break:break-word}
+.prf-bio-empty{font-size:13px;color:#3a3a3a;font-style:italic}
+.prf-stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
+.prf-stat{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;padding:14px 12px;text-align:center;transition:border-color .15s}
+.prf-stat:hover{border-color:#2e1f55}
+.prf-stat-num{font-size:20px;font-weight:700;color:#a78bfa;margin-bottom:3px}
+.prf-stat-lbl{font-size:11px;color:#555}
+.prf-section-title{font-size:13px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
+.prf-tags-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
+.prf-tag{font-size:12px;background:#1e1535;color:#a78bfa;border:1px solid #2e1f55;padding:5px 14px;border-radius:20px;font-weight:500}
+.prf-contact-card{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:12px;overflow:hidden;margin-bottom:24px}
+.prf-contact-row{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid #141414;transition:background .12s}
+.prf-contact-row:last-child{border-bottom:none}
+.prf-contact-row:hover{background:#111}
+.prf-contact-icon{width:30px;height:30px;border-radius:8px;background:#1a1a1a;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.prf-contact-text{flex:1;min-width:0}
+.prf-contact-lbl{font-size:11px;color:#555;margin-bottom:1px}
+.prf-contact-val{font-size:13px;color:#ccc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.modal-prf{background:#161616;border:1px solid #2e1f55;border-radius:14px;padding:26px;width:100%;max-width:480px;margin:16px;max-height:92vh;overflow-y:auto}
+.modal-prf::-webkit-scrollbar{width:3px}
+.modal-prf::-webkit-scrollbar-thumb{background:#2e1f55;border-radius:2px}
+.modal-prf-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.modal-prf-title{font-size:16px;font-weight:700;color:#fff}
+
+/* ── BOTÃO SAIR (nav) ── */
+.nav-item.nav-logout:hover{background:#2a0a0a;color:#f87171}
+
+/* ══════════════════════════════════════════
+   BOTTOM DRAWER (mobile "Mais")
+══════════════════════════════════════════ */
+#more-drawer-overlay{
+  display:none;position:fixed;inset:0;background:rgba(0,0,0,0.72);z-index:190;
+}
+#more-drawer-overlay.open{display:block}
+#more-drawer{
+  display:none;position:fixed;left:0;right:0;bottom:0;
+  background:#111;border-radius:18px 18px 0 0;
+  z-index:191;
+  transform:translateY(100%);transition:transform .28s cubic-bezier(.32,.72,0,1);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+}
+#more-drawer.open{transform:translateY(0)}
+.more-drawer-handle{width:36px;height:4px;background:#2a2a2a;border-radius:2px;margin:12px auto 2px}
+.more-drawer-title{font-size:12px;font-weight:700;color:#444;letter-spacing:.08em;text-transform:uppercase;padding:6px 20px 10px}
+.more-drawer-list{display:flex;flex-direction:column;padding-bottom:calc(58px + 8px)}
+.more-drawer-item{
+  display:flex;align-items:center;gap:14px;
+  padding:15px 20px;color:#ccc;font-size:14px;font-weight:500;
+  cursor:pointer;transition:background .15s;
+  border-top:1px solid #1a1a1a;
+}
+.more-drawer-item:first-child{border-top:none}
+.more-drawer-item:hover,.more-drawer-item:active{background:#1a1a1a;color:#fff}
+.more-drawer-item .nav-icon{width:20px;height:20px;opacity:.7;flex-shrink:0}
+.more-drawer-item:hover .nav-icon,.more-drawer-item:active .nav-icon{opacity:1}
+.more-drawer-logout{color:#f87171}
+.more-drawer-logout:hover,.more-drawer-logout:active{background:#2a0a0a;color:#f87171}
+
+/* ══════════════════════════════════════════
+   VIEW: CONFIGURAÇÕES
+══════════════════════════════════════════ */
+.cfg-section{margin-bottom:28px}
+.cfg-section-title{font-size:11px;font-weight:700;color:#555;letter-spacing:.08em;text-transform:uppercase;margin-bottom:12px}
+.cfg-card{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:12px;overflow:hidden}
+.cfg-row{display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #141414;gap:16px}
+.cfg-row:last-child{border-bottom:none}
+.cfg-label{font-size:13px;font-weight:500;color:#ccc}
+.cfg-sub{font-size:11px;color:#555;margin-top:2px}
+.cfg-select{background:#1a1a1a;border:1px solid #2e2e2e;border-radius:8px;color:#fff;font-size:13px;padding:7px 12px;outline:none;font-family:inherit;cursor:pointer;min-width:130px}
+.cfg-select:focus{border-color:#7B52F0}
+.cfg-toggle{position:relative;display:inline-block;width:42px;height:24px;flex-shrink:0}
+.cfg-toggle input{opacity:0;width:0;height:0}
+.cfg-toggle-slider{position:absolute;inset:0;background:#2a2a2a;border-radius:12px;transition:background .2s;cursor:pointer}
+.cfg-toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:transform .2s}
+.cfg-toggle input:checked + .cfg-toggle-slider{background:#7B52F0}
+.cfg-toggle input:checked + .cfg-toggle-slider::before{transform:translateX(18px)}
+.cfg-btn{padding:11px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;border:1px solid #2e2e2e;background:transparent;color:#ccc}
+.cfg-btn:hover{border-color:#555;color:#fff}
+.cfg-btn-danger{border-color:#7f1d1d;color:#f87171}
+.cfg-btn-danger:hover{background:#2a0a0a;border-color:#f87171}
+
+/* ── Modal de confirmação cancelar evento ── */
+#cancel-event-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:600;align-items:center;justify-content:center}
+#cancel-event-modal.open{display:flex}
+.cancel-event-box{background:#141414;border:1px solid #2e1f55;border-radius:14px;padding:28px;width:100%;max-width:420px;margin:16px}
+.cancel-event-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:10px}
+.cancel-event-msg{font-size:13px;color:#888;line-height:1.6;margin-bottom:24px}
+.cancel-event-actions{display:flex;gap:10px;justify-content:flex-end}
+.btn-cancel-back{padding:10px 18px;background:transparent;border:1px solid #2e2e2e;border-radius:8px;color:#aaa;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-cancel-back:hover{border-color:#555;color:#fff}
+.btn-cancel-confirm{padding:10px 18px;background:#c0392b;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.btn-cancel-confirm:hover{background:#e74c3c}
+
+/* ══════════════════════════════════════════
+   MODAL DE CADASTRO
+══════════════════════════════════════════ */
+#register-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:center;justify-content:center}
+#register-modal.open{display:flex}
+.register-box{
+  background:#141414;border:1px solid #2a2a2a;border-radius:14px;
+  padding:28px;width:100%;max-width:420px;margin:16px;
+  animation:fadeInUp .25s ease both;
+}
+.register-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
+.register-title{font-size:17px;font-weight:700;color:#fff}
+.register-close{width:28px;height:28px;border-radius:7px;background:#1e1e1e;border:1px solid #2a2a2a;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s;flex-shrink:0}
+.register-close:hover{background:#2a2a2a;color:#fff}
+.register-fields{display:flex;flex-direction:column;gap:14px}
+.register-field{display:flex;flex-direction:column;gap:5px}
+.register-label{font-size:12px;color:#bbb;font-weight:500}
+.register-input{
+  width:100%;padding:13px 14px;
+  background:#1a1a1a;border:1px solid #2e2e2e;
+  border-radius:9px;color:#fff;font-size:14px;
+  outline:none;font-family:inherit;transition:border-color .15s;
+}
+.register-input:focus{border-color:#7B52F0}
+.register-input::placeholder{color:#555}
+.register-input.error{border-color:#f87171}
+.register-error{font-size:12px;color:#f87171;text-align:center;min-height:16px;margin-top:-6px}
+.btn-register-confirm{
+  width:100%;padding:14px;background:#7B52F0;border:none;
+  border-radius:10px;color:#fff;font-size:15px;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:background .15s,transform .1s;
+  margin-top:2px;
+}
+.btn-register-confirm:hover{background:#6940e0}
+.btn-register-confirm:active{transform:scale(.98)}
+.btn-register-confirm:disabled{opacity:.6;cursor:not-allowed}
+
+/* ══════════════════════════════════════════
+   ROLE SELECTOR (register modal)
+══════════════════════════════════════════ */
+.role-selector{display:flex;gap:10px;margin-bottom:2px}
+.role-btn{
+  flex:1;padding:11px 8px;border-radius:9px;
+  border:1px solid #2e2e2e;background:#1a1a1a;
+  color:#aaa;font-size:13px;font-weight:500;
+  cursor:pointer;font-family:inherit;
+  transition:border-color .15s,color .15s;
+  text-align:center;
+}
+.role-btn.active{border-color:#6A3DE8;color:#c4b5fd}
+
+/* ══════════════════════════════════════════
+   DESCOBRIR MÚSICOS
+══════════════════════════════════════════ */
+.disc-search-bar{
+  display:flex;align-items:center;gap:10px;
+  background:#1a1a1a;border:1px solid #2a2a2a;
+  border-radius:10px;padding:0 14px;
+  margin-bottom:14px;
+}
+.disc-search-bar input{
+  flex:1;background:none;border:none;outline:none;
+  color:#fff;font-size:14px;padding:13px 0;
+  font-family:inherit;
+}
+.disc-search-bar input::placeholder{color:#555}
+.disc-search-icon{color:#555;flex-shrink:0;font-size:16px}
+.disc-filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.disc-chip{
+  padding:6px 13px;border-radius:20px;
+  border:1px solid #2a2a2a;background:#1a1a1a;
+  color:#888;font-size:12px;cursor:pointer;
+  font-family:inherit;transition:all .15s;white-space:nowrap;
+}
+.disc-chip.active{border-color:#7B52F0;background:#1e1535;color:#c4b5fd}
+.musicians-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:14px;
+  margin-bottom:18px;
+}
+.musician-card{
+  background:#141414;border:1px solid #1e1e1e;
+  border-radius:12px;padding:16px 14px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:10px;transition:border-color .15s;cursor:default;
+}
+.musician-card:hover{border-color:#2a2a2a}
+.mc-avatar{
+  width:54px;height:54px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:18px;font-weight:700;color:#000;flex-shrink:0;
+}
+.mc-name{font-size:14px;font-weight:600;color:#fff;text-align:center;line-height:1.3}
+.mc-cidade{font-size:12px;color:#666;text-align:center}
+.mc-estilos{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+.mc-estilo-tag{
+  padding:3px 8px;border-radius:10px;
+  background:#1e1e2e;color:#a78bfa;
+  font-size:11px;border:1px solid #2a2a3a;
+}
+.mc-cache{font-size:12px;color:#888;text-align:center}
+.mc-cache span{color:#c4b5fd;font-weight:600}
+.btn-mc-proposta{
+  width:100%;padding:9px 0;border-radius:8px;
+  background:#7B52F0;border:none;
+  color:#fff;font-size:12px;font-weight:600;
+  cursor:pointer;font-family:inherit;
+  transition:background .15s;
+}
+.btn-mc-proposta:hover{background:#6940e0}
+.disc-empty{
+  text-align:center;padding:40px 20px;color:#555;
+  grid-column:1/-1;
+}
+.disc-empty-icon{font-size:40px;margin-bottom:10px}
+.disc-load-more{
+  width:100%;padding:12px;border-radius:10px;
+  background:transparent;border:1px solid #2a2a2a;
+  color:#888;font-size:13px;font-weight:500;
+  cursor:pointer;font-family:inherit;transition:all .15s;
+}
+.disc-load-more:hover{border-color:#555;color:#fff}
+
+/* ══════════════════════════════════════════
+   MODAL: ENVIAR PROPOSTA
+══════════════════════════════════════════ */
+/* ══════════════════════════════════════════
+   PERFIL DO MÚSICO (view)
+══════════════════════════════════════════ */
+.btn-mp-proposta{padding:14px;background:#7B52F0;border:none;border-radius:10px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s,transform .1s}
+.btn-mp-proposta:hover{background:#6940e0}
+.btn-mp-proposta:active{transform:scale(.98)}
+
+#send-proposal-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:400;align-items:center;justify-content:center}
+#send-proposal-modal.open{display:flex}
+.sp-box{
+  background:#141414;border:1px solid #2a2a2a;border-radius:14px;
+  padding:24px;width:100%;max-width:480px;margin:16px;
+  max-height:90vh;overflow-y:auto;
+  animation:fadeInUp .25s ease both;
+}
+.sp-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.sp-title{font-size:16px;font-weight:700;color:#fff}
+.sp-close{width:28px;height:28px;border-radius:7px;background:#1e1e1e;border:1px solid #2a2a2a;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s;flex-shrink:0}
+.sp-close:hover{background:#2a2a2a;color:#fff}
+.sp-to{font-size:13px;color:#888;margin-bottom:18px}
+.sp-to strong{color:#c4b5fd}
+.sp-fields{display:flex;flex-direction:column;gap:12px}
+.sp-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sp-field{display:flex;flex-direction:column;gap:5px}
+.sp-label{font-size:12px;color:#bbb;font-weight:500}
+.sp-input{
+  width:100%;padding:11px 12px;
+  background:#1a1a1a;border:1px solid #2e2e2e;
+  border-radius:9px;color:#fff;font-size:13px;
+  outline:none;font-family:inherit;transition:border-color .15s;
+}
+.sp-input:focus{border-color:#7B52F0}
+.sp-input::placeholder{color:#555}
+.sp-input.error{border-color:#f87171}
+.sp-estilos-wrap{display:flex;flex-wrap:wrap;gap:7px}
+.sp-estilo-chip{
+  padding:5px 12px;border-radius:14px;
+  border:1px solid #2a2a2a;background:#1a1a1a;
+  color:#888;font-size:12px;cursor:pointer;
+  font-family:inherit;transition:all .15s;
+}
+.sp-estilo-chip.active{border-color:#7B52F0;background:#1e1535;color:#c4b5fd}
+.sp-error{font-size:12px;color:#f87171;text-align:center;min-height:16px}
+.btn-sp-confirm{
+  width:100%;padding:13px;background:#7B52F0;border:none;
+  border-radius:10px;color:#fff;font-size:14px;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:background .15s,transform .1s;
+  margin-top:4px;
+}
+.btn-sp-confirm:hover{background:#6940e0}
+.btn-sp-confirm:active{transform:scale(.98)}
+.btn-sp-confirm:disabled{opacity:.6;cursor:not-allowed}
+
+@media(max-width:768px){
+  .musicians-grid{grid-template-columns:repeat(2,1fr)}
+  .sp-row{grid-template-columns:1fr}
+  #send-proposal-modal{align-items:flex-end}
+  .sp-box{border-radius:16px 16px 0 0;margin:0;max-width:100%;max-height:92vh}
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVIDADE — MOBILE (≤ 768px)
+══════════════════════════════════════════ */
+@media (max-width: 768px) {
+
+  /* ── Layout principal ── */
+  .dash { flex-direction: column; }
+
+  /* ── Sidebar → barra de navegação inferior ── */
+  .sidebar {
+    width: 100% !important;
+    min-width: unset !important;
+    max-width: unset !important;
+    height: 58px;
+    flex-direction: row;
+    align-items: stretch;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    border-right: none;
+    border-top: 1px solid #1e1e1e;
+    z-index: 50;
+    background: #0a0a0a;
+  }
+
+  /* Oculta elementos da sidebar que não servem no bottom nav */
+  .sb-top, .sb-divider, .sb-footer, .sb-section-label { display: none !important; }
+
+  /* Cada secção ocupa espaço igual em linha */
+  .sb-section {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    padding: 0;
+    margin: 0;
+    height: 100%;
+  }
+
+  /* Cada item de nav: ícone em cima, sem texto */
+  .nav-item {
+    flex: 1;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 3px;
+    padding: 6px 2px;
+    border-radius: 0;
+    font-size: 9px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .nav-icon { width: 18px; height: 18px; opacity: .7; }
+  .nav-item.active .nav-icon { opacity: 1; }
+
+  /* Badge de propostas no bottom nav */
+  .nav-badge {
+    position: absolute;
+    top: 6px;
+    right: calc(50% - 18px);
+    margin-left: 0;
+  }
+
+  /* Mostra apenas 5 itens no bottom nav */
+  #nav-agenda    { display: none !important; }
+  .sb-section:last-of-type { display: none !important; }   /* esconde Perfil/Config/Sair da sidebar */
+  #nav-mais      { display: flex !important; }
+  .nav-logout    { display: none !important; }
+
+  /* Ordem: Início · Descobrir · Propostas · Mensagens · Mais */
+  #nav-inicio    { order: 1; }
+  #nav-descobrir { order: 2; }
+  #nav-propostas { order: 3; }
+  #nav-mensagens { order: 4; }
+  #nav-mais      { order: 5; }
+
+  /* Drawer habilitado em mobile (display gerido por JS via .open) */
+  #more-drawer          { display: block; }
+  #more-drawer-overlay  { display: none; }
+
+  /* ── Main area ── */
+  .main {
+    min-height: 100vh;
+    padding-bottom: 58px;
+  }
+
+  /* ── Topbar ── */
+  .topbar { padding: 12px 16px; }
+
+  /* ── Conteúdo ── */
+  .view { padding: 16px !important; }
+
+  /* ── Grids colapsam para 1 coluna ── */
+  .prop-details { grid-template-columns: 1fr !important; }
+  .info-grid { grid-template-columns: 1fr !important; }
+  .home-stats-row { grid-template-columns: 1fr 1fr; }
+  .ganhos-row { flex-direction: column; }
+  .form-row { grid-template-columns: 1fr !important; }
+
+  /* ── Botões de acção empilham verticalmente ── */
+  .prop-actions { flex-direction: column; }
+  .prop-actions .btn { width: 100%; justify-content: center; text-align: center; }
+
+  /* ── Contraproposta ── */
+  .counter-row { flex-direction: column; }
+  .counter-actions { justify-content: stretch; flex-direction: column; }
+  .btn-send, .btn-cancel-sm { width: 100%; text-align: center; }
+
+  /* ── Próximo show ── */
+  .next-show-card { flex-direction: column; gap: 12px; align-items: flex-start; }
+
+  /* ── Event cards com botões manuais ── */
+  .event-card { flex-wrap: wrap; gap: 8px; }
+
+  /* ── Perfil ── */
+  .prf-cover { height: 130px; }
+  .prf-header-row { margin-top: -36px; }
+  .prf-avatar { width: 72px; height: 72px; font-size: 22px; }
+
+  /* ── Modais: sobem do fundo como sheets ── */
+  .modal-overlay { align-items: flex-end; }
+  .modal {
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    width: 100%;
+  }
+  .modal-add {
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    width: 100%;
+    max-height: 90vh;
+  }
+  .modal-prf {
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0 !important;
+    width: 100%;
+    max-height: 90vh;
+  }
+
+  /* ── Modal de registo ── */
+  #register-modal { align-items: flex-end; }
+  .register-box {
+    max-width: 100% !important;
+    margin: 0 !important;
+    border-radius: 16px 16px 0 0;
+    width: 100%;
+  }
+
+  /* ── Toast ── */
+  .toast {
+    left: 16px;
+    right: 16px;
+    bottom: 70px;
+    max-width: unset;
+    text-align: center;
+  }
+
+  /* ── Login ── */
+  .login-box { padding: 0 8px; }
+}
+
+/* ══════════════════════════════════════════
+   VIEW: MENSAGENS
+══════════════════════════════════════════ */
+.conv-list{display:flex;flex-direction:column;gap:2px}
+.conv-item{
+  display:flex;align-items:center;gap:12px;
+  padding:12px;border-radius:10px;
+  background:#0d0d0d;border:1px solid #1a1a1a;
+  cursor:pointer;transition:background .15s;
+}
+.conv-item:hover{background:#141414;border-color:#2a2a2a}
+.conv-avatar{
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-weight:700;color:#000;
+}
+.conv-info{flex:1;min-width:0}
+.conv-name{font-size:13px;font-weight:600;color:#e0e0e0;margin-bottom:2px}
+.conv-preview{font-size:12px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.conv-time{font-size:11px;color:#444}
+.conv-unread{background:#6A3DE8;color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px}
+.conv-empty{text-align:center;padding:48px 20px;color:#444;font-size:14px}
+.conv-empty-icon{font-size:36px;margin-bottom:10px}
+.conv-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
+.conv-toolbar-actions{display:flex;gap:8px}
+.btn-conv-select{background:transparent;border:1px solid #2e2e2e;border-radius:8px;color:#aaa;font-size:13px;font-weight:500;padding:7px 14px;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-conv-select:hover{border-color:#555;color:#fff}
+.btn-conv-select.active{border-color:#7B52F0;color:#a78bfa}
+.btn-conv-delete{background:#c0392b;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;padding:7px 14px;cursor:pointer;font-family:inherit;transition:background .15s;display:none}
+.btn-conv-delete:hover{background:#e74c3c}
+.conv-checkbox{display:none;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:2px solid #333;background:transparent;flex-shrink:0;transition:all .15s}
+.conv-list.select-mode .conv-checkbox{display:flex}
+.conv-item.selected .conv-checkbox{border-color:#7B52F0;background:#7B52F0}
+.conv-item.selected .conv-checkbox::after{content:'✓';font-size:11px;color:#fff;font-weight:700}
+.conv-item.selected{background:#1a1230;border-color:#3d2a7a}
+
+/* ══════════════════════════════════════════
+   MODAL: CHAT
+══════════════════════════════════════════ */
+#chat-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:500;align-items:center;justify-content:center}
+#chat-modal.open{display:flex}
+.chat-box{
+  background:#161616;border:1px solid #2e1f55;border-radius:14px;
+  width:100%;max-width:480px;height:560px;margin:16px;
+  display:flex;flex-direction:column;overflow:hidden;
+  animation:fadeInUp .22s ease both;
+}
+.chat-header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:14px 16px;border-bottom:1px solid #1e1e2a;flex-shrink:0;
+}
+.chat-header-name{font-size:15px;font-weight:600;color:#fff}
+.chat-close{width:28px;height:28px;border-radius:7px;background:#1e1e1e;border:1px solid #2a2a2a;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s;flex-shrink:0}
+.chat-close:hover{background:#2a2a2a;color:#fff}
+.chat-messages{
+  flex:1;overflow-y:auto;padding:14px;
+  display:flex;flex-direction:column;gap:8px;
+}
+.chat-msg{display:flex;flex-direction:column;max-width:78%}
+.chat-msg.mine{align-self:flex-end;align-items:flex-end}
+.chat-msg.theirs{align-self:flex-start;align-items:flex-start}
+.chat-bubble{
+  padding:9px 13px;font-size:13px;line-height:1.45;word-break:break-word;
+}
+.chat-msg.mine .chat-bubble{background:#6A3DE8;color:#fff;border-radius:12px 12px 2px 12px}
+.chat-msg.theirs .chat-bubble{background:#1e1e1e;color:#ddd;border-radius:12px 12px 12px 2px}
+.chat-ts{font-size:10px;color:#444;margin-top:2px;padding:0 2px}
+.chat-footer{
+  display:flex;gap:8px;padding:12px;
+  border-top:1px solid #1e1e2a;flex-shrink:0;
+}
+.chat-input{
+  flex:1;background:#1a1a1a;border:1px solid #2a2a2a;
+  border-radius:9px;padding:10px 13px;
+  color:#fff;font-size:13px;outline:none;font-family:inherit;
+  transition:border-color .15s;resize:none;
+}
+.chat-input:focus{border-color:#6A3DE8}
+.chat-input::placeholder{color:#555}
+.btn-chat-send{
+  padding:10px 16px;background:#6A3DE8;border:none;
+  border-radius:9px;color:#fff;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:background .15s;flex-shrink:0;
+}
+.btn-chat-send:hover{background:#5a33c8}
+.chat-empty{text-align:center;padding:40px 20px;color:#444;font-size:13px;flex:1;display:flex;align-items:center;justify-content:center}
+@media(max-width:768px){
+  #chat-modal{align-items:flex-end}
+  .chat-box{border-radius:16px 16px 0 0;margin:0;max-width:100%;height:88vh}
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     TELA DE LOGIN
+══════════════════════════════════════════ -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-logo-icon">G</div>
+      <span class="login-logo-text">My<em>GUIG</em></span>
+    </div>
+
+    <h1 class="login-title">Conecte-se à sua música</h1>
+    <p class="login-sub">Uma conta. Todos os papéis.<br>Músico, artista ou contratante — você decide na hora.</p>
+
+    <div class="login-fields">
+      <div class="login-field">
+        <label class="login-label">E-mail</label>
+        <input class="login-input" id="login-email" type="email" placeholder="seu@email.com"
+          onkeydown="if(event.key==='Enter')document.getElementById('login-senha').focus()">
+      </div>
+
+      <div class="login-field">
+        <label class="login-label">Senha</label>
+        <input class="login-input" id="login-senha" type="password" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter')handleLogin()">
+      </div>
+
+      <div class="login-error-msg" id="login-error"></div>
+
+      <button class="btn-login" onclick="handleLogin()">Entrar</button>
+
+      <div class="login-divider">
+        <div class="login-divider-line"></div>
+        <span class="login-divider-txt">ou</span>
+        <div class="login-divider-line"></div>
+      </div>
+
+      <button class="btn-register" onclick="handleRegister()">Criar conta gratuita</button>
+
+      <p class="login-terms">Ao entrar você concorda com os <a onclick="showToast('Termos em breve!','info')">Termos de uso</a></p>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     DASHBOARD PRINCIPAL
+══════════════════════════════════════════ -->
+<div id="main-app">
+<div class="dash">
+  <div class="sidebar">
+    <div class="sb-top">
+      <div class="sb-logo">
+        <div class="sb-logo-icon">G</div>
+        <div class="sb-logo-text">My<span>GUIG</span></div>
+      </div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+      <div class="sb-section-label">Principal</div>
+      <div class="nav-item active" id="nav-inicio" onclick="navigate('inicio',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+        Início
+      </div>
+      <div class="nav-item" id="nav-descobrir" onclick="navigate('descobrir',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="4"/><path d="M10.5 10.5l3 3"/></svg>
+        Descobrir
+      </div>
+      <div class="nav-item" id="nav-propostas" onclick="navigate('propostas',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 2h12v10H9l-3 3v-3H2z"/></svg>
+        Propostas
+        <span class="nav-badge" id="nav-count">2</span>
+      </div>
+      <div class="nav-item" id="nav-mensagens" onclick="navigate('mensagens',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 3H2a1 1 0 00-1 1v7a1 1 0 001 1h3v2.5l3-2.5h6a1 1 0 001-1V4a1 1 0 00-1-1z"/></svg>
+        Mensagens
+        <span class="nav-badge" id="msg-badge" style="display:none">0</span>
+      </div>
+      <div class="nav-item" id="nav-agenda" onclick="navigate('agenda',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="1.5"/><path d="M5 1v4M11 1v4M1 7h14"/></svg>
+        Agenda
+      </div>
+      <div class="nav-item" id="nav-mais" onclick="openMoreDrawer()" style="display:none">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="3" cy="8" r="1.2" fill="currentColor" stroke="none"/><circle cx="8" cy="8" r="1.2" fill="currentColor" stroke="none"/><circle cx="13" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg>
+        Mais
+      </div>
+    </div>
+    <div class="sb-divider"></div>
+    <div class="sb-section">
+      <div class="sb-section-label">Conta</div>
+      <div class="nav-item" id="nav-perfil" onclick="navigate('perfil',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+        Meu perfil
+      </div>
+      <div class="nav-item" id="nav-configuracoes" onclick="navigate('configuracoes',this)">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>
+        Configurações
+      </div>
+      <div class="nav-item nav-logout" onclick="handleLogout()">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l4-4-4-4M14 7H6"/></svg>
+        Sair
+      </div>
+    </div>
+    <div class="sb-footer" onclick="navigate('perfil',document.getElementById('nav-perfil'))" style="cursor:pointer" title="Ver meu perfil">
+      <div class="footer-avatar" id="sb-footer-avatar">PA</div>
+      <div><div class="footer-name" id="sb-footer-name">Pedro Alves</div><div class="footer-status">Músico ativo</div></div>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="topbar">
+      <div style="display:flex;align-items:center;gap:10px">
+        <button id="btn-topbar-back"
+                onclick="navigate('descobrir',document.querySelector('[onclick*=descobrir]'))"
+                style="display:none;background:transparent;border:none;color:#a78bfa;
+                       cursor:pointer;font-size:14px;font-family:inherit;padding:4px 2px;
+                       display:none;align-items:center;gap:5px;transition:color .15s"
+                onmouseover="this.style.color='#c4b5fd'"
+                onmouseout="this.style.color='#a78bfa'">
+          &#8592; Voltar
+        </button>
+        <span class="topbar-title" id="topbar-title">Início</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <!-- INÍCIO -->
+      <div class="view active" id="view-inicio">
+        <div style="font-size:22px;font-weight:700;color:#fff;margin-bottom:4px">Boa tarde, <span id="home-greeting-name">Pedro</span></div>
+        <div style="font-size:13px;color:#666;margin-bottom:22px">Você está como <span style="color:#8B5CF6;font-weight:500">Músico</span> &#8212; alterne no menu lateral para mudar o contexto</div>
+        <div id="home-proximo"></div>
+        <div class="home-stats-row" id="home-stats"></div>
+        <div id="home-notifs"></div>
+        <div id="home-financeiro"></div>
+      </div>
+
+      <!-- PROPOSTAS -->
+      <div class="view" id="view-propostas">
+        <div class="page-title">Propostas recebidas</div>
+        <div class="page-sub">Gerencie, negocie e confirme seus compromissos musicais</div>
+        <div class="sync-hint"><div class="sync-dot"></div>Estado global ativo &#8212; Propostas e Agenda compartilham a mesma lista de dados</div>
+        <div class="filters">
+          <button class="filter-chip active" onclick="setFilter('all',this)">Todas</button>
+          <button class="filter-chip" onclick="setFilter('pending',this)">Pendentes</button>
+          <button class="filter-chip" onclick="setFilter('negotiating',this)">Em Negociação</button>
+          <button class="filter-chip" onclick="setFilter('confirmed',this)">Confirmadas</button>
+          <button class="filter-chip" onclick="setFilter('declined',this)">Recusadas</button>
+        </div>
+        <div id="proposals-container"></div>
+      </div>
+
+      <!-- AGENDA -->
+      <div class="view" id="view-agenda">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:3px">
+          <div style="font-size:22px;font-weight:700;color:#fff">Agenda</div>
+          <button class="add-event-btn" onclick="openAddEventModal()">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 2v12M2 8h12"/></svg>
+            Adicionar Evento
+          </button>
+        </div>
+        <div style="font-size:13px;color:#666;margin-bottom:16px">Ensaios, shows e compromissos confirmados</div>
+        <div class="ganhos-row">
+          <div class="faturamento-widget">
+            <div class="fat-label">Total do Mês</div>
+            <div class="fat-value" id="fat-mes-valor">R$ 0,00</div>
+            <div class="fat-sub" id="fat-mes-sub">0 show(s) confirmado(s)</div>
+          </div>
+          <div class="faturamento-widget anual">
+            <div class="fat-label">Total do Ano</div>
+            <div class="fat-value" id="fat-ano-valor">R$ 0,00</div>
+            <div class="fat-sub" id="fat-ano-sub">Total acumulado</div>
+          </div>
+        </div>
+        <div class="cal-wrap">
+          <div class="cal-nav">
+            <div class="cal-nav-btn" onclick="changeMonth(-1)">&#8249;</div>
+            <div class="cal-month" id="cal-month-label"></div>
+            <div class="cal-nav-btn" onclick="changeMonth(1)">&#8250;</div>
+          </div>
+          <div class="cal-grid" id="cal-grid"></div>
+        </div>
+        <div class="cal-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div>Show / ensaio confirmado</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Proposta pendente</div>
+        </div>
+        <div id="agenda-day-detail" style="display:none;margin-bottom:20px;background:#0d0d0d;border:1px solid #2e1f55;border-radius:12px;overflow:hidden"></div>
+        <div class="events-title">Próximos eventos</div>
+        <div id="events-list"></div>
+      </div>
+
+      <div class="view" id="view-descobrir">
+        <div class="page-title" style="margin-bottom:16px">Descobrir músicos</div>
+        <div class="disc-search-bar">
+          <span class="disc-search-icon">&#128269;</span>
+          <input type="text" id="disc-search" placeholder="Buscar por nome ou bio…" oninput="debouncedDiscSearch()">
+        </div>
+        <div class="disc-filters" id="disc-filters">
+          <button class="disc-chip active" onclick="setDiscStyle('',this)">Todos</button>
+          <button class="disc-chip" onclick="setDiscStyle('MPB',this)">MPB</button>
+          <button class="disc-chip" onclick="setDiscStyle('Rock',this)">Rock</button>
+          <button class="disc-chip" onclick="setDiscStyle('Jazz',this)">Jazz</button>
+          <button class="disc-chip" onclick="setDiscStyle('Sertanejo',this)">Sertanejo</button>
+          <button class="disc-chip" onclick="setDiscStyle('Funk',this)">Funk</button>
+          <button class="disc-chip" onclick="setDiscStyle('Clássico',this)">Clássico</button>
+        </div>
+        <div class="musicians-grid" id="musicians-grid"></div>
+        <button class="disc-load-more" id="disc-load-more" style="display:none" onclick="loadMusicians(true)">Carregar mais</button>
+      </div>
+
+      <!-- MENSAGENS -->
+      <div class="view" id="view-mensagens">
+        <div class="page-title" style="margin-bottom:4px">Mensagens</div>
+        <div class="page-sub" style="margin-bottom:18px">As tuas conversas com contratantes e músicos</div>
+        <div class="conv-toolbar">
+          <div style="font-size:13px;color:#555" id="conv-select-count"></div>
+          <div class="conv-toolbar-actions">
+            <button class="btn-conv-delete" id="btn-conv-delete" onclick="deleteSelectedConvs()">🗑 Excluir selecionadas</button>
+            <button class="btn-conv-select" id="btn-conv-select" onclick="toggleSelectMode()">Selecionar</button>
+          </div>
+        </div>
+        <div class="conv-list" id="conversations-list"></div>
+      </div>
+
+      <!-- CONFIGURAÇÕES -->
+      <div class="view" id="view-configuracoes">
+        <div class="page-title" style="margin-bottom:4px">Configurações</div>
+        <div class="page-sub" style="margin-bottom:22px">Personalize a tua experiência no MyGUIg</div>
+
+        <!-- 1. Preferências de exibição -->
+        <div class="cfg-section">
+          <div class="cfg-section-title">Preferências de exibição</div>
+          <div class="cfg-card">
+            <div class="cfg-row">
+              <div><div class="cfg-label">Moeda</div><div class="cfg-sub">Afeta como os valores de cachê são exibidos</div></div>
+              <select class="cfg-select" id="cfg-moeda" onchange="saveCfg()">
+                <option value="BRL">BRL (R$)</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+              </select>
+            </div>
+            <div class="cfg-row">
+              <div><div class="cfg-label">Idioma</div><div class="cfg-sub">Apenas visual, sem tradução real</div></div>
+              <select class="cfg-select" id="cfg-idioma" onchange="saveCfg()">
+                <option value="pt-BR">PT-BR</option>
+                <option value="en">EN</option>
+                <option value="es">ES</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. Notificações -->
+        <div class="cfg-section">
+          <div class="cfg-section-title">Notificações</div>
+          <div class="cfg-card">
+            <div class="cfg-row">
+              <div><div class="cfg-label">Notificações de novas propostas</div></div>
+              <label class="cfg-toggle"><input type="checkbox" id="cfg-notif-propostas" onchange="saveCfg()"><span class="cfg-toggle-slider"></span></label>
+            </div>
+            <div class="cfg-row">
+              <div><div class="cfg-label">Notificações de mensagens</div></div>
+              <label class="cfg-toggle"><input type="checkbox" id="cfg-notif-mensagens" onchange="saveCfg()"><span class="cfg-toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 3. Privacidade -->
+        <div class="cfg-section">
+          <div class="cfg-section-title">Privacidade</div>
+          <div class="cfg-card">
+            <div class="cfg-row">
+              <div><div class="cfg-label">Mostrar cachê mínimo no perfil público</div></div>
+              <label class="cfg-toggle"><input type="checkbox" id="cfg-show-cache" onchange="saveCfg()"><span class="cfg-toggle-slider"></span></label>
+            </div>
+            <div class="cfg-row">
+              <div><div class="cfg-label">Permitir mensagens de desconhecidos</div></div>
+              <label class="cfg-toggle"><input type="checkbox" id="cfg-allow-msgs" onchange="saveCfg()"><span class="cfg-toggle-slider"></span></label>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Conta -->
+        <div class="cfg-section">
+          <div class="cfg-section-title">Conta</div>
+          <div class="cfg-card">
+            <div class="cfg-row">
+              <div><div class="cfg-label">Alterar senha</div><div class="cfg-sub">Modifica a senha de acesso à conta</div></div>
+              <button class="cfg-btn" onclick="showToast('Em breve','info')">Alterar senha</button>
+            </div>
+            <div class="cfg-row">
+              <div><div class="cfg-label">Eliminar conta</div><div class="cfg-sub">Remove permanentemente a tua conta e dados</div></div>
+              <button class="cfg-btn cfg-btn-danger" onclick="confirmDeleteAccount()">Eliminar conta</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- PERFIL -->
+      <div class="view" id="view-perfil">
+        <div class="prf-wrap">
+          <div style="position:relative;margin-bottom:0">
+            <div class="prf-cover" id="prf-cover-bg">
+              <img id="prf-cover-img" class="prf-cover-img" src="" alt="" style="display:none">
+              <div class="prf-cover-gradient"></div>
+            </div>
+            <div class="prf-cover-cam" title="Alterar foto de capa" style="position:absolute;bottom:12px;right:12px;z-index:4" onclick="document.getElementById('input-capa').click()">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+          <input type="file" accept="image/*" id="input-capa" style="display:none;position:absolute;left:-9999px" onchange="handleCapaUpload(event)">
+
+          <div class="prf-header-row">
+            <div class="prf-avatar-wrap">
+              <div class="prf-avatar" id="prf-avatar-el">PA</div>
+              <label class="prf-avatar-cam" title="Alterar foto de perfil">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
+                <input type="file" accept="image/*" id="input-avatar" style="display:none" onchange="handleAvatarUpload(event)">
+              </label>
+            </div>
+            <button class="prf-edit-btn" onclick="openEditPerfil()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+              Editar informações
+            </button>
+          </div>
+
+          <div class="prf-identity">
+            <div class="prf-name" id="prf-nome-display">Pedro Alves</div>
+            <div style="margin-top:5px">
+              <span class="prf-role">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 19V6l12-3v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="15" r="3"/></svg>
+                Músico
+              </span>
+            </div>
+          </div>
+
+          <div class="prf-bio-card">
+            <div class="prf-bio-label">Sobre mim</div>
+            <div id="prf-bio-display"></div>
+          </div>
+
+          <div class="prf-stats-row" id="prf-stats-row"></div>
+
+          <div class="prf-section-title">Estilos musicais</div>
+          <div class="prf-tags-row" id="prf-estilos-row">
+            <span class="prf-tag">Rock</span><span class="prf-tag">MPB</span>
+            <span class="prf-tag">Jazz</span><span class="prf-tag">Blues</span>
+            <span class="prf-tag">Bossa Nova</span>
+          </div>
+
+          <div class="prf-section-title">Contato &amp; links</div>
+          <div class="prf-contact-card">
+            <div class="prf-contact-row">
+              <div class="prf-contact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg></div>
+              <div class="prf-contact-text"><div class="prf-contact-lbl">E-mail</div><div class="prf-contact-val" id="prf-email-display">pedro@email.com</div></div>
+            </div>
+            <div class="prf-contact-row">
+              <div class="prf-contact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 9.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg></div>
+              <div class="prf-contact-text"><div class="prf-contact-lbl">WhatsApp / Tel</div><div class="prf-contact-val" id="prf-tel-display">(11) 91234-5678</div></div>
+            </div>
+            <div class="prf-contact-row">
+              <div class="prf-contact-icon"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg></div>
+              <div class="prf-contact-text"><div class="prf-contact-lbl">Instagram</div><div class="prf-contact-val" id="prf-instagram-display">@pedroalvesmusica</div></div>
+            </div>
+          </div>
+          <button onclick="handleLogout()" style="width:100%;padding:12px;background:transparent;border:1px solid #4a1515;border-radius:10px;color:#f87171;font-size:14px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;margin-top:8px" onmouseover="this.style.background='#2a0a0a'" onmouseout="this.style.background='transparent'">Sair da conta</button>
+        </div>
+      </div><!-- /view-perfil -->
+
+      <!-- PERFIL DO MÚSICO (view, igual ao #view-perfil mas só-leitura) -->
+      <div class="view" id="view-musico-perfil">
+        <div class="prf-wrap">
+
+          <!-- Capa -->
+          <div style="position:relative;margin-bottom:0">
+            <div class="prf-cover" id="vmp-cover">
+              <div class="prf-cover-gradient"></div>
+            </div>
+          </div>
+
+          <!-- Avatar + botões de ação (no lugar do botão Editar) -->
+          <div class="prf-header-row">
+            <div class="prf-avatar-wrap">
+              <div class="prf-avatar" id="vmp-avatar"></div>
+            </div>
+            <div style="display:flex;gap:10px;margin-bottom:4px">
+              <button class="btn-mp-proposta" onclick="openSendProposalFromProfile()">
+                📋 Enviar proposta
+              </button>
+              <button onclick="openChatFromProfile()"
+                      style="padding:9px 18px;background:#1e1535;border:1px solid #2e1f55;
+                             border-radius:9px;color:#a78bfa;font-size:13px;font-weight:500;
+                             cursor:pointer;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:7px"
+                      onmouseover="this.style.background='#2a1a45';this.style.borderColor='#6A3DE8'"
+                      onmouseout="this.style.background='#1e1535';this.style.borderColor='#2e1f55'">
+                💬 Enviar mensagem
+              </button>
+            </div>
+          </div>
+
+          <!-- Nome + badge -->
+          <div class="prf-identity">
+            <div class="prf-name" id="vmp-nome"></div>
+            <div style="margin-top:5px">
+              <span class="prf-role">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 19V6l12-3v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="15" r="3"/></svg>
+                Músico
+              </span>
+            </div>
+          </div>
+
+          <!-- Bio -->
+          <div class="prf-bio-card">
+            <div class="prf-bio-label">Sobre mim</div>
+            <div id="vmp-bio"></div>
+          </div>
+
+          <!-- Estilos musicais -->
+          <div class="prf-section-title">Estilos musicais</div>
+          <div class="prf-tags-row" id="vmp-estilos-row"></div>
+
+          <!-- Contato & links -->
+          <div class="prf-section-title">Contato &amp; links</div>
+          <div class="prf-contact-card">
+            <!-- Cachê mínimo -->
+            <div class="prf-contact-row">
+              <div class="prf-contact-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+              </div>
+              <div class="prf-contact-text">
+                <div class="prf-contact-lbl">Cachê mínimo</div>
+                <div class="prf-contact-val" id="vmp-cache" style="color:#c4b5fd;font-weight:600"></div>
+              </div>
+            </div>
+            <!-- Cidade -->
+            <div class="prf-contact-row" id="vmp-cidade-row">
+              <div class="prf-contact-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+              </div>
+              <div class="prf-contact-text">
+                <div class="prf-contact-lbl">Cidade</div>
+                <div class="prf-contact-val" id="vmp-cidade"></div>
+              </div>
+            </div>
+            <!-- Instagram -->
+            <div class="prf-contact-row" id="vmp-instagram-row">
+              <div class="prf-contact-icon">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+              </div>
+              <div class="prf-contact-text">
+                <div class="prf-contact-lbl">Instagram</div>
+                <a class="prf-contact-val" id="vmp-instagram" target="_blank" rel="noopener"
+                   style="color:#a78bfa;text-decoration:none;display:block"></a>
+              </div>
+            </div>
+          </div><!-- /prf-contact-card -->
+
+        </div><!-- /prf-wrap -->
+      </div><!-- /view-musico-perfil -->
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+  <!-- MODAL: RECUSAR PROPOSTA -->
+  <div class="modal-overlay" id="decline-modal">
+    <div class="modal">
+      <div class="modal-title">Recusar proposta</div>
+      <div class="modal-sub">Selecione o motivo da recusa:</div>
+      <div class="reason-list">
+        <div class="reason-option" onclick="selectReason(this)"><div class="reason-radio"></div>Data indisponível</div>
+        <div class="reason-option" onclick="selectReason(this)"><div class="reason-radio"></div>Cachê abaixo do esperado</div>
+        <div class="reason-option" onclick="selectReason(this)"><div class="reason-radio"></div>Conflito de agenda</div>
+        <div class="reason-option" onclick="selectReason(this)"><div class="reason-radio"></div>Perfil não compatível</div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" onclick="closeDeclineModal()">Cancelar</button>
+        <button class="btn-modal-confirm" onclick="confirmDecline()">Confirmar recusa</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <!-- MODAL: ADICIONAR EVENTO MANUAL -->
+  <div class="modal-overlay" id="add-event-modal">
+    <div class="modal-add">
+      <div class="modal-add-header">
+        <div class="modal-add-title">&#43; Novo Evento Manual</div>
+        <button class="modal-close-btn" onclick="closeAddEventModal()">&#10005;</button>
+      </div>
+      <div class="modal-add-sub">Cadastre um compromisso externo que não veio por proposta do app</div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label class="form-label">Nome do Evento<span>*</span></label>
+          <input class="form-input" id="ae-nome" type="text" placeholder="Ex: Show no Bar das Artes">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Data<span>*</span></label>
+          <input class="form-input" id="ae-data" type="date">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Horário de Início</label>
+          <input class="form-input" id="ae-inicio" type="time">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Horário de Término</label>
+          <input class="form-input" id="ae-termino" type="time">
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label class="form-label">Cachê (R$)</label>
+          <input class="form-input" id="ae-cache" type="number" min="0" placeholder="Ex: 1500">
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label class="form-label">Local</label>
+          <input class="form-input" id="ae-local" type="text" placeholder="Ex: Teatro Municipal &#8212; Centro, SP">
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label class="form-label">Descrição</label>
+          <textarea class="form-textarea" id="ae-descricao" rows="3" placeholder="Detalhes do evento, observações, repertório..."></textarea>
+        </div>
+      </div>
+      <div class="modal-add-actions">
+        <button class="btn-add-cancel" onclick="closeAddEventModal()">Cancelar</button>
+        <button class="btn-add-confirm" onclick="saveManualEvent()">&#10003; Salvar Evento</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: EDITAR PERFIL -->
+  <div class="modal-overlay" id="edit-perfil-modal">
+    <div class="modal-prf">
+      <div class="modal-prf-hdr">
+        <div class="modal-prf-title">&#9998;&nbsp; Editar perfil</div>
+        <button class="modal-close-btn" onclick="closeEditPerfil()">&#10005;</button>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label class="form-label">Nome completo<span style="color:#f87171;margin-left:2px">*</span></label>
+          <input class="form-input" id="ep-nome" type="text" placeholder="Seu nome artístico ou real">
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label class="form-label">Bio / Sobre mim</label>
+          <textarea class="form-textarea" id="ep-bio" rows="4" placeholder="Conte sobre você, sua experiência musical e estilo..."></textarea>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">E-mail</label>
+          <input class="form-input" id="ep-email" type="email" placeholder="seu@email.com">
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp / Tel</label>
+          <input class="form-input" id="ep-tel" type="text" placeholder="(11) 9xxxx-xxxx">
+        </div>
+      </div>
+      <div class="form-row single">
+        <div class="form-group">
+          <label class="form-label">Instagram</label>
+          <input class="form-input" id="ep-instagram" type="text" placeholder="@seu_usuario">
+        </div>
+      </div>
+      <div class="modal-add-actions">
+        <button class="btn-add-cancel" onclick="closeEditPerfil()">Cancelar</button>
+        <button class="btn-add-confirm" onclick="salvarPerfil()">&#10003; Salvar perfil</button>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /dash -->
+</div><!-- /main-app -->
+
+<!-- ══════════════════════════════════════════
+     MODAL: CANCELAR EVENTO
+══════════════════════════════════════════ -->
+<div id="cancel-event-modal">
+  <div class="cancel-event-box">
+    <div class="cancel-event-title">Cancelar compromisso</div>
+    <div class="cancel-event-msg">Tens a certeza que queres cancelar este compromisso? O contratante será notificado.</div>
+    <div class="cancel-event-actions">
+      <button class="btn-cancel-back" onclick="closeCancelEventModal()">Voltar</button>
+      <button class="btn-cancel-confirm" onclick="confirmCancelProposal()">Confirmar cancelamento</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL: CRIAR CONTA
+══════════════════════════════════════════ -->
+<div id="chat-modal">
+  <div class="chat-box">
+    <div class="chat-header">
+      <div class="chat-header-name" id="chat-header-name">Conversa</div>
+      <button class="chat-close" onclick="closeChatModal()">&#10005;</button>
+    </div>
+    <div class="chat-messages" id="chat-messages"></div>
+    <div class="chat-footer">
+      <input class="chat-input" id="chat-input" type="text" placeholder="Escreve uma mensagem…"
+        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}">
+      <button class="btn-chat-send" onclick="sendMessage()">Enviar</button>
+    </div>
+  </div>
+</div>
+
+
+<div id="send-proposal-modal">
+  <div class="sp-box">
+    <div class="sp-header">
+      <div class="sp-title">Enviar Proposta</div>
+      <button class="sp-close" onclick="closeSendProposalModal()">&#10005;</button>
+    </div>
+    <div class="sp-to">Para: <strong id="sp-musician-name">—</strong></div>
+    <div class="sp-fields">
+      <div class="sp-field">
+        <label class="sp-label">Nome do evento *</label>
+        <input class="sp-input" id="sp-evento" type="text" placeholder="Ex: Casamento, Show, Festa corporativa">
+      </div>
+      <div class="sp-row">
+        <div class="sp-field">
+          <label class="sp-label">Data *</label>
+          <input class="sp-input" id="sp-data" type="date">
+        </div>
+        <div class="sp-field">
+          <label class="sp-label">Horário de início</label>
+          <input class="sp-input" id="sp-horario" type="time">
+        </div>
+      </div>
+      <div class="sp-row">
+        <div class="sp-field">
+          <label class="sp-label">Local *</label>
+          <input class="sp-input" id="sp-local" type="text" placeholder="Endereço ou nome do espaço">
+        </div>
+        <div class="sp-field">
+          <label class="sp-label">Cachê oferecido (R$) *</label>
+          <input class="sp-input" id="sp-cache" type="number" min="0" placeholder="0.00">
+        </div>
+      </div>
+      <div class="sp-field">
+        <label class="sp-label">Estilos musicais desejados</label>
+        <div class="sp-estilos-wrap" id="sp-estilos-wrap">
+          <button class="sp-estilo-chip" onclick="toggleSpEstilo(this,'MPB')">MPB</button>
+          <button class="sp-estilo-chip" onclick="toggleSpEstilo(this,'Rock')">Rock</button>
+          <button class="sp-estilo-chip" onclick="toggleSpEstilo(this,'Jazz')">Jazz</button>
+          <button class="sp-estilo-chip" onclick="toggleSpEstilo(this,'Sertanejo')">Sertanejo</button>
+          <button class="sp-estilo-chip" onclick="toggleSpEstilo(this,'Funk')">Funk</button>
+          <button class="sp-estilo-chip" onclick="toggleSpEstilo(this,'Bossa Nova')">Bossa Nova</button>
+          <button class="sp-estilo-chip" onclick="toggleSpEstilo(this,'Clássico')">Clássico</button>
+          <button class="sp-estilo-chip" onclick="toggleSpEstilo(this,'Pop')">Pop</button>
+        </div>
+      </div>
+      <div class="sp-field">
+        <label class="sp-label">Descrição / Repertório</label>
+        <textarea class="sp-input" id="sp-descricao" rows="3" placeholder="Descreva o evento, preferências de repertório…" style="resize:vertical"></textarea>
+      </div>
+      <div class="sp-error" id="sp-error"></div>
+      <button class="btn-sp-confirm" id="sp-btn" onclick="submitSendProposal()">Enviar proposta</button>
+    </div>
+  </div>
+</div>
+
+<div id="register-modal">
+  <div class="register-box">
+    <div class="register-header">
+      <div class="register-title">Criar conta gratuita</div>
+      <button class="register-close" onclick="closeRegisterModal()">&#10005;</button>
+    </div>
+    <div class="register-fields">
+      <div class="register-field">
+        <label class="register-label">Você é…</label>
+        <div class="role-selector">
+          <button class="role-btn active" id="role-musician" onclick="selectRole('musician')">🎵 Sou Músico / Cantor</button>
+          <button class="role-btn" id="role-contractor" onclick="selectRole('contractor')">🎪 Sou Contratante / Bar</button>
+        </div>
+      </div>
+      <div class="register-field">
+        <label class="register-label">Nome completo</label>
+        <input class="register-input" id="reg-name" type="text" placeholder="Seu nome"
+          onkeydown="if(event.key==='Enter')document.getElementById('reg-email').focus()">
+      </div>
+      <div class="register-field">
+        <label class="register-label">E-mail</label>
+        <input class="register-input" id="reg-email" type="email" placeholder="seu@email.com"
+          onkeydown="if(event.key==='Enter')document.getElementById('reg-senha').focus()">
+      </div>
+      <div class="register-field">
+        <label class="register-label">Senha (mín. 8 caracteres)</label>
+        <input class="register-input" id="reg-senha" type="password" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter')document.getElementById('reg-confirma').focus()">
+      </div>
+      <div class="register-field">
+        <label class="register-label">Confirmar senha</label>
+        <input class="register-input" id="reg-confirma" type="password" placeholder="••••••••"
+          onkeydown="if(event.key==='Enter')submitRegister()">
+      </div>
+      <div class="register-error" id="reg-error"></div>
+      <button class="btn-register-confirm" id="reg-btn" onclick="submitRegister()">Criar conta</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════
+   GESTÃO DE TELAS — LOGIN ↔ DASHBOARD
+════════════════════════════════════════════ */
+
+async function showApp(){
+  document.getElementById('login-screen').style.display='none';
+  document.getElementById('main-app').style.display='block';
+  syncSidebar();
+  renderHome();
+  loadAndRenderProposals(false);
+}
+
+function showLogin(){
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  /* Limpa campos do login */
+  document.getElementById('login-email').value='';
+  document.getElementById('login-senha').value='';
+  document.getElementById('login-error').textContent='';
+  document.getElementById('login-email').classList.remove('error');
+  document.getElementById('login-senha').classList.remove('error');
+}
+
+var API = 'https://myguig-backend-production.up.railway.app';
+
+/* ── Utilitários de token ── */
+function saveToken(token){ localStorage.setItem('myguig_token', token); }
+function getToken(){ return localStorage.getItem('myguig_token'); }
+function clearToken(){ localStorage.removeItem('myguig_token'); }
+
+function authHeaders(){
+  return { 'Content-Type':'application/json', 'Authorization':'Bearer '+getToken() };
+}
+
+/* ── Login ── */
+async function handleLogin(){
+  var email  = document.getElementById('login-email').value.trim();
+  var senha  = document.getElementById('login-senha').value;
+  var errEl  = document.getElementById('login-error');
+  var emailEl= document.getElementById('login-email');
+  var senhaEl= document.getElementById('login-senha');
+  var btn    = document.querySelector('.btn-login');
+
+  errEl.textContent='';
+  emailEl.classList.remove('error');
+  senhaEl.classList.remove('error');
+
+  if(!email){ emailEl.classList.add('error'); errEl.textContent='Preencha todos os campos.'; return; }
+  if(!senha){ senhaEl.classList.add('error'); errEl.textContent='Preencha todos os campos.'; return; }
+
+  btn.textContent='Entrando...'; btn.disabled=true;
+  try {
+    var res  = await fetch(API+'/auth/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({email, password: senha})
+    });
+    var data = await res.json();
+    if(!res.ok){
+      emailEl.classList.add('error'); senhaEl.classList.add('error');
+      errEl.textContent = data.error || 'Credenciais inválidas.';
+      return;
+    }
+    saveToken(data.token);
+    applyUserToUI(data.user);
+    showApp();
+  } catch(e) {
+    errEl.textContent='Servidor offline. Certifique-se de que npm run dev está rodando.';
+  } finally {
+    btn.textContent='Entrar'; btn.disabled=false;
+  }
+}
+
+/* ── Abrir/fechar modal de cadastro ── */
+function handleRegister(){
+  document.getElementById('register-modal').classList.add('open');
+  setTimeout(function(){ document.getElementById('reg-name').focus(); }, 50);
+}
+function closeRegisterModal(){
+  document.getElementById('register-modal').classList.remove('open');
+  ['reg-name','reg-email','reg-senha','reg-confirma'].forEach(function(id){
+    document.getElementById(id).value='';
+    document.getElementById(id).classList.remove('error');
+  });
+  document.getElementById('reg-error').textContent='';
+}
+
+/* ── Submeter cadastro ── */
+async function submitRegister(){
+  var name     = document.getElementById('reg-name').value.trim();
+  var email    = document.getElementById('reg-email').value.trim();
+  var senha    = document.getElementById('reg-senha').value;
+  var confirma = document.getElementById('reg-confirma').value;
+  var errEl    = document.getElementById('reg-error');
+  var btn      = document.getElementById('reg-btn');
+
+  errEl.textContent='';
+  ['reg-name','reg-email','reg-senha','reg-confirma'].forEach(function(id){
+    document.getElementById(id).classList.remove('error');
+  });
+
+  if(!name)   { document.getElementById('reg-name').classList.add('error');    errEl.textContent='Preencha o nome.'; return; }
+  if(!email)  { document.getElementById('reg-email').classList.add('error');   errEl.textContent='Preencha o e-mail.'; return; }
+  if(senha.length<8){ document.getElementById('reg-senha').classList.add('error'); errEl.textContent='A senha deve ter no mínimo 8 caracteres.'; return; }
+  if(senha!==confirma){ document.getElementById('reg-confirma').classList.add('error'); errEl.textContent='As senhas não coincidem.'; return; }
+
+  btn.textContent='Criando conta...'; btn.disabled=true;
+  try {
+    var res  = await fetch(API+'/auth/register', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({name, email, password: senha, role: _selectedRole})
+    });
+    var data = await res.json();
+    if(!res.ok){
+      errEl.textContent = data.error || 'Erro ao criar conta.';
+      return;
+    }
+    saveToken(data.token);
+    applyUserToUI(data.user);
+    closeRegisterModal();
+    showApp();
+    showToast('Conta criada com sucesso! Bem-vindo(a) 🎵','success');
+  } catch(e) {
+    errEl.textContent='Servidor offline. Certifique-se de que npm run dev está rodando.';
+  } finally {
+    btn.textContent='Criar conta'; btn.disabled=false;
+  }
+}
+
+/* ── Logout ── */
+/* ── BOTTOM DRAWER (mobile "Mais") ── */
+function openMoreDrawer(){
+  document.getElementById('more-drawer-overlay').classList.add('open');
+  document.getElementById('more-drawer').classList.add('open');
+}
+function closeMoreDrawer(){
+  document.getElementById('more-drawer-overlay').classList.remove('open');
+  document.getElementById('more-drawer').classList.remove('open');
+}
+
+async function handleLogout(){
+  var token = getToken();
+  if(token){
+    try {
+      await fetch(API+'/auth/logout', { method:'POST', headers: authHeaders() });
+    } catch(e) { /* silently ignore if server is down */ }
+  }
+  clearToken();
+  showToast('Até logo! 👋','info');
+  setTimeout(showLogin, 800);
+}
+
+/* ── Aplica dados do user à UI ── */
+var _currentUserId = null;
+
+function applyUserToUI(user){
+  if(!user) return;
+  _currentUserId         = user.id    || null;
+  userProfile.nome       = user.name  || userProfile.nome;
+  userProfile.email      = user.email || userProfile.email;
+  if(user.bio       != null) userProfile.bio       = user.bio;
+  if(user.instagram != null) userProfile.instagram = user.instagram;
+  if(user.cidade    != null) userProfile.cidade    = user.cidade;
+  if(user.cache_minimo != null) userProfile.cache_minimo = parseFloat(user.cache_minimo) || 0;
+  if(user.estilos   != null){
+    try{ userProfile.estilos = typeof user.estilos==='string' ? JSON.parse(user.estilos) : user.estilos; }
+    catch(e){ userProfile.estilos = []; }
+  }
+  saveProfile();
+  syncSidebar();
+  renderPerfil();
+}
+
+/* ── Verifica token ao carregar ── */
+(async function(){
+  var token = getToken();
+  if(!token) return;
+  try {
+    var res = await fetch(API+'/auth/me', { headers: authHeaders() });
+    if(res.ok){
+      var data = await res.json();
+      applyUserToUI(data.user);
+      showApp();
+    } else {
+      clearToken();
+    }
+  } catch(e) {
+    /* Servidor offline — não tenta auto-login, mostra tela de login */
+    clearToken();
+  }
+})();
+
+/* ════════════════════════════════════════════
+   DASHBOARD — API-BASED LOGIC
+════════════════════════════════════════════ */
+var calYear=new Date().getFullYear(), calMonth=new Date().getMonth(), currentFilter='all', declineTarget=null, selectedReason=null, _selectedCalDay=null;
+var MONTHS_SHORT=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+var MONTHS_FULL=['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+var TODAY = new Date();
+
+var proposals = [];
+var manualEvents = [];
+var _propPage = 1, _propTotal = 0, _propLoading = false;
+
+function allProposals(){ return proposals.concat(manualEvents); }
+
+async function apiCall(method, path, body){
+  var opts = { method: method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() } };
+  if(body) opts.body = JSON.stringify(body);
+  var r = await fetch(API + path, opts);
+  var json = await r.json().catch(function(){ return {}; });
+  if(!r.ok) throw new Error(json.error || r.statusText);
+  return json;
+}
+
+function normalizeProposal(p){
+  var dateStr = (p.data_iso || '').toString().substring(0, 10); // handles "2026-08-15" and "2026-08-15T00:00:00.000Z"
+  var d = new Date(dateStr + 'T12:00:00');
+  var estilos = Array.isArray(p.estilos) ? p.estilos : JSON.parse(p.estilos || '[]');
+  var colorPalette = ['#2dd4bf','#f472b6','#fb923c','#818cf8','#facc15','#34d399','#60a5fa'];
+  var color = colorPalette[p.id % colorPalette.length];
+  var name = (p.contractor && p.contractor.name) || p.contractor_name || 'Contratante';
+  var initials = name.split(' ').filter(function(w){return w;}).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('') || 'CT';
+  var horario = p.horario_inicio ? p.horario_inicio.replace(':','h').substring(0,5) : '—';
+  var counterMsg = '';
+  if(p.lastCounter){
+    counterMsg = 'Contraproposta';
+    if(p.lastCounter.novo_cache) counterMsg += ': ' + fmtCache(parseFloat(p.lastCounter.novo_cache));
+    if(p.lastCounter.mensagem) counterMsg += ' — "' + p.lastCounter.mensagem.substring(0,40) + '"';
+  }
+  return {
+    id: p.id,
+    initials: initials,
+    color: color,
+    name: name,
+    evento: p.evento,
+    data: String(d.getDate()).padStart(2,'0') + ' ' + MONTHS_SHORT[d.getMonth()],
+    dia: d.getDate(), mes: d.getMonth(), ano: d.getFullYear(),
+    horario: horario,
+    local: p.local,
+    cache: parseFloat(p.cache) || 0,
+    cacheStr: fmtCache(parseFloat(p.cache) || 0),
+    status: p.status,
+    estilos: estilos,
+    repertorio: p.repertorio || '—',
+    metodo: p.metodo || '—',
+    descricao: p.descricao || '—',
+    counterMsg: counterMsg,
+    _raw: p,
+  };
+}
+
+async function loadAndRenderProposals(append){
+  if(_propLoading) return;
+  _propLoading = true;
+  var page = append ? _propPage + 1 : 1;
+  var c = document.getElementById('proposals-container');
+  if(!append) c.innerHTML = '<div class="skeleton-card"></div><div class="skeleton-card"></div>';
+  try {
+    // 'all' e 'pending' buscam tudo do servidor; filtro cliente aplica pending+negotiating
+    var statusParam = (currentFilter==='confirmed'||currentFilter==='declined'||currentFilter==='negotiating') ? '&status='+currentFilter : '';
+    var json = await apiCall('GET', '/api/proposals?page=' + page + '&limit=10' + statusParam);
+    var normalized = (json.data || []).map(normalizeProposal);
+    proposals = append ? proposals.concat(normalized) : normalized;
+    _propPage = json.pagination ? json.pagination.page : 1;
+    _propTotal = json.pagination ? json.pagination.total : proposals.length;
+    renderProposals(proposals);
+    document.getElementById('nav-count').textContent = proposals.filter(function(p){return p.status==='pending';}).length;
+    if(document.getElementById('view-inicio').classList.contains('active')) renderHome();
+  } catch(e) {
+    c.innerHTML = '<div style="text-align:center;padding:40px;color:#f87171;font-size:13px">Erro ao carregar propostas: ' + e.message + '</div>';
+  } finally {
+    _propLoading = false;
+  }
+}
+/* \u2500\u2500 CONFIGURA\u00c7\u00d5ES \u2500\u2500 */
+var LS_CFG = 'myguig_settings';
+var _cfg = {
+  moeda: 'BRL', idioma: 'pt-BR',
+  notifPropostas: true, notifMensagens: true,
+  showCache: true, allowMsgs: true
+};
+(function(){ try{ var s=localStorage.getItem(LS_CFG); if(s) _cfg=Object.assign(_cfg,JSON.parse(s)); }catch(e){} })();
+
+function saveCfg(){
+  var mo=document.getElementById('cfg-moeda');
+  var id=document.getElementById('cfg-idioma');
+  var np=document.getElementById('cfg-notif-propostas');
+  var nm=document.getElementById('cfg-notif-mensagens');
+  var sc=document.getElementById('cfg-show-cache');
+  var am=document.getElementById('cfg-allow-msgs');
+  if(mo) _cfg.moeda=mo.value;
+  if(id) _cfg.idioma=id.value;
+  if(np) _cfg.notifPropostas=np.checked;
+  if(nm) _cfg.notifMensagens=nm.checked;
+  if(sc) _cfg.showCache=sc.checked;
+  if(am) _cfg.allowMsgs=am.checked;
+  try{ localStorage.setItem(LS_CFG, JSON.stringify(_cfg)); }catch(e){}
+  showToast('\u2713 Configura\u00e7\u00f5es guardadas', 'success');
+}
+
+function renderCfgView(){
+  var mo=document.getElementById('cfg-moeda'); if(mo) mo.value=_cfg.moeda;
+  var id=document.getElementById('cfg-idioma'); if(id) id.value=_cfg.idioma;
+  var np=document.getElementById('cfg-notif-propostas'); if(np) np.checked=_cfg.notifPropostas;
+  var nm=document.getElementById('cfg-notif-mensagens'); if(nm) nm.checked=_cfg.notifMensagens;
+  var sc=document.getElementById('cfg-show-cache'); if(sc) sc.checked=_cfg.showCache;
+  var am=document.getElementById('cfg-allow-msgs'); if(am) am.checked=_cfg.allowMsgs;
+}
+
+function confirmDeleteAccount(){
+  if(!confirm('Tens a certeza que queres eliminar a tua conta? Esta a\u00e7\u00e3o \u00e9 irrevers\u00edvel.')) return;
+  showToast('Em breve', 'info');
+}
+
+function fmtCache(v){
+  var sym={'BRL':'R$\u00a0','USD':'$','EUR':'\u20ac'};
+  var locale={'BRL':'pt-BR','USD':'en-US','EUR':'de-DE'};
+  var m=_cfg.moeda||'BRL';
+  try{
+    return (sym[m]||'R$\u00a0')+v.toLocaleString(locale[m]||'pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }catch(e){ return 'R$\u00a0'+v.toFixed(2); }
+}
+function statusLabel(s){
+  if(s==='pending') return '<span class="prop-badge badge-pending">Aguardando sua resposta</span>';
+  if(s==='negotiating') return '<span class="prop-badge badge-negotiating">Em Negociação</span>';
+  if(s==='confirmed') return '<span class="prop-badge badge-confirmed">Confirmado</span>';
+  if(s==='declined') return '<span class="prop-badge badge-declined">Recusado</span>';
+  return '';
+}
+
+function renderHome(){
+  var all=allProposals();
+  var nx=all.filter(function(p){
+    if(p.status!=='confirmed') return false;
+    return new Date(p.ano,p.mes,p.dia)>=TODAY;
+  }).sort(function(a,b){return new Date(a.ano,a.mes,a.dia)-new Date(b.ano,b.mes,b.dia);})[0]||null;
+  var proxEl=document.getElementById('home-proximo');
+  if(nx){
+    proxEl.innerHTML='<div class="next-show-card">'+
+      '<div class="next-show-date"><div class="next-show-day">'+String(nx.dia).padStart(2,'0')+'</div><div class="next-show-month">'+MONTHS_SHORT[nx.mes]+'</div></div>'+
+      '<div class="next-show-body"><div class="next-show-label">Sua próxima agenda</div>'+
+      '<div class="next-show-title">'+nx.evento+'</div>'+
+      '<div class="next-show-meta">'+
+        '<div class="nsm-item"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5"><circle cx="8" cy="7" r="3.5"/><path d="M8 13.5S3 9.2 3 6.5a5 5 0 0110 0c0 2.7-5 7-5 7z"/></svg>'+nx.local.split('—')[0].trim()+'</div>'+
+        '<div class="nsm-item"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 2"/></svg>'+nx.horario+'</div>'+
+        '<div class="nsm-item" style="color:#666">'+nx.repertorio+'</div>'+
+      '</div></div>'+
+    '</div>';
+  } else {
+    proxEl.innerHTML='<div class="empty-home"><div class="empty-home-icon">&#127925;</div><div class="empty-home-text">Nenhum show marcado para os próximos dias.</div><div class="empty-home-sub">Que tal descobrir novos músicos e fechar novos trabalhos?</div></div>';
+  }
+  var pendCount=proposals.filter(function(p){return p.status==='pending';}).length;
+  var confCount=proposals.filter(function(p){return p.status==='confirmed';}).length;
+  var negCount=proposals.filter(function(p){return p.status==='negotiating';}).length;
+  document.getElementById('home-stats').innerHTML=
+    '<div class="home-stat"><div class="home-stat-label">Pendentes</div><div class="home-stat-num">'+pendCount+'</div><div class="home-stat-hint" style="color:#fbbf24">Aguardando resposta</div></div>'+
+    '<div class="home-stat"><div class="home-stat-label">Em negociação</div><div class="home-stat-num">'+negCount+'</div><div class="home-stat-hint" style="color:#818cf8">Contrapropostas</div></div>'+
+    '<div class="home-stat"><div class="home-stat-label">Confirmados</div><div class="home-stat-num">'+confCount+'</div><div class="home-stat-hint" style="color:#4ade80">Na agenda</div></div>';
+  var pending=proposals.filter(function(p){return p.status==='pending';});
+  var notifsEl=document.getElementById('home-notifs');
+  if(pending.length){
+    notifsEl.innerHTML='<div class="notif-section-title"><div class="notif-blink"></div>Notificações de propostas ('+pending.length+')</div>'+
+      pending.map(function(p){
+        return '<div class="notif-card">'+
+          '<div class="notif-avatar" style="background:'+p.color+'">'+p.initials+'</div>'+
+          '<div class="notif-body">'+
+            '<div class="notif-headline">&#9888; Nova proposta recebida</div>'+
+            '<div class="notif-name">'+p.name+' · '+p.evento+'</div>'+
+            '<div class="notif-detail">'+p.data+' · '+p.horario+'</div>'+
+          '</div>'+
+          '<button class="btn-ver" onclick="navigate(\'propostas\',document.querySelector(\'[onclick*=propostas]\'))">Ver proposta</button>'+
+        '</div>';
+      }).join('')+'<div style="margin-bottom:20px"></div>';
+  } else {
+    notifsEl.innerHTML='<div style="font-size:13px;color:#444;margin-bottom:20px">Nenhuma proposta pendente no momento.</div>';
+  }
+  document.getElementById('home-financeiro').innerHTML='';
+}
+
+function applyFilterToList(list){
+  if(currentFilter==='confirmed')   return list.filter(function(p){return p.status==='confirmed';});
+  if(currentFilter==='declined')    return list.filter(function(p){return p.status==='declined';});
+  if(currentFilter==='negotiating') return list.filter(function(p){return p.status==='negotiating';});
+  // 'all' e 'pending' — só activas
+  return list.filter(function(p){return p.status==='pending'||p.status==='negotiating';});
+}
+function renderProposals(list){
+  var c=document.getElementById('proposals-container');
+  if(!list) list=proposals;
+  list=applyFilterToList(list);
+  if(!list.length){c.innerHTML='<div style="text-align:center;padding:40px;color:#444;font-size:13px">Nenhuma proposta nesta categoria</div>';return;}
+  c.innerHTML=list.map(function(p){
+    var ec=p.status==='confirmed'?' status-confirmed':p.status==='declined'?' status-declined':p.status==='negotiating'?' status-negotiating':'';
+    var infoExtra='<div class="info-extra"><div class="info-extra-title">Informações extras</div><div class="info-grid"><div style="grid-column:1/-1"><div class="info-item-label">Estilos musicais</div><div class="tags-row">'+p.estilos.map(function(e){return '<span class="style-tag">'+e+'</span>';}).join('')+'</div></div></div><div class="info-desc">'+p.descricao+'</div></div>';
+    var actions='';
+    if(p.status==='pending'){
+      actions='<div class="prop-actions"><button class="btn btn-accept" onclick="acceptProposal('+p.id+')">&#10003; Aceitar proposta</button><button class="btn btn-decline" onclick="openDeclineModal('+p.id+')">&#10005; Recusar</button><button class="btn btn-negotiate" onclick="toggleCounter('+p.id+')">&#8645; Negociar</button></div><div class="counter-box" id="counter-'+p.id+'"><div class="counter-title">Fazer Contraproposta</div><div class="counter-row"><div class="counter-field"><div class="counter-label">Novo cachê</div><input class="counter-input" id="val-'+p.id+'" type="number" min="0" placeholder="Ex: 1200"></div><div class="counter-field"><div class="counter-label">Novo horário</div><input class="counter-input" id="hor-'+p.id+'" type="text" placeholder="Ex: 20:30"></div></div><div class="counter-field"><div class="counter-label">Mensagem</div><textarea class="counter-textarea" id="msg-'+p.id+'" rows="2" placeholder="Explique sua contraproposta..."></textarea></div><div class="counter-actions"><button class="btn-cancel-sm" onclick="toggleCounter('+p.id+')">Cancelar</button><button class="btn-send" onclick="sendCounter('+p.id+')">Enviar contraproposta</button></div></div>';
+    } else if(p.status==='negotiating'){
+      var cm=p.counterMsg||'Contraproposta recebida. Aguardando.';
+      actions='<div class="status-msg">&#8648; '+cm+'</div><div class="prop-actions"><button class="btn btn-accept" onclick="acceptProposal('+p.id+')">&#10003; Aceitar mesmo assim</button><button class="btn btn-decline" onclick="openDeclineModal('+p.id+')">&#10005; Cancelar</button><button class="btn btn-negotiate" onclick="toggleCounter('+p.id+')">&#8645; Contraproposta</button></div><div class="counter-box" id="counter-'+p.id+'"><div class="counter-title">Fazer Contraproposta</div><div class="counter-row"><div class="counter-field"><div class="counter-label">Novo cachê</div><input class="counter-input" id="val-'+p.id+'" type="number" min="0" placeholder="Ex: 1200"></div><div class="counter-field"><div class="counter-label">Novo horário</div><input class="counter-input" id="hor-'+p.id+'" type="text" placeholder="Ex: 20:30"></div></div><div class="counter-field"><div class="counter-label">Mensagem</div><textarea class="counter-textarea" id="msg-'+p.id+'" rows="2" placeholder="Explique sua contraproposta..."></textarea></div><div class="counter-actions"><button class="btn-cancel-sm" onclick="toggleCounter('+p.id+')">Cancelar</button><button class="btn-send" onclick="sendCounter('+p.id+')">Enviar contraproposta</button></div></div>';
+    } else if(p.status==='confirmed'){
+      actions='<div class="status-msg" style="color:#4ade80">&#10003; Aceita — sincronizada na Agenda.</div>';
+    } else {
+      actions='<div class="status-msg" style="color:#f87171">&#10005; Proposta recusada</div>';
+    }
+    return '<div class="prop-card'+ec+'"><div class="prop-header"><div class="prop-avatar" style="background:'+p.color+'">'+p.initials+'</div><div class="prop-meta"><div class="prop-contratante">'+p.name+'</div><div class="prop-evento">'+p.evento+'</div></div>'+statusLabel(p.status)+'</div><div class="prop-details" style="grid-template-columns:1fr 1fr 1fr"><div><div class="detail-label">&#128197; Data</div><div class="detail-val">'+p.data+', '+p.horario+'</div></div><div><div class="detail-label">&#128205; Local</div><div class="detail-val">'+p.local+'</div></div><div><div class="detail-label">&#128176; Cachê</div><div class="detail-val green">'+p.cacheStr+'</div></div></div>'+infoExtra+actions+'</div>';
+  }).join('');
+  if(_propTotal > proposals.length){
+    c.insertAdjacentHTML('beforeend','<div style="text-align:center;padding:16px"><button onclick="loadAndRenderProposals(true)" style="background:#1a1a1a;color:#a78bfa;border:1px solid #2a2a2a;border-radius:8px;padding:8px 20px;cursor:pointer;font-size:13px">Carregar mais</button></div>');
+  }
+}
+
+async function acceptProposal(id){
+  try {
+    await apiCall('PATCH', '/api/proposals/'+id+'/accept');
+    var p=proposals.find(function(x){return x.id===id;});
+    if(p) p.status='confirmed';
+    renderProposals(allProposals());
+    renderHome();
+    renderCalendar();
+    showToast('&#10003; Proposta aceita! Sincronizada na Agenda.','success');
+  } catch(e){ showToast('Erro: '+e.message,'info'); }
+}
+function openDeclineModal(id){
+  declineTarget=id;selectedReason=null;
+  document.querySelectorAll('.reason-option').forEach(function(r){r.classList.remove('selected');r.querySelector('.reason-radio').style.cssText='';});
+  document.getElementById('decline-modal').classList.add('open');
+}
+function closeDeclineModal(){document.getElementById('decline-modal').classList.remove('open');}
+function selectReason(el){
+  document.querySelectorAll('.reason-option').forEach(function(r){r.classList.remove('selected');r.querySelector('.reason-radio').style.cssText='';});
+  el.classList.add('selected');el.querySelector('.reason-radio').style.cssText='background:#6A3DE8;border-color:#6A3DE8';
+  selectedReason=el.textContent.trim();
+}
+async function confirmDecline(){
+  if(!selectedReason){showToast('Selecione um motivo','info');return;}
+  try {
+    await apiCall('PATCH', '/api/proposals/'+declineTarget+'/decline', {reason: selectedReason});
+    var p=proposals.find(function(x){return x.id===declineTarget;});
+    if(p) p.status='declined';
+    closeDeclineModal();renderProposals(allProposals());
+    if(document.getElementById('view-inicio').classList.contains('active')) renderHome();
+    showToast('Proposta recusada.','info');
+  } catch(e){ showToast('Erro: '+e.message,'info'); }
+}
+function toggleCounter(id){var b=document.getElementById('counter-'+id);if(b) b.classList.toggle('open');}
+async function sendCounter(id){
+  var valEl=document.getElementById('val-'+id);
+  var horEl=document.getElementById('hor-'+id);
+  var msgEl=document.getElementById('msg-'+id);
+  var val=valEl?parseFloat(valEl.value)||null:null;
+  var hor=horEl?horEl.value.trim()||null:null;
+  var msg=msgEl?msgEl.value.trim()||null:null;
+  if(!val&&!hor&&!msg){showToast('Preencha ao menos um campo','info');return;}
+  try {
+    await apiCall('POST', '/api/proposals/'+id+'/counter', {novo_cache:val,novo_horario:hor,mensagem:msg});
+    var p=proposals.find(function(x){return x.id===id;});
+    if(p){p.status='negotiating';p.counterMsg='Contraproposta enviada'+(val?': '+fmtCache(val):'')+(msg?' — "'+msg.substring(0,40)+'"':'');}
+    var cb=document.getElementById('counter-'+id);if(cb) cb.classList.remove('open');
+    renderProposals(proposals);showToast('✓ Contraproposta enviada!','success');
+  } catch(e){ showToast('Erro: '+e.message,'info'); }
+}
+async function setFilter(f,el){
+  currentFilter=f;
+  document.querySelectorAll('.filter-chip').forEach(function(c){c.classList.remove('active');});
+  el.classList.add('active');
+  proposals=[];_propPage=1;
+  await loadAndRenderProposals(false);
+}
+
+function renderCalendar(){
+  var all=allProposals();
+  document.getElementById('cal-month-label').textContent=MONTHS_FULL[calMonth]+' '+calYear;
+  var conf=all.filter(function(p){return p.status==='confirmed'&&p.mes===calMonth&&p.ano===calYear;}).map(function(p){return p.dia;});
+  var pend=all.filter(function(p){return p.status==='pending'&&p.mes===calMonth&&p.ano===calYear;}).map(function(p){return p.dia;});
+  var firstDay=new Date(calYear,calMonth,1).getDay();
+  var daysInMonth=new Date(calYear,calMonth+1,0).getDate();
+  var html=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(function(d){return '<div class="cal-dow">'+d+'</div>';}).join('');
+  for(var i=0;i<firstDay;i++) html+='<div class="cal-day cal-empty"></div>';
+  for(var d=1;d<=daysInMonth;d++){
+    var cls='cal-day';
+    var hasEvent=conf.indexOf(d)>-1||pend.indexOf(d)>-1;
+    if(conf.indexOf(d)>-1) cls+=' cal-confirmed';
+    else if(pend.indexOf(d)>-1) cls+=' cal-pending';
+    var click=hasEvent?' onclick="showDayEvents('+calYear+','+calMonth+','+d+')"':'';
+    html+='<div class="'+cls+'"'+click+'>'+d+'</div>';
+  }
+  document.getElementById('cal-grid').innerHTML=html;
+  /* ── Faturamento: Total do Mês e Total do Ano ── */
+  var fmtMoeda=function(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);};
+  var confMes=all.filter(function(p){return p.status==='confirmed'&&p.mes===calMonth&&p.ano===calYear;});
+  var totalMes=confMes.reduce(function(acc,p){return acc+(parseFloat(p.cache)||0);},0);
+  document.getElementById('fat-mes-valor').textContent=fmtMoeda(totalMes);
+  document.getElementById('fat-mes-sub').textContent=confMes.length+' show(s) confirmado(s) em '+MONTHS_SHORT[calMonth];
+  var confAno=all.filter(function(p){return p.status==='confirmed'&&p.ano===calYear;});
+  var totalAno=confAno.reduce(function(acc,p){return acc+(parseFloat(p.cache)||0);},0);
+  document.getElementById('fat-ano-valor').textContent=fmtMoeda(totalAno);
+  document.getElementById('fat-ano-sub').textContent=confAno.length+' show(s) acumulado(s) em '+calYear;
+  /* ── Lista de eventos ── */
+  var evts=all.filter(function(p){return (p.status==='confirmed'||p.status==='pending')&&p.mes===calMonth&&p.ano===calYear;}).sort(function(a,b){return a.dia-b.dia;});
+  document.getElementById('events-list').innerHTML=evts.length?evts.map(function(e){
+    var dc=e.status==='confirmed'?'event-day-green':'event-day-amber';
+    var badge=e.status==='confirmed'?'<span class="prop-badge badge-confirmed">Confirmado</span>':'<span class="prop-badge badge-pending">Pendente</span>';
+    var manualBtns=e.manual?'<div style="display:flex;gap:6px;margin-left:8px"><button class="btn btn-negotiate" style="padding:4px 10px;font-size:11px" onclick="editManualEvent('+e.id+')">Editar</button><button class="btn btn-decline" style="padding:4px 10px;font-size:11px" onclick="removeManualEvent('+e.id+')">Remover</button></div>':'';
+    return '<div class="event-card"><div class="event-day-badge '+dc+'">'+e.dia+'</div><div class="event-info"><div class="event-name">'+e.evento+' — '+e.name+'</div><div class="event-meta">'+e.horario+' · '+e.local.split('—')[0].trim()+'</div></div>'+badge+manualBtns+'</div>';
+  }).join(''):'<div class="empty-events">Nenhum evento neste mês</div>';
+}
+function changeMonth(dir){
+  calMonth+=dir;
+  if(calMonth>11){calMonth=0;calYear++;}
+  if(calMonth<0){calMonth=11;calYear--;}
+  _selectedCalDay=null;
+  document.getElementById('agenda-day-detail').style.display='none';
+  renderCalendar();
+}
+
+var _cancelEventTarget = null; // { id, manual }
+
+function showDayEvents(year,month,day){
+  var panel=document.getElementById('agenda-day-detail');
+  var key=year+'-'+month+'-'+day;
+  if(_selectedCalDay===key){
+    _selectedCalDay=null;
+    panel.style.display='none';
+    return;
+  }
+  _selectedCalDay=key;
+  var evts=allProposals().filter(function(p){
+    return p.dia===day && p.mes===month && p.ano===year &&
+           (p.status==='confirmed'||p.status==='pending'||p.status==='negotiating');
+  });
+  if(!evts.length){panel.style.display='none';return;}
+  var statusColors={confirmed:'#4ade80',pending:'#fbbf24',negotiating:'#a78bfa'};
+  var statusLabels={confirmed:'Confirmado',pending:'Pendente',negotiating:'Em negociação'};
+  panel.innerHTML=
+    '<div style="padding:12px 16px;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between">' +
+      '<span style="font-size:13px;font-weight:600;color:#fff">'+day+' de '+MONTHS_FULL[month]+'</span>' +
+      '<button onclick="document.getElementById(\'agenda-day-detail\').style.display=\'none\';_selectedCalDay=null;" ' +
+              'style="background:none;border:none;color:#555;cursor:pointer;font-size:16px;line-height:1">&#10005;</button>' +
+    '</div>' +
+    evts.map(function(e){
+      var sc=statusColors[e.status]||'#888';
+      var sl=statusLabels[e.status]||e.status;
+      var isManual=!!e.manual;
+      var cancelBtn='<div style="padding:10px 16px 14px">' +
+        '<button onclick="cancelEventClick(\''+e.id+'\','+isManual+')" ' +
+          'style="background:transparent;border:1px solid #7f1d1d;border-radius:8px;color:#f87171;font-size:12px;font-weight:600;padding:7px 14px;cursor:pointer;font-family:inherit;transition:all .15s" ' +
+          'onmouseover="this.style.background=\'#2a0a0a\'" onmouseout="this.style.background=\'transparent\'">Cancelar evento</button>' +
+        '</div>';
+      return '<div style="border-bottom:1px solid #141414">' +
+        '<div style="padding:14px 16px 10px">' +
+          '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
+            '<span style="font-size:14px;font-weight:600;color:#fff">'+e.evento+'</span>' +
+            '<span style="font-size:11px;font-weight:600;color:'+sc+';background:'+sc+'18;border:1px solid '+sc+'44;border-radius:20px;padding:2px 10px">'+sl+'</span>' +
+          '</div>' +
+          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+            '<div><div style="font-size:10px;color:#555;margin-bottom:2px">HORÁRIO</div><div style="font-size:13px;color:#ccc">'+(e.horario||'—')+'</div></div>' +
+            '<div><div style="font-size:10px;color:#555;margin-bottom:2px">CACHÊ</div><div style="font-size:13px;color:#c4b5fd;font-weight:600">'+fmtCache(e.cache||0)+'</div></div>' +
+            '<div style="grid-column:1/-1"><div style="font-size:10px;color:#555;margin-bottom:2px">LOCAL</div><div style="font-size:13px;color:#ccc">'+e.local+'</div></div>' +
+          '</div>' +
+        '</div>' +
+        cancelBtn +
+      '</div>';
+    }).join('');
+  panel.style.display='block';
+  panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function cancelEventClick(id, isManual){
+  if(isManual){
+    if(!confirm('Remover este evento manual?')) return;
+    manualEvents=manualEvents.filter(function(e){ return String(e.id)!==String(id); });
+    _selectedCalDay=null;
+    document.getElementById('agenda-day-detail').style.display='none';
+    renderCalendar();
+    showToast('Evento removido','info');
+  } else {
+    _cancelEventTarget={id:id, manual:false};
+    document.getElementById('cancel-event-modal').classList.add('open');
+  }
+}
+
+function closeCancelEventModal(){
+  document.getElementById('cancel-event-modal').classList.remove('open');
+  _cancelEventTarget=null;
+}
+
+async function confirmCancelProposal(){
+  if(!_cancelEventTarget) return;
+  var id=_cancelEventTarget.id;
+  closeCancelEventModal();
+  try {
+    await apiCall('PATCH','/api/proposals/'+id+'/cancel');
+    var p=proposals.find(function(x){ return String(x.id)===String(id); });
+    if(p) p.status='cancelled';
+    _selectedCalDay=null;
+    document.getElementById('agenda-day-detail').style.display='none';
+    renderCalendar();
+    showToast('Compromisso cancelado. O contratante foi notificado.','info');
+  } catch(e){
+    showToast('Erro ao cancelar: '+(e.message||'tente novamente'),'error');
+  }
+}
+
+function navigate(viewId,el){
+  document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
+  if(el) el.classList.add('active');
+  var titles={inicio:'Início',descobrir:'Descobrir músicos',mensagens:'Mensagens',propostas:'Propostas',agenda:'Agenda',perfil:'Meu Perfil','musico-perfil':'Perfil do Músico',configuracoes:'Configurações'};
+  document.getElementById('topbar-title').textContent=titles[viewId]||viewId;
+  document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
+  var v=document.getElementById('view-'+viewId);
+  if(v) v.classList.add('active');
+  // Botão voltar — só aparece na view do músico
+  var backBtn=document.getElementById('btn-topbar-back');
+  if(backBtn) backBtn.style.display = viewId==='musico-perfil' ? 'inline-flex' : 'none';
+  if(viewId==='agenda')       { loadAndRenderProposals(false).then(renderCalendar); }
+  if(viewId==='inicio')       renderHome();
+  if(viewId==='perfil')       renderPerfil();
+  if(viewId==='descobrir')    loadMusicians(false);
+  if(viewId==='mensagens')       loadConversations();
+  if(viewId==='configuracoes')   renderCfgView();
+}
+
+function showToast(msg,type){
+  var t=document.getElementById('toast');
+  t.innerHTML=msg;t.className='toast toast-'+(type||'success')+' show';
+  setTimeout(function(){t.classList.remove('show');},3200);
+}
+
+/* ── PERFIL ── */
+var LS_PRF='myguig_profile';
+var PRF_DEFAULT={
+  nome:'Pedro Alves',
+  bio:'Músico profissional com mais de 10 anos de experiência em shows, casamentos e eventos corporativos. Violonista, guitarrista e arranjador. Adoro criar atmosferas únicas para cada tipo de evento.',
+  email:'pedro@email.com',
+  tel:'(11) 91234-5678',
+  instagram:'@pedroalvesmusica',
+  imgPerfil:null,
+  imgCapa:null
+};
+function loadProfile(){
+  try{var s=localStorage.getItem(LS_PRF);if(s){var p=JSON.parse(s);return Object.assign({},PRF_DEFAULT,p);}}catch(e){}
+  return Object.assign({},PRF_DEFAULT);
+}
+function saveProfile(){try{localStorage.setItem(LS_PRF,JSON.stringify(userProfile));}catch(e){}}
+var userProfile=loadProfile();
+function getInitials(nome){return (nome||'').split(' ').filter(function(w){return w;}).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'?';}
+
+function syncSidebar(){
+  var ini=getInitials(userProfile.nome);
+  var av=document.getElementById('sb-footer-avatar');
+  if(av){
+    if(userProfile.imgPerfil){av.innerHTML='<img src="'+userProfile.imgPerfil+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';av.style.background='none';}
+    else{av.textContent=ini;av.style.background='#6A3DE8';}
+  }
+  var fn=document.getElementById('sb-footer-name');if(fn) fn.textContent=userProfile.nome;
+  var gn=document.getElementById('home-greeting-name');if(gn) gn.textContent=userProfile.nome.split(' ')[0]||userProfile.nome;
+}
+
+function renderPerfil(){
+  var av=document.getElementById('prf-avatar-el');
+  if(av){
+    if(userProfile.imgPerfil){av.innerHTML='<img src="'+userProfile.imgPerfil+'" style="width:100%;height:100%;object-fit:cover">';av.style.background='none';}
+    else{av.innerHTML=getInitials(userProfile.nome);av.style.background='#6A3DE8';}
+  }
+  var ci=document.getElementById('prf-cover-img');
+  if(ci){if(userProfile.imgCapa){ci.src=userProfile.imgCapa;ci.style.display='block';}else{ci.style.display='none';}}
+  var nd=document.getElementById('prf-nome-display');if(nd) nd.textContent=userProfile.nome;
+  var bd=document.getElementById('prf-bio-display');
+  if(bd){
+    if(userProfile.bio&&userProfile.bio.trim()){bd.className='prf-bio-text';bd.textContent=userProfile.bio;}
+    else{bd.className='prf-bio-empty';bd.textContent='Nenhuma bio adicionada. Clique em "Editar informações" para adicionar.';}
+  }
+  var el=document.getElementById('prf-email-display');if(el) el.textContent=userProfile.email||'—';
+  var tl=document.getElementById('prf-tel-display');if(tl) tl.textContent=userProfile.tel||'—';
+  var ig=document.getElementById('prf-instagram-display');if(ig) ig.textContent=userProfile.instagram||'—';
+  var all=allProposals();
+  var conf=all.filter(function(p){return p.status==='confirmed';});
+  var pend=all.filter(function(p){return p.status==='pending'||p.status==='negotiating';}).length;
+  var sr=document.getElementById('prf-stats-row');
+  if(sr) sr.innerHTML=
+    '<div class="prf-stat"><div class="prf-stat-num">'+conf.length+'</div><div class="prf-stat-lbl">Shows confirmados</div></div>'+
+    '<div class="prf-stat"><div class="prf-stat-num">'+pend+'</div><div class="prf-stat-lbl">Propostas ativas</div></div>';
+}
+
+function openEditPerfil(){
+  document.getElementById('ep-nome').value=userProfile.nome||'';
+  document.getElementById('ep-bio').value=userProfile.bio||'';
+  document.getElementById('ep-email').value=userProfile.email||'';
+  document.getElementById('ep-tel').value=userProfile.tel||'';
+  document.getElementById('ep-instagram').value=userProfile.instagram||'';
+  document.getElementById('ep-nome').classList.remove('error');
+  document.getElementById('edit-perfil-modal').classList.add('open');
+  setTimeout(function(){document.getElementById('ep-nome').focus();},80);
+}
+function closeEditPerfil(){document.getElementById('edit-perfil-modal').classList.remove('open');}
+async function salvarPerfil(){
+  var nome=document.getElementById('ep-nome').value.trim();
+  if(!nome){document.getElementById('ep-nome').classList.add('error');showToast('O nome é obrigatório','info');return;}
+  userProfile.nome      = nome;
+  userProfile.bio       = document.getElementById('ep-bio').value.trim();
+  userProfile.email     = document.getElementById('ep-email').value.trim();
+  userProfile.tel       = document.getElementById('ep-tel').value.trim();
+  userProfile.instagram = document.getElementById('ep-instagram').value.trim();
+  saveProfile();
+  closeEditPerfil();
+  renderPerfil();
+  syncSidebar();
+  try {
+    await apiCall('PUT', '/auth/profile', {
+      name:         userProfile.nome,
+      bio:          userProfile.bio          || null,
+      instagram:    userProfile.instagram    || null,
+      cidade:       userProfile.cidade       || null,
+      cache_minimo: userProfile.cache_minimo || 0,
+      estilos:      userProfile.estilos      || []
+    });
+    showToast('✓ Perfil atualizado!', 'success');
+  } catch(e) {
+    showToast('✓ Perfil salvo localmente', 'success');
+  }
+}
+function handleAvatarUpload(evt){
+  var f=evt.target.files[0];if(!f) return;
+  if(f.size>5*1024*1024){showToast('Imagem muito grande (máx. 5 MB)','info');return;}
+  var r=new FileReader();
+  r.onload=function(e){userProfile.imgPerfil=e.target.result;saveProfile();renderPerfil();syncSidebar();showToast('✓ Foto de perfil atualizada!','success');};
+  r.readAsDataURL(f);evt.target.value='';
+}
+function handleCapaUpload(evt){
+  var f=evt.target.files[0];if(!f) return;
+  if(f.size>8*1024*1024){showToast('Imagem muito grande (máx. 8 MB)','info');return;}
+  var r=new FileReader();
+  r.onload=function(e){userProfile.imgCapa=e.target.result;saveProfile();renderPerfil();showToast('✓ Foto de capa atualizada!','success');};
+  r.readAsDataURL(f);evt.target.value='';
+}
+
+/* ── AGENDAMENTO MANUAL ── */
+var COLORS_MANUAL=['#6A3DE8','#2dd4bf','#f472b6','#fb923c','#818cf8','#facc15','#34d399'];
+var _editingEventId=null;
+
+function openAddEventModal(){
+  _editingEventId=null;
+  ['ae-nome','ae-data','ae-inicio','ae-termino','ae-cache','ae-local','ae-descricao'].forEach(function(id){
+    var el=document.getElementById(id);if(el){el.value='';el.classList.remove('error');}
+  });
+  var pad=function(n){return String(n).padStart(2,'0');};
+  var today=new Date();
+  var defaultDate=(calYear===today.getFullYear()&&calMonth===today.getMonth())?today:new Date(calYear,calMonth,1);
+  document.getElementById('ae-data').value=defaultDate.getFullYear()+'-'+pad(defaultDate.getMonth()+1)+'-'+pad(defaultDate.getDate());
+  document.getElementById('add-event-modal').classList.add('open');
+  setTimeout(function(){document.getElementById('ae-nome').focus();},80);
+}
+function closeAddEventModal(){document.getElementById('add-event-modal').classList.remove('open');_editingEventId=null;}
+
+function editManualEvent(id){
+  var ev=manualEvents.find(function(e){return e.id===id;});
+  if(!ev) return;
+  _editingEventId=id;
+  var pad=function(n){return String(n).padStart(2,'0');};
+  document.getElementById('ae-nome').value=ev.evento||'';
+  document.getElementById('ae-data').value=ev.ano+'-'+pad(ev.mes+1)+'-'+pad(ev.dia);
+  document.getElementById('ae-cache').value=ev.cache||'';
+  document.getElementById('ae-local').value=ev.local||'';
+  document.getElementById('ae-descricao').value=ev.descricao||'';
+  document.getElementById('ae-inicio').value='';
+  document.getElementById('ae-termino').value='';
+  ['ae-nome','ae-data'].forEach(function(id){document.getElementById(id).classList.remove('error');});
+  document.getElementById('add-event-modal').classList.add('open');
+  setTimeout(function(){document.getElementById('ae-nome').focus();},80);
+}
+
+function removeManualEvent(id){
+  manualEvents=manualEvents.filter(function(e){return e.id!==id;});
+  renderCalendar();renderHome();
+  showToast('Evento removido','info');
+}
+
+function saveManualEvent(){
+  var nome=document.getElementById('ae-nome').value.trim();
+  var dataVal=document.getElementById('ae-data').value;
+  var inicio=document.getElementById('ae-inicio').value;
+  var termino=document.getElementById('ae-termino').value;
+  var local=document.getElementById('ae-local').value.trim();
+  var descricao=document.getElementById('ae-descricao').value.trim();
+  var valid=true;
+  if(!nome){document.getElementById('ae-nome').classList.add('error');valid=false;}
+  if(!dataVal){document.getElementById('ae-data').classList.add('error');valid=false;}
+  if(!valid){showToast('Preencha os campos obrigatórios (*)','info');return;}
+  var parts=dataVal.split('-');
+  var ano=parseInt(parts[0]);var mes=parseInt(parts[1])-1;var dia=parseInt(parts[2]);
+  var cache=parseFloat(document.getElementById('ae-cache').value)||0;
+  var MS=['Jan','Fev','Mar','Abr','Mai','Jun','Jul','Ago','Set','Out','Nov','Dez'];
+  var dataStr=String(dia)+' '+MS[mes];
+  var horarioStr='A definir';
+  if(inicio){var hParts=inicio.split(':');horarioStr=hParts[0]+'h'+hParts[1];if(termino){var tParts=termino.split(':');horarioStr+=' — '+tParts[0]+'h'+tParts[1];}}
+
+  if(_editingEventId){
+    var idx=manualEvents.findIndex(function(e){return e.id===_editingEventId;});
+    if(idx>-1){
+      var existing=manualEvents[idx];
+      manualEvents[idx]=Object.assign({},existing,{
+        evento:nome,data:dataStr,dia:dia,mes:mes,ano:ano,
+        local:local||'Local não informado',cache:cache,cacheStr:fmtCache(cache),
+        descricao:descricao||'Evento externo adicionado manualmente.',
+        repertorio:descricao?descricao.substring(0,40)+(descricao.length>40?'…':''):'Sem detalhes',
+        horario:horarioStr,
+      });
+    }
+    closeAddEventModal();renderCalendar();renderHome();
+    showToast('✓ Evento atualizado!','success');
+    return;
+  }
+
+  var newId=Date.now()+(Math.floor(Math.random()*1000));
+  var colorIdx=manualEvents.length%COLORS_MANUAL.length;
+  var initials=nome.split(' ').slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase()||'ME';
+  var newEvent={
+    id:newId,initials:initials,color:COLORS_MANUAL[colorIdx],name:'(Manual)',
+    evento:nome,data:dataStr,dia:dia,mes:mes,ano:ano,horario:horarioStr,
+    local:local||'Local não informado',cache:cache,cacheStr:fmtCache(cache),
+    status:'confirmed',estilos:['Manual'],
+    repertorio:descricao?descricao.substring(0,40)+(descricao.length>40?'…':''):'Sem detalhes',
+    metodo:'Evento cadastrado manualmente.',
+    descricao:descricao||'Evento externo adicionado manualmente.',
+    manual:true
+  };
+  manualEvents.push(newEvent);
+  closeAddEventModal();renderCalendar();renderHome();
+  showToast('✓ Evento "'+nome+'" adicionado à agenda!','success');
+}
+
+
+/* ════════════════════════════════════════════
+   ROLE SELECTOR (register)
+════════════════════════════════════════════ */
+var _selectedRole = 'musician';
+function selectRole(role){
+  _selectedRole = role;
+  document.getElementById('role-musician').classList.toggle('active', role==='musician');
+  document.getElementById('role-contractor').classList.toggle('active', role==='contractor');
+}
+
+/* ════════════════════════════════════════════
+   DESCOBRIR MÚSICOS
+════════════════════════════════════════════ */
+var _discPage    = 1;
+var _discTotal   = 0;
+var _discLoading = false;
+var _discStyle   = '';
+var _discSearch  = '';
+var _discDebounce = null;
+var _DISC_COLORS = ['#2dd4bf','#f472b6','#fb923c','#818cf8','#facc15','#34d399','#60a5fa'];
+var _musiciansList = [];
+
+function debouncedDiscSearch(){
+  clearTimeout(_discDebounce);
+  _discDebounce = setTimeout(function(){
+    _discSearch = (document.getElementById('disc-search').value||'').trim();
+    loadMusicians(false);
+  }, 400);
+}
+
+function setDiscStyle(style, el){
+  _discStyle = style;
+  document.querySelectorAll('.disc-chip').forEach(function(c){c.classList.remove('active');});
+  if(el) el.classList.add('active');
+  loadMusicians(false);
+}
+
+async function loadMusicians(append){
+  if(_discLoading) return;
+  if(!append){ _discPage=1; _discTotal=0; }
+
+  _discLoading = true;
+  var grid = document.getElementById('musicians-grid');
+  var btn  = document.getElementById('disc-load-more');
+
+  if(!append){
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#555">A carregar músicos…</div>';
+    if(btn) btn.style.display='none';
+  }
+
+  try {
+    var params = new URLSearchParams({
+      page:  _discPage,
+      limit: 12,
+    });
+    if(_discSearch) params.set('search', _discSearch);
+    if(_discStyle)  params.set('style',  _discStyle);
+
+    var data = await apiCall('GET', '/api/musicians?'+params.toString());
+
+    _discTotal = data.pagination.total;
+    var musicians = data.data;
+
+    if(!append){ grid.innerHTML=''; _musiciansList=[]; }
+
+    if(!musicians.length && !append){
+      grid.innerHTML = '<div class="disc-empty"><div class="disc-empty-icon">🎸</div><div>Nenhum músico encontrado.</div></div>';
+      if(btn) btn.style.display='none';
+      return;
+    }
+
+    musicians.forEach(function(m){
+      _musiciansList.push(m);
+      var initials = (m.name||'').split(' ').filter(function(w){return w;}).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'?';
+      var color    = _DISC_COLORS[m.id % _DISC_COLORS.length];
+      var estilos  = (m.estilos||[]).slice(0,3).map(function(e){return '<span class="mc-estilo-tag">'+e+'</span>';}).join('');
+      var cache    = parseFloat(m.cache_minimo||0);
+      var cacheStr = cache > 0 ? 'A partir de <span>R$ '+cache.toLocaleString('pt-BR',{minimumFractionDigits:0})+'</span>' : '<span>A combinar</span>';
+
+      var card = document.createElement('div');
+      card.className = 'musician-card';
+      card.innerHTML =
+        '<div class="mc-avatar" style="background:'+color+'">'+initials+'</div>'+
+        '<div class="mc-name">'+m.name+'</div>'+
+        (m.cidade ? '<div class="mc-cidade">📍 '+m.cidade+'</div>' : '')+
+        (estilos  ? '<div class="mc-estilos">'+estilos+'</div>' : '')+
+        '<div class="mc-cache">'+cacheStr+'</div>'+
+        '<button class="btn-mc-proposta" onclick="openMusicianProfile('+m.id+')">Ver perfil / Enviar proposta</button>';
+      grid.appendChild(card);
+    });
+
+    var loaded = (_discPage-1)*12 + musicians.length;
+    if(btn) btn.style.display = loaded < _discTotal ? 'block' : 'none';
+    _discPage++;
+
+  } catch(e){
+    if(!append) grid.innerHTML = '<div class="disc-empty"><div class="disc-empty-icon">⚠️</div><div>Erro ao carregar músicos.</div></div>';
+  } finally {
+    _discLoading = false;
+  }
+}
+
+/* ════════════════════════════════════════════
+   MODAL: ENVIAR PROPOSTA
+════════════════════════════════════════════ */
+var _spMusicianId   = null;
+var _spSelectedEstilos = [];
+
+/* ════════════════════════════════════════════
+   PERFIL DO MÚSICO (view)
+════════════════════════════════════════════ */
+var _profileMusician = null;
+
+function openMusicianProfile(id){
+  var musician = _musiciansList.find(function(m){ return m.id === id; });
+  if(!musician){ console.warn('openMusicianProfile: músico não encontrado para id='+id); return; }
+  _profileMusician = musician;
+
+  var initials = (musician.name||'').split(' ').filter(function(w){return w;}).slice(0,2)
+                   .map(function(w){return w[0].toUpperCase();}).join('') || '?';
+  var color    = _DISC_COLORS[musician.id % _DISC_COLORS.length];
+  var cache    = parseFloat(musician.cache_minimo||0);
+  var cacheStr = cache > 0 ? 'R$ '+cache.toLocaleString('pt-BR',{minimumFractionDigits:2}) : 'A combinar';
+
+  // ── Capa ──
+  document.getElementById('vmp-cover').style.background =
+    'linear-gradient(135deg,'+color+'33 0%,#0e0e1a 55%,#141414 100%)';
+
+  // ── Avatar ──
+  var av = document.getElementById('vmp-avatar');
+  av.textContent      = initials;
+  av.style.background = color;
+  av.style.color      = '#000';
+
+  // ── Nome ──
+  document.getElementById('vmp-nome').textContent = musician.name || '';
+
+  // ── Bio ──
+  var bioEl = document.getElementById('vmp-bio');
+  if(musician.bio){
+    bioEl.className   = 'prf-bio-text';
+    bioEl.textContent = musician.bio;
+  } else {
+    bioEl.className   = 'prf-bio-empty';
+    bioEl.textContent = 'Nenhuma bio adicionada.';
+  }
+
+  // ── Estilos ──
+  var estilos   = musician.estilos || [];
+  var estilosEl = document.getElementById('vmp-estilos-row');
+  estilosEl.innerHTML = estilos.length
+    ? estilos.map(function(e){ return '<span class="prf-tag">'+e+'</span>'; }).join('')
+    : '<span style="font-size:13px;color:#3a3a3a;font-style:italic">Nenhum estilo adicionado.</span>';
+
+  // ── Cachê ──
+  document.getElementById('vmp-cache').textContent = cacheStr;
+
+  // ── Cidade ──
+  var cidadeRow = document.getElementById('vmp-cidade-row');
+  if(musician.cidade){
+    document.getElementById('vmp-cidade').textContent = musician.cidade;
+    cidadeRow.style.display = '';
+  } else {
+    cidadeRow.style.display = 'none';
+  }
+
+  // ── Instagram ──
+  var igRow = document.getElementById('vmp-instagram-row');
+  var igEl  = document.getElementById('vmp-instagram');
+  if(musician.instagram){
+    igEl.textContent = musician.instagram;
+    igEl.href        = 'https://instagram.com/'+musician.instagram.replace('@','');
+    igRow.style.display = '';
+  } else {
+    igRow.style.display = 'none';
+  }
+
+  // ── Navega para a view (sem marcar nenhum nav-item) ──
+  navigate('musico-perfil', null);
+}
+
+function openSendProposalFromProfile(){
+  if(_profileMusician) openSendProposalModal(_profileMusician);
+}
+
+function openChatFromProfile(){
+  if(_profileMusician) openChatWith(_profileMusician.id, _profileMusician.name);
+}
+
+function openSendProposalModal(musician){
+  _spMusicianId = musician.id;
+  _spSelectedEstilos = [];
+  document.getElementById('sp-musician-name').textContent = musician.name;
+  document.getElementById('sp-evento').value   = '';
+  document.getElementById('sp-data').value     = '';
+  document.getElementById('sp-horario').value  = '';
+  document.getElementById('sp-local').value    = '';
+  document.getElementById('sp-cache').value    = '';
+  document.getElementById('sp-descricao').value= '';
+  document.getElementById('sp-error').textContent = '';
+  document.querySelectorAll('.sp-estilo-chip').forEach(function(c){c.classList.remove('active');});
+  document.getElementById('send-proposal-modal').classList.add('open');
+}
+
+function closeSendProposalModal(){
+  document.getElementById('send-proposal-modal').classList.remove('open');
+}
+
+function toggleSpEstilo(el, estilo){
+  var idx = _spSelectedEstilos.indexOf(estilo);
+  if(idx === -1){ _spSelectedEstilos.push(estilo); el.classList.add('active'); }
+  else          { _spSelectedEstilos.splice(idx,1); el.classList.remove('active'); }
+}
+
+async function submitSendProposal(){
+  var evento  = document.getElementById('sp-evento').value.trim();
+  var data    = document.getElementById('sp-data').value;
+  var horario = document.getElementById('sp-horario').value;
+  var local   = document.getElementById('sp-local').value.trim();
+  var cache   = document.getElementById('sp-cache').value;
+  var descr   = document.getElementById('sp-descricao').value.trim();
+  var errEl   = document.getElementById('sp-error');
+  var btn     = document.getElementById('sp-btn');
+
+  errEl.textContent = '';
+  ['sp-evento','sp-data','sp-local','sp-cache'].forEach(function(id){
+    document.getElementById(id).classList.remove('error');
+  });
+
+  if(!evento){ document.getElementById('sp-evento').classList.add('error'); errEl.textContent='Preencha o nome do evento.'; return; }
+  if(!data)  { document.getElementById('sp-data').classList.add('error');   errEl.textContent='Selecione a data.'; return; }
+  if(!local) { document.getElementById('sp-local').classList.add('error');  errEl.textContent='Preencha o local.'; return; }
+  if(!cache || parseFloat(cache) < 0){ document.getElementById('sp-cache').classList.add('error'); errEl.textContent='Informe o cachê.'; return; }
+
+  var body = {
+    musician_id:    _spMusicianId,
+    evento:         evento,
+    data_iso:       data,
+    horario_inicio: horario || null,
+    local:          local,
+    cache:          parseFloat(cache),
+    estilos:        _spSelectedEstilos,
+    repertorio:     null,
+    metodo:         null,
+    descricao:      descr || null,
+  };
+  console.log('submitSendProposal — body:', JSON.stringify(body));
+
+  btn.textContent='Enviando…'; btn.disabled=true;
+  try {
+    await apiCall('POST', '/api/proposals', body);
+    closeSendProposalModal();
+    showToast('✓ Proposta enviada com sucesso!', 'success');
+  } catch(e){
+    var msg = (e && e.message) || 'Erro ao enviar proposta.';
+    errEl.textContent = msg;
+    showToast('Erro: ' + msg, 'info');
+  } finally {
+    btn.textContent='Enviar proposta'; btn.disabled=false;
+  }
+}
+
+/* ════════════════════════════════════════════
+   MENSAGENS & CHAT
+════════════════════════════════════════════ */
+var _activeConvId   = null;
+var _chatPolling    = null;
+var _chatOtherName  = '';
+var _CONV_COLORS    = ['#2dd4bf','#f472b6','#fb923c','#818cf8','#facc15','#34d399','#60a5fa'];
+var _selectMode     = false;
+var _selectedConvs  = [];
+
+function _convInitials(name){
+  return (name||'').split(' ').filter(function(w){return w;}).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'?';
+}
+function _convTimestamp(iso){
+  if(!iso) return '';
+  var d=new Date(iso), now=new Date();
+  var diff=now-d;
+  if(diff<60000) return 'agora';
+  if(diff<3600000) return Math.floor(diff/60000)+'min';
+  if(diff<86400000) return d.getHours()+'h'+String(d.getMinutes()).padStart(2,'0');
+  return d.getDate()+'/'+(d.getMonth()+1);
+}
+
+async function loadConversations(){
+  var list=document.getElementById('conversations-list');
+  list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon">💬</div>A carregar…</div>';
+  // reset select mode on reload
+  _selectMode=false; _selectedConvs=[];
+  _updateSelectUI();
+  try {
+    var data=await apiCall('GET','/api/conversations');
+    var convs=data.data||[];
+    var totalUnread=convs.reduce(function(acc,c){return acc+(c.unread_count||0);},0);
+    var badge=document.getElementById('msg-badge');
+    if(badge){ badge.textContent=totalUnread; badge.style.display=totalUnread>0?'flex':'none'; }
+
+    if(!convs.length){
+      list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon">💬</div>Nenhuma conversa ainda.<br><span style="font-size:12px;color:#333">Envia uma proposta a um músico para começar.</span></div>';
+      return;
+    }
+    list.innerHTML='';
+    if(_selectMode) list.classList.add('select-mode');
+    convs.forEach(function(c){
+      var other=c.other_user||{};
+      var initials=_convInitials(other.name);
+      var color=_CONV_COLORS[(other.id||0)%_CONV_COLORS.length];
+      var preview=(c.last_message||'Sem mensagens').substring(0,50)+(c.last_message&&c.last_message.length>50?'…':'');
+      var el=document.createElement('div');
+      el.className='conv-item';
+      el.innerHTML=
+        '<div class="conv-checkbox"></div>'+
+        '<div class="conv-avatar" style="background:'+color+'">'+initials+'</div>'+
+        '<div class="conv-info">'+
+          '<div class="conv-name">'+other.name+'</div>'+
+          '<div class="conv-preview">'+preview+'</div>'+
+        '</div>'+
+        '<div class="conv-meta">'+
+          '<div class="conv-time">'+_convTimestamp(c.last_message_at)+'</div>'+
+          (c.unread_count>0?'<div class="conv-unread">'+c.unread_count+'</div>':'')+
+        '</div>';
+      el.onclick=(function(conv, otherUser, elem){
+        return function(){
+          if(_selectMode){ toggleConvSelect(conv.id, elem); }
+          else { openConversation(conv.id, otherUser.name||'Conversa'); }
+        };
+      })(c, other, el);
+      list.appendChild(el);
+    });
+  } catch(e){
+    list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon">⚠️</div>Erro ao carregar conversas.</div>';
+  }
+}
+
+function _updateSelectUI(){
+  var btnSel=document.getElementById('btn-conv-select');
+  var btnDel=document.getElementById('btn-conv-delete');
+  var countEl=document.getElementById('conv-select-count');
+  var list=document.getElementById('conversations-list');
+  if(!btnSel) return;
+  if(_selectMode){
+    btnSel.textContent='Cancelar';
+    btnSel.classList.add('active');
+    if(list) list.classList.add('select-mode');
+    var n=_selectedConvs.length;
+    countEl.textContent=n>0?n+' selecionada'+(n>1?'s':''):'';
+    btnDel.style.display=n>0?'block':'none';
+  } else {
+    btnSel.textContent='Selecionar';
+    btnSel.classList.remove('active');
+    if(list) list.classList.remove('select-mode');
+    countEl.textContent='';
+    btnDel.style.display='none';
+  }
+}
+
+function toggleSelectMode(){
+  _selectMode=!_selectMode;
+  _selectedConvs=[];
+  // deselect all items visually
+  document.querySelectorAll('#conversations-list .conv-item').forEach(function(el){
+    el.classList.remove('selected');
+  });
+  _updateSelectUI();
+}
+
+function toggleConvSelect(id, el){
+  var idx=_selectedConvs.indexOf(id);
+  if(idx===-1){ _selectedConvs.push(id); el.classList.add('selected'); }
+  else { _selectedConvs.splice(idx,1); el.classList.remove('selected'); }
+  _updateSelectUI();
+}
+
+async function deleteSelectedConvs(){
+  if(!_selectedConvs.length) return;
+  var n=_selectedConvs.length;
+  if(!confirm('Apagar '+(n===1?'1 conversa':n+' conversas')+'? Esta ação não pode ser desfeita.')) return;
+  var ids=_selectedConvs.slice();
+  try {
+    await Promise.all(ids.map(function(id){ return apiCall('DELETE','/api/conversations/'+id); }));
+    showToast('✓ '+(n===1?'Conversa apagada':'Conversas apagadas')+'!','success');
+  } catch(e){
+    showToast('Erro ao apagar algumas conversas.','error');
+  }
+  _selectMode=false; _selectedConvs=[];
+  loadConversations();
+}
+
+function openConversation(convId, otherName){
+  if(_chatPolling) clearInterval(_chatPolling);
+  _activeConvId  = convId;
+  _chatOtherName = otherName||'Conversa';
+  document.getElementById('chat-header-name').textContent=_chatOtherName;
+  document.getElementById('chat-messages').innerHTML='';
+  document.getElementById('chat-modal').classList.add('open');
+  fetchMessages();
+  _chatPolling=setInterval(fetchMessages, 5000);
+}
+
+function closeChatModal(){
+  document.getElementById('chat-modal').classList.remove('open');
+  clearInterval(_chatPolling);
+  _chatPolling=null;
+  _activeConvId=null;
+}
+
+async function fetchMessages(){
+  if(!_activeConvId) return;
+  try {
+    var data=await apiCall('GET','/api/conversations/'+_activeConvId+'/messages');
+    var msgs=data.data||[];
+    var el=document.getElementById('chat-messages');
+    if(!msgs.length){
+      el.innerHTML='<div class="chat-empty">Ainda não há mensagens. Diz olá! 👋</div>';
+      return;
+    }
+    el.innerHTML='';
+    msgs.forEach(function(m){
+      var mine=(_currentUserId&&m.sender_id===_currentUserId);
+      var div=document.createElement('div');
+      div.className='chat-msg '+(mine?'mine':'theirs');
+      var ts=_convTimestamp(m.created_at);
+      div.innerHTML='<div class="chat-bubble">'+m.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div><div class="chat-ts">'+ts+'</div>';
+      el.appendChild(div);
+    });
+    el.scrollTop=el.scrollHeight;
+  } catch(e){ /* silent during polling */ }
+}
+
+async function sendMessage(){
+  var input=document.getElementById('chat-input');
+  var body=(input.value||'').trim();
+  if(!body||!_activeConvId) return;
+  input.value='';
+  try {
+    await apiCall('POST','/api/conversations/'+_activeConvId+'/messages',{body:body});
+    await fetchMessages();
+  } catch(e){
+    showToast('Erro ao enviar mensagem.','info');
+    input.value=body;
+  }
+}
+
+async function openChatWith(userId, userName){
+  try {
+    var data=await apiCall('POST','/api/conversations',{user_b_id:userId});
+    openConversation(data.conversation_id, userName);
+  } catch(e){
+    showToast('Erro ao abrir conversa.','info');
+  }
+}
+
+/* Overlay clicks */
+document.getElementById('add-event-modal').addEventListener('click',function(e){if(e.target===this)closeAddEventModal();});
+document.getElementById('edit-perfil-modal').addEventListener('click',function(e){if(e.target===this)closeEditPerfil();});
+document.getElementById('decline-modal').addEventListener('click',function(e){if(e.target===this)closeDeclineModal();});
+document.getElementById('send-proposal-modal').addEventListener('click',function(e){if(e.target===this)closeSendProposalModal();});
+document.getElementById('chat-modal').addEventListener('click',function(e){if(e.target===this)closeChatModal();});
+['ae-nome','ae-data'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el) el.addEventListener('input',function(){this.classList.remove('error');});
+});
+document.getElementById('ep-nome').addEventListener('input',function(){this.classList.remove('error');});
+
+/* Enter no login */
+document.getElementById('login-email').addEventListener('input',function(){this.classList.remove('error');document.getElementById('login-error').textContent='';});
+document.getElementById('login-senha').addEventListener('input',function(){this.classList.remove('error');document.getElementById('login-error').textContent='';});
+</script>
+
+<!-- ══════════════════════════════════════════
+     BOTTOM SHEET: MAIS (mobile only)
+══════════════════════════════════════════ -->
+<div id="more-drawer-overlay" onclick="closeMoreDrawer()"></div>
+<div id="more-drawer">
+  <div class="more-drawer-handle"></div>
+  <div class="more-drawer-title">Menu</div>
+  <div class="more-drawer-list">
+    <div class="more-drawer-item" onclick="navigate('agenda',document.getElementById('nav-mais'));closeMoreDrawer()">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="3" width="14" height="12" rx="1.5"/><path d="M5 1v4M11 1v4M1 7h14"/></svg>
+      Agenda
+    </div>
+    <div class="more-drawer-item" onclick="navigate('perfil',document.getElementById('nav-mais'));closeMoreDrawer()">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
+      Meu Perfil
+    </div>
+    <div class="more-drawer-item" onclick="navigate('configuracoes',document.getElementById('nav-mais'));closeMoreDrawer()">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="8" r="2.5"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3.05 3.05l1.41 1.41M11.54 11.54l1.41 1.41M3.05 12.95l1.41-1.41M11.54 4.46l1.41-1.41"/></svg>
+      Configurações
+    </div>
+    <div class="more-drawer-item more-drawer-logout" onclick="closeMoreDrawer();handleLogout()">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l4-4-4-4M14 7H6"/></svg>
+      Sair
+    </div>
+  </div>
+</div>
+</body>
+</html>
