@@ -1908,7 +1908,7 @@ async function loadAndRenderProposals(append){
 /* \u2500\u2500 CONFIGURA\u00c7\u00d5ES \u2500\u2500 */
 var LS_CFG = 'myguig_settings';
 var _cfg = {
-  moeda: 'BRL', idioma: 'pt-BR',
+  moeda: 'EUR', idioma: 'pt-PT',
   notifPropostas: true, notifMensagens: true,
   showCache: true, allowMsgs: true
 };
@@ -1946,12 +1946,12 @@ function confirmDeleteAccount(){
 }
 
 function fmtCache(v){
-  var sym={'BRL':'R$\u00a0','USD':'$','EUR':'\u20ac'};
-  var locale={'BRL':'pt-BR','USD':'en-US','EUR':'de-DE'};
-  var m=_cfg.moeda||'BRL';
+  var sym={'BRL':'R$\u00a0','USD':'$\u00a0','EUR':'\u20ac\u00a0'};
+  var locale={'BRL':'pt-BR','USD':'en-US','EUR':'pt-PT'};
+  var m=_cfg.moeda||'EUR';
   try{
-    return (sym[m]||'R$\u00a0')+v.toLocaleString(locale[m]||'pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
-  }catch(e){ return 'R$\u00a0'+v.toFixed(2); }
+    return (sym[m]||'\u20ac\u00a0')+v.toLocaleString(locale[m]||'pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }catch(e){ return '\u20ac\u00a0'+v.toFixed(2); }
 }
 function statusLabel(s){
   if(s==='pending') return '<span class="prop-badge badge-pending">Aguardando sua resposta</span>';
@@ -2207,7 +2207,7 @@ function renderCalendar(){
   }
   document.getElementById('cal-grid').innerHTML=html;
   /* ── Faturamento: Total do Mês e Total do Ano ── */
-  var fmtMoeda=function(v){return new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(v);};
+  var fmtMoeda=function(v){return '€ '+v.toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});};
   var confMes=all.filter(function(p){return p.status==='confirmed'&&p.mes===calMonth&&p.ano===calYear;});
   var totalMes=confMes.reduce(function(acc,p){return acc+(parseFloat(p.cache)||0);},0);
   document.getElementById('fat-mes-valor').textContent=fmtMoeda(totalMes);
@@ -2628,7 +2628,7 @@ async function loadMusicians(append){
       var color    = _DISC_COLORS[m.id % _DISC_COLORS.length];
       var estilos  = (m.estilos||[]).slice(0,3).map(function(e){return '<span class="mc-estilo-tag">'+e+'</span>';}).join('');
       var cache    = parseFloat(m.cache_minimo||0);
-      var cacheStr = cache > 0 ? 'A partir de <span>R$ '+cache.toLocaleString('pt-BR',{minimumFractionDigits:0})+'</span>' : '<span>A combinar</span>';
+      var cacheStr = cache > 0 ? 'A partir de <span>€ '+cache.toLocaleString('pt-PT',{minimumFractionDigits:0})+'</span>' : '<span>A combinar</span>';
 
       var card = document.createElement('div');
       card.className = 'musician-card';
@@ -2673,7 +2673,7 @@ function openMusicianProfile(id){
                    .map(function(w){return w[0].toUpperCase();}).join('') || '?';
   var color    = _DISC_COLORS[musician.id % _DISC_COLORS.length];
   var cache    = parseFloat(musician.cache_minimo||0);
-  var cacheStr = cache > 0 ? 'R$ '+cache.toLocaleString('pt-BR',{minimumFractionDigits:2}) : 'A combinar';
+  var cacheStr = cache > 0 ? '€ '+cache.toLocaleString('pt-PT',{minimumFractionDigits:2}) : 'A combinar';
 
   // ── Capa ──
   document.getElementById('vmp-cover').style.background =
