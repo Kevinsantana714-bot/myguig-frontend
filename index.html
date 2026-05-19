@@ -262,6 +262,16 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 @keyframes pulse{0%,100%{opacity:.4}50%{opacity:.8}}
 .notif-card{background:#121212;border:1px solid #2a1e0a;border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;transition:border-color .15s}
 .notif-card:hover{border-color:#4a3010}
+.hn-card{display:flex;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:10px;border:1px solid #1e1e1e;background:#0d0d0d;margin-bottom:6px;cursor:pointer;transition:all .15s}
+.hn-card:hover{background:#141414;border-color:#2a2a2a}
+.hn-card.unread{background:#120e1f;border-color:#2e1f55}
+.hn-card.unread:hover{background:#1a1235;border-color:#4a2e80}
+.hn-dot{width:8px;height:8px;border-radius:50%;background:#7B52F0;flex-shrink:0;margin-top:4px}
+.hn-dot.read{background:transparent}
+.hn-msg{flex:1;font-size:13px;color:#ccc;line-height:1.5}
+.hn-card.unread .hn-msg{color:#e0e0e0;font-weight:500}
+.hn-time{font-size:11px;color:#444;white-space:nowrap;flex-shrink:0}
+.hn-empty{font-size:13px;color:#444;padding:16px 0 24px;text-align:center}
 .notif-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;color:#fff;flex-shrink:0}
 .notif-body{flex:1;min-width:0}
 .notif-headline{font-size:11px;color:#fbbf24;font-weight:600;margin-bottom:3px;display:flex;align-items:center;gap:4px}
@@ -942,6 +952,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
       <div class="nav-item active" id="nav-inicio" onclick="navigate('inicio',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
         Início
+        <span class="nav-badge" id="notif-inicio-badge" style="display:none">0</span>
       </div>
       <div class="nav-item" id="nav-descobrir" onclick="navigate('descobrir',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="6" cy="6" r="4"/><path d="M10.5 10.5l3 3"/></svg>
@@ -1013,6 +1024,13 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
         <div class="home-stats-row" id="home-stats"></div>
         <div id="home-notifs"></div>
         <div id="home-financeiro"></div>
+        <div style="margin-top:8px">
+          <div class="notif-section-title" style="margin-bottom:10px">
+            <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="#a78bfa" stroke-width="1.5"><path d="M8 1a5 5 0 015 5v2.5l1 2H2l1-2V6a5 5 0 015-5zM6.5 13a1.5 1.5 0 003 0"/></svg>
+            Notificações recentes
+          </div>
+          <div id="home-backend-notifs"><div class="hn-empty">A carregar…</div></div>
+        </div>
       </div>
 
       <!-- PROPOSTAS -->
@@ -1922,6 +1940,75 @@ function statusLabel(s){
   return '';
 }
 
+/* ── NOTIFICAÇÕES DO BACKEND (dashboard) ── */
+var _homeNotifs = [];
+
+function _updateNotifBadge(){
+  var unread = _homeNotifs.filter(function(n){ return n.read === 0; }).length;
+  var badge  = document.getElementById('notif-inicio-badge');
+  if(!badge) return;
+  badge.textContent = unread;
+  badge.style.display = unread > 0 ? 'flex' : 'none';
+}
+
+async function loadHomeNotifications(){
+  var container = document.getElementById('home-backend-notifs');
+  if(!container) return;
+  try {
+    var data = await apiCall('GET', '/api/notifications?limit=5');
+    _homeNotifs = data.data || [];
+    _updateNotifBadge();
+    _renderHomeNotifs(container);
+  } catch(e){
+    container.innerHTML = '<div class="hn-empty">Não foi possível carregar notificações.</div>';
+  }
+}
+
+function _renderHomeNotifs(container){
+  if(!container) container = document.getElementById('home-backend-notifs');
+  if(!container) return;
+  if(!_homeNotifs.length){
+    container.innerHTML = '<div class="hn-empty">Nenhuma notificação recente.</div>';
+    return;
+  }
+  container.innerHTML = _homeNotifs.map(function(n){
+    var isUnread = n.read === 0;
+    var ago = _hnTimeAgo(n.created_at);
+    return '<div class="hn-card'+(isUnread?' unread':'')+'" onclick="markNotifRead('+n.id+',this)">' +
+      '<div class="hn-dot'+(isUnread?'':' read')+'"></div>' +
+      '<div class="hn-msg">'+_escHtml(n.message)+'</div>' +
+      '<div class="hn-time">'+ago+'</div>' +
+    '</div>';
+  }).join('');
+}
+
+function _hnTimeAgo(dateStr){
+  var d   = new Date(dateStr);
+  var now = Date.now();
+  var diff = now - d.getTime();
+  if(diff < 60000)  return 'agora';
+  if(diff < 3600000) return Math.floor(diff/60000)+'min';
+  if(diff < 86400000) return Math.floor(diff/3600000)+'h';
+  return d.getDate()+'/'+(d.getMonth()+1);
+}
+
+function _escHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+async function markNotifRead(id, el){
+  var notif = _homeNotifs.find(function(n){ return n.id === id; });
+  if(!notif || notif.read === 1) return;
+  notif.read = 1;
+  if(el){
+    el.classList.remove('unread');
+    var dot = el.querySelector('.hn-dot');
+    if(dot) dot.classList.add('read');
+  }
+  _updateNotifBadge();
+  try { await apiCall('PATCH', '/api/notifications/'+id+'/read'); } catch(e){}
+}
+
 function renderHome(){
   var all=allProposals();
   var nx=all.filter(function(p){
@@ -1969,6 +2056,7 @@ function renderHome(){
     notifsEl.innerHTML='<div style="font-size:13px;color:#444;margin-bottom:20px">Nenhuma proposta pendente no momento.</div>';
   }
   document.getElementById('home-financeiro').innerHTML='';
+  loadHomeNotifications();
 }
 
 function applyFilterToList(list){
