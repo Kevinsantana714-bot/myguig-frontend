@@ -241,6 +241,11 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .next-show-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .next-show-meta{display:flex;gap:14px;flex-wrap:wrap}
 .nsm-item{display:flex;align-items:center;gap:5px;font-size:12px;color:#888}
+.ns-nav{display:flex;align-items:center;gap:5px;margin-left:auto;flex-shrink:0}
+.ns-nav-btn{background:none;border:1px solid #252525;border-radius:6px;color:#666;cursor:pointer;width:22px;height:22px;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;transition:border-color .15s,color .15s;padding:0}
+.ns-nav-btn:hover:not(:disabled){border-color:#444;color:#bbb}
+.ns-nav-btn:disabled{opacity:.2;cursor:default}
+.ns-nav-count{font-size:10px;color:#555;min-width:26px;text-align:center;letter-spacing:.3px}
 .home-stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:20px;max-width:800px}
 .home-stat{background:#121212;border:1px solid #1e1e1e;border-radius:10px;padding:14px 16px;transition:border-color .15s}
 .home-stat:hover{border-color:#2a2a2a}
@@ -1908,6 +1913,8 @@ var TODAY = new Date();
 var proposals = [];
 var manualEvents = [];
 var _propPage = 1, _propTotal = 0, _propLoading = false;
+var _nextShowIdx   = 0;   // índice do show visível no card "Próximo Show"
+var _upcomingShows = [];  // lista de eventos futuros confirmados, ordenada
 
 function allProposals(){ return proposals.concat(manualEvents); }
 
@@ -1972,6 +1979,7 @@ function normalizeProposal(p){
     counterByMe:    counterByMe,
     counterMsg:     counterMsg,
     source:         'proposal',
+    _timeSort:      p.horario_inicio || '',   // 'HH:MM:SS' — usado para sort secundário por hora
     _raw:           p,
   };
 }
@@ -1988,6 +1996,7 @@ async function loadAndRenderProposals(append){
     var json = await apiCall('GET', '/api/proposals?page=' + page + '&limit=10' + statusParam);
     var normalized = (json.data || []).map(normalizeProposal);
     proposals = append ? proposals.concat(normalized) : normalized;
+    if(!append) _nextShowIdx = 0; // reset navegação ao recarregar dados frescos
     _propPage = json.pagination ? json.pagination.page : 1;
     _propTotal = json.pagination ? json.pagination.total : proposals.length;
     renderProposals(proposals);
@@ -2144,25 +2153,52 @@ async function markNotifRead(id, el){
 function renderHome(){
   var all=allProposals();
   var isPureContractor=(userProfile.role==='contractor');
-  // "Próximo show": para músico = onde está como performer; para contratante = qualquer
+  // "Próximo show": para músico = onde está como performer; para contratante = qualquer confirmado
   var upcoming=all.filter(function(p){
     if(p.status!=='confirmed') return false;
-    if(!isPureContractor && p.iAmContractor) return false; // músico não quer ver os seus como contratante aqui
-    return new Date(p.ano,p.mes,p.dia)>=TODAY;
-  }).sort(function(a,b){return new Date(a.ano,a.mes,a.dia)-new Date(b.ano,b.mes,b.dia);});
-  var nx=upcoming[0]||null;
+    if(!isPureContractor && p.iAmContractor) return false; // músico não conta os seus como contratante
+    var d=new Date(p.ano,p.mes,p.dia);
+    d.setHours(0,0,0,0);
+    var t=new Date(); t.setHours(0,0,0,0);
+    return d>=t;
+  }).sort(function(a,b){
+    // Ordenação primária: data ASC; secundária: hora ASC
+    var da=new Date(a.ano,a.mes,a.dia)-new Date(b.ano,b.mes,b.dia);
+    if(da!==0) return da;
+    return (a._timeSort||'').localeCompare(b._timeSort||'');
+  });
+
+  // Actualiza lista global e clamp do índice
+  _upcomingShows=upcoming;
+  if(_nextShowIdx>=_upcomingShows.length) _nextShowIdx=Math.max(0,_upcomingShows.length-1);
+
+  var nx=_upcomingShows[_nextShowIdx]||null;
   var proxEl=document.getElementById('home-proximo');
   var nextLabel = isPureContractor ? 'Próximo compromisso' : 'Próximo show';
   if(nx){
+    var prevDis = _nextShowIdx===0 ? ' disabled' : '';
+    var nextDis = _nextShowIdx>=_upcomingShows.length-1 ? ' disabled' : '';
+    var navHtml = _upcomingShows.length>1
+      ? '<div class="ns-nav">'+
+          '<button class="ns-nav-btn" onclick="navigateShow(-1)"'+prevDis+' title="Anterior">&#8249;</button>'+
+          '<span class="ns-nav-count">'+(_nextShowIdx+1)+' / '+_upcomingShows.length+'</span>'+
+          '<button class="ns-nav-btn" onclick="navigateShow(1)"'+nextDis+' title="Próximo">&#8250;</button>'+
+        '</div>'
+      : '';
     proxEl.innerHTML='<div class="next-show-card">'+
       '<div class="next-show-date"><div class="next-show-day">'+String(nx.dia).padStart(2,'0')+'</div><div class="next-show-month">'+MONTHS_SHORT[nx.mes]+'</div></div>'+
-      '<div class="next-show-body"><div class="next-show-label">'+nextLabel+'</div>'+
-      '<div class="next-show-title">'+_escHtml(nx.evento)+'</div>'+
-      '<div class="next-show-meta">'+
-        '<div class="nsm-item"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5"><circle cx="8" cy="7" r="3.5"/><path d="M8 13.5S3 9.2 3 6.5a5 5 0 0110 0c0 2.7-5 7-5 7z"/></svg>'+(nx.local||'').split('—')[0].trim()+'</div>'+
-        '<div class="nsm-item"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 2"/></svg>'+nx.horario+'</div>'+
-        '<div class="nsm-item" style="color:#666">'+nx.repertorio+'</div>'+
-      '</div></div>'+
+      '<div class="next-show-body">'+
+        '<div style="display:flex;align-items:center;margin-bottom:5px">'+
+          '<div class="next-show-label">'+nextLabel+'</div>'+
+          navHtml+
+        '</div>'+
+        '<div class="next-show-title">'+_escHtml(nx.evento)+'</div>'+
+        '<div class="next-show-meta">'+
+          '<div class="nsm-item"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5"><circle cx="8" cy="7" r="3.5"/><path d="M8 13.5S3 9.2 3 6.5a5 5 0 0110 0c0 2.7-5 7-5 7z"/></svg>'+(nx.local||'').split('—')[0].trim()+'</div>'+
+          '<div class="nsm-item"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 2"/></svg>'+nx.horario+'</div>'+
+          '<div class="nsm-item" style="color:#666">'+nx.repertorio+'</div>'+
+        '</div>'+
+      '</div>'+
     '</div>';
   } else {
     var emptyMsg = isPureContractor ? 'Nenhum compromisso marcado.' : 'Nenhum show marcado para os próximos dias.';
@@ -2200,6 +2236,12 @@ function renderHome(){
   }
   document.getElementById('home-financeiro').innerHTML='';
   loadHomeNotifications();
+}
+
+// Navega entre os shows futuros no card "Próximo Show" (dir: -1 anterior / +1 próximo)
+function navigateShow(dir){
+  _nextShowIdx = Math.max(0, Math.min(_nextShowIdx + dir, _upcomingShows.length - 1));
+  renderHome();
 }
 
 function applyFilterToList(list){
@@ -2900,6 +2942,7 @@ function normalizeManualEvent(row){
     metodo:'Evento cadastrado manualmente.',
     descricao:descricao,
     time_start:inicio,time_end:termino,
+    _timeSort:inicio,                         // 'HH:MM' — usado para sort secundário por hora
     manual:true,source:'manual'
   };
 }
@@ -2909,6 +2952,7 @@ async function loadManualEvents(){
   try {
     var data=await apiCall('GET','/api/events');
     manualEvents=(data.data||[]).map(normalizeManualEvent);
+    _nextShowIdx=0; // reset navegação ao recarregar eventos manuais
   } catch(e){ console.warn('[loadManualEvents]',e.message); }
 }
 
