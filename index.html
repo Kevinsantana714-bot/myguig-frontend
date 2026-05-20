@@ -1804,8 +1804,9 @@ function applyUserToUI(user){
     catch(e){ userProfile.estilos = []; }
   }
   // Novos campos
-  if(user.phone      != null && user.phone !== '') userProfile.tel = user.phone;
+  if(user.phone      != null && user.phone !== '') userProfile.tel       = user.phone;
   if(user.avatar_url != null && user.avatar_url !== '') userProfile.imgPerfil = user.avatar_url;
+  if(user.role       != null) userProfile.role = user.role;
 
   saveProfile();
   syncSidebar();
@@ -1917,40 +1918,58 @@ async function apiCall(method, path, body){
 }
 
 function normalizeProposal(p){
-  var dateStr = (p.data_iso || '').toString().substring(0, 10); // handles "2026-08-15" and "2026-08-15T00:00:00.000Z"
+  var dateStr = (p.data_iso || '').toString().substring(0, 10);
   var d = new Date(dateStr + 'T12:00:00');
   var estilos = Array.isArray(p.estilos) ? p.estilos : JSON.parse(p.estilos || '[]');
   var colorPalette = ['#2dd4bf','#f472b6','#fb923c','#818cf8','#facc15','#34d399','#60a5fa'];
   var color = colorPalette[p.id % colorPalette.length];
-  var name = (p.contractor && p.contractor.name) || p.contractor_name || 'Contratante';
-  var initials = name.split(' ').filter(function(w){return w;}).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('') || 'CT';
+  var contractorId  = parseInt(p.contractor_id) || 0;
+  var musicianId    = parseInt(p.musician_id)   || 0;
+  var iAmContractor = (_currentUserId !== null && _currentUserId === contractorId);
+  // Nome da outra parte para o header do card
+  var contractorName = (p.contractor && p.contractor.name) || 'Contratante';
+  var musicianName   = (p.musician   && p.musician.name)   || 'Músico';
+  var displayName    = iAmContractor ? musicianName : contractorName;
+  var initials = displayName.split(' ').filter(function(w){return w;}).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('') || (iAmContractor ? 'MS' : 'CT');
   var horario = p.horario_inicio ? p.horario_inicio.replace(':','h').substring(0,5) : '—';
+  // Última contraproposta
+  var lastCounter   = p.lastCounter || null;
+  var counterAuthor = lastCounter ? (parseInt(lastCounter.author_id) || 0) : 0;
+  var counterByMe   = counterAuthor === _currentUserId;
   var counterMsg = '';
-  if(p.lastCounter){
-    counterMsg = 'Contraproposta';
-    if(p.lastCounter.novo_cache) counterMsg += ': ' + fmtCache(parseFloat(p.lastCounter.novo_cache));
-    if(p.lastCounter.mensagem) counterMsg += ' — "' + p.lastCounter.mensagem.substring(0,40) + '"';
+  if(lastCounter){
+    counterMsg = counterByMe ? 'Contraproposta enviada' : 'Contraproposta recebida';
+    if(lastCounter.novo_cache) counterMsg += ': ' + fmtCache(parseFloat(lastCounter.novo_cache));
+    if(lastCounter.mensagem)   counterMsg += ' — "' + lastCounter.mensagem.substring(0,40) + '"';
   }
   return {
-    id: p.id,
-    initials: initials,
-    color: color,
-    name: name,
-    evento: p.evento,
-    data: String(d.getDate()).padStart(2,'0') + ' ' + MONTHS_SHORT[d.getMonth()],
+    id:             p.id,
+    contractor_id:  contractorId,
+    musician_id:    musicianId,
+    iAmContractor:  iAmContractor,
+    initials:       initials,
+    color:          color,
+    name:           displayName,
+    contractorName: contractorName,
+    musicianName:   musicianName,
+    evento:         p.evento,
+    data:           String(d.getDate()).padStart(2,'0') + ' ' + MONTHS_SHORT[d.getMonth()],
     dia: d.getDate(), mes: d.getMonth(), ano: d.getFullYear(),
-    horario: horario,
-    local: p.local,
-    cache: parseFloat(p.cache) || 0,
-    cacheStr: fmtCache(parseFloat(p.cache) || 0),
-    status: p.status,
-    estilos: estilos,
-    repertorio: p.repertorio || '—',
-    metodo: p.metodo || '—',
-    descricao: p.descricao || '—',
-    counterMsg: counterMsg,
-    source: 'proposal',
-    _raw: p,
+    horario:        horario,
+    local:          p.local,
+    cache:          parseFloat(p.cache) || 0,
+    cacheStr:       fmtCache(parseFloat(p.cache) || 0),
+    status:         p.status,
+    estilos:        estilos,
+    repertorio:     p.repertorio || '—',
+    metodo:         p.metodo || '—',
+    descricao:      p.descricao || '—',
+    lastCounter:    lastCounter,
+    counterAuthor:  counterAuthor,
+    counterByMe:    counterByMe,
+    counterMsg:     counterMsg,
+    source:         'proposal',
+    _raw:           p,
   };
 }
 
@@ -2184,16 +2203,70 @@ function renderProposals(list){
   c.innerHTML=list.map(function(p){
     var ec=p.status==='confirmed'?' status-confirmed':p.status==='declined'?' status-declined':p.status==='negotiating'?' status-negotiating':'';
     var infoExtra='<div class="info-extra"><div class="info-extra-title">Informações extras</div><div class="info-grid"><div style="grid-column:1/-1"><div class="info-item-label">Estilos musicais</div><div class="tags-row">'+p.estilos.map(function(e){return '<span class="style-tag">'+e+'</span>';}).join('')+'</div></div></div><div class="info-desc">'+p.descricao+'</div></div>';
+    var counterForm='<div class="counter-box" id="counter-'+p.id+'"><div class="counter-title">Fazer Contraproposta</div><div class="counter-row"><div class="counter-field"><div class="counter-label">Novo cachê</div><input class="counter-input" id="val-'+p.id+'" type="number" min="0" placeholder="Ex: 1200"></div><div class="counter-field"><div class="counter-label">Novo horário</div><input class="counter-input" id="hor-'+p.id+'" type="text" placeholder="Ex: 20:30"></div></div><div class="counter-field"><div class="counter-label">Mensagem</div><textarea class="counter-textarea" id="msg-'+p.id+'" rows="2" placeholder="Explique sua contraproposta..."></textarea></div><div class="counter-actions"><button class="btn-cancel-sm" onclick="toggleCounter('+p.id+')">Cancelar</button><button class="btn-send" onclick="sendCounter('+p.id+')">Enviar contraproposta</button></div></div>';
     var actions='';
-    if(p.status==='pending'){
-      actions='<div class="prop-actions"><button class="btn btn-accept" onclick="acceptProposal('+p.id+')">&#10003; Aceitar proposta</button><button class="btn btn-decline" onclick="openDeclineModal('+p.id+')">&#10005; Recusar</button><button class="btn btn-negotiate" onclick="toggleCounter('+p.id+')">&#8645; Negociar</button></div><div class="counter-box" id="counter-'+p.id+'"><div class="counter-title">Fazer Contraproposta</div><div class="counter-row"><div class="counter-field"><div class="counter-label">Novo cachê</div><input class="counter-input" id="val-'+p.id+'" type="number" min="0" placeholder="Ex: 1200"></div><div class="counter-field"><div class="counter-label">Novo horário</div><input class="counter-input" id="hor-'+p.id+'" type="text" placeholder="Ex: 20:30"></div></div><div class="counter-field"><div class="counter-label">Mensagem</div><textarea class="counter-textarea" id="msg-'+p.id+'" rows="2" placeholder="Explique sua contraproposta..."></textarea></div><div class="counter-actions"><button class="btn-cancel-sm" onclick="toggleCounter('+p.id+')">Cancelar</button><button class="btn-send" onclick="sendCounter('+p.id+')">Enviar contraproposta</button></div></div>';
-    } else if(p.status==='negotiating'){
-      var cm=p.counterMsg||'Contraproposta recebida. Aguardando.';
-      actions='<div class="status-msg">&#8648; '+cm+'</div><div class="prop-actions"><button class="btn btn-accept" onclick="acceptProposal('+p.id+')">&#10003; Aceitar mesmo assim</button><button class="btn btn-decline" onclick="openDeclineModal('+p.id+')">&#10005; Cancelar</button><button class="btn btn-negotiate" onclick="toggleCounter('+p.id+')">&#8645; Contraproposta</button></div><div class="counter-box" id="counter-'+p.id+'"><div class="counter-title">Fazer Contraproposta</div><div class="counter-row"><div class="counter-field"><div class="counter-label">Novo cachê</div><input class="counter-input" id="val-'+p.id+'" type="number" min="0" placeholder="Ex: 1200"></div><div class="counter-field"><div class="counter-label">Novo horário</div><input class="counter-input" id="hor-'+p.id+'" type="text" placeholder="Ex: 20:30"></div></div><div class="counter-field"><div class="counter-label">Mensagem</div><textarea class="counter-textarea" id="msg-'+p.id+'" rows="2" placeholder="Explique sua contraproposta..."></textarea></div><div class="counter-actions"><button class="btn-cancel-sm" onclick="toggleCounter('+p.id+')">Cancelar</button><button class="btn-send" onclick="sendCounter('+p.id+')">Enviar contraproposta</button></div></div>';
-    } else if(p.status==='confirmed'){
-      actions='<div class="status-msg" style="color:#4ade80">&#10003; Aceita — sincronizada na Agenda.</div>';
+    if(p.iAmContractor){
+      // ── Vista do CONTRATANTE ─────────────────────────────────
+      if(p.status==='pending'){
+        actions='<div class="status-msg" style="color:#888">&#8987; Aguardando resposta do músico...</div>';
+      } else if(p.status==='negotiating'){
+        if(!p.counterByMe){
+          // Músico enviou contraproposta → contratante pode responder
+          var cv=p.lastCounter&&p.lastCounter.novo_cache?fmtCache(parseFloat(p.lastCounter.novo_cache)):'';
+          var cm=p.lastCounter&&p.lastCounter.mensagem?p.lastCounter.mensagem.substring(0,60):'';
+          var counterBanner='<div style="margin-bottom:8px;padding:12px 14px;background:#0d0d1a;border:1px solid #2e1f55;border-radius:10px">' +
+            '<div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:6px">&#128172; CONTRAPROPOSTA DO MÚSICO</div>' +
+            (cv?'<div style="font-size:14px;font-weight:700;color:#c4b5fd;margin-bottom:4px">'+cv+'</div>':'') +
+            (cm?'<div style="font-size:12px;color:#aaa;font-style:italic">"'+cm+'"</div>':'') +
+          '</div>';
+          actions=counterBanner+
+            '<div class="prop-actions">' +
+              '<button class="btn btn-accept" onclick="acceptCounter('+p.id+')">&#10003; Aceitar contraproposta</button>' +
+              '<button class="btn btn-decline" onclick="openDeclineModal('+p.id+')">&#10005; Recusar</button>' +
+              '<button class="btn btn-negotiate" onclick="toggleCounter('+p.id+')">&#8645; Nova proposta</button>' +
+            '</div>'+counterForm;
+        } else {
+          // Contratante já enviou a sua contraproposta, aguardando músico
+          actions='<div class="status-msg">&#8648; '+p.counterMsg+'</div>'+
+            '<div class="prop-actions"><button class="btn btn-decline" onclick="openDeclineModal('+p.id+')">&#10005; Cancelar proposta</button></div>';
+        }
+      } else if(p.status==='confirmed'){
+        actions='<div class="status-msg" style="color:#4ade80">&#10003; Confirmado pelo músico.</div>';
+      } else if(p.status==='cancelled'){
+        actions='<div class="status-msg" style="color:#f87171">&#10005; Proposta cancelada pelo músico.</div>';
+      } else {
+        actions='<div class="status-msg" style="color:#f87171">&#10005; Proposta recusada.</div>';
+      }
     } else {
-      actions='<div class="status-msg" style="color:#f87171">&#10005; Proposta recusada</div>';
+      // ── Vista do MÚSICO ──────────────────────────────────────
+      if(p.status==='pending'){
+        actions='<div class="prop-actions"><button class="btn btn-accept" onclick="acceptProposal('+p.id+')">&#10003; Aceitar proposta</button><button class="btn btn-decline" onclick="openDeclineModal('+p.id+')">&#10005; Recusar</button><button class="btn btn-negotiate" onclick="toggleCounter('+p.id+')">&#8645; Negociar</button></div>'+counterForm;
+      } else if(p.status==='negotiating'){
+        if(!p.counterByMe){
+          // Contratante enviou contraproposta → músico responde
+          var cv2=p.lastCounter&&p.lastCounter.novo_cache?fmtCache(parseFloat(p.lastCounter.novo_cache)):'';
+          var cm2=p.lastCounter&&p.lastCounter.mensagem?p.lastCounter.mensagem.substring(0,60):'';
+          var counterBanner2='<div style="margin-bottom:8px;padding:12px 14px;background:#0d0d1a;border:1px solid #2e1f55;border-radius:10px">' +
+            '<div style="font-size:11px;font-weight:700;color:#a78bfa;margin-bottom:6px">&#128172; CONTRAPROPOSTA DO CONTRATANTE</div>' +
+            (cv2?'<div style="font-size:14px;font-weight:700;color:#c4b5fd;margin-bottom:4px">'+cv2+'</div>':'') +
+            (cm2?'<div style="font-size:12px;color:#aaa;font-style:italic">"'+cm2+'"</div>':'') +
+          '</div>';
+          actions=counterBanner2+
+            '<div class="prop-actions">' +
+              '<button class="btn btn-accept" onclick="acceptProposal('+p.id+')">&#10003; Aceitar</button>' +
+              '<button class="btn btn-decline" onclick="openDeclineModal('+p.id+')">&#10005; Recusar</button>' +
+              '<button class="btn btn-negotiate" onclick="toggleCounter('+p.id+')">&#8645; Contraproposta</button>' +
+            '</div>'+counterForm;
+        } else {
+          // Músico já enviou a sua contraproposta, aguardando contratante
+          actions='<div class="status-msg">&#8648; '+p.counterMsg+'</div>'+
+            '<div class="prop-actions"><button class="btn btn-accept" onclick="acceptProposal('+p.id+')">&#10003; Aceitar mesmo assim</button><button class="btn btn-decline" onclick="openDeclineModal('+p.id+')">&#10005; Cancelar</button><button class="btn btn-negotiate" onclick="toggleCounter('+p.id+')">&#8645; Contraproposta</button></div>'+counterForm;
+        }
+      } else if(p.status==='confirmed'){
+        actions='<div class="status-msg" style="color:#4ade80">&#10003; Aceita — sincronizada na Agenda.</div>';
+      } else {
+        actions='<div class="status-msg" style="color:#f87171">&#10005; Proposta recusada</div>';
+      }
     }
     return '<div class="prop-card'+ec+'"><div class="prop-header"><div class="prop-avatar" style="background:'+p.color+'">'+p.initials+'</div><div class="prop-meta"><div class="prop-contratante">'+p.name+'</div><div class="prop-evento">'+p.evento+'</div></div>'+statusLabel(p.status)+'</div><div class="prop-details" style="grid-template-columns:1fr 1fr 1fr"><div><div class="detail-label">&#128197; Data</div><div class="detail-val">'+p.data+', '+p.horario+'</div></div><div><div class="detail-label">&#128205; Local</div><div class="detail-val">'+p.local+'</div></div><div><div class="detail-label">&#128176; Cachê</div><div class="detail-val green">'+p.cacheStr+'</div></div></div>'+infoExtra+actions+'</div>';
   }).join('');
@@ -2211,6 +2284,19 @@ async function acceptProposal(id){
     renderHome();
     renderCalendar();
     showToast('&#10003; Proposta aceita! Sincronizada na Agenda.','success');
+  } catch(e){ showToast('Erro: '+e.message,'info'); }
+}
+
+// Contratante aceita a contraproposta enviada pelo músico
+async function acceptCounter(id){
+  try {
+    await apiCall('PATCH', '/api/proposals/'+id+'/accept');
+    var p=proposals.find(function(x){return x.id===id;});
+    if(p) p.status='confirmed';
+    renderProposals(allProposals());
+    renderHome();
+    renderCalendar();
+    showToast('&#10003; Contraproposta aceita! Show confirmado.','success');
   } catch(e){ showToast('Erro: '+e.message,'info'); }
 }
 function openDeclineModal(id){
@@ -2546,6 +2632,7 @@ var PRF_DEFAULT={
   email:'',
   tel:'',
   instagram:'',
+  role:'musician',
   imgPerfil:null,  // URL Cloudinary (string) ou null — NÃO guardar base64 aqui
   imgCapa:null
 };
