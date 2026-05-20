@@ -228,16 +228,6 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .cal-legend{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:#888}
 .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
-.events-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:10px}
-.event-card{background:#121212;border:1px solid #1e1e1e;border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:14px;transition:border-color .15s}
-.event-card:hover{border-color:#333}
-.event-day-badge{width:44px;height:44px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;flex-shrink:0}
-.event-day-green{background:#1a3326;color:#4ade80}
-.event-day-amber{background:#2e2510;color:#fbbf24}
-.event-info{flex:1;min-width:0}
-.event-name{font-size:13px;font-weight:500;color:#fff;margin-bottom:2px}
-.event-meta{font-size:12px;color:#666}
-.empty-events{text-align:center;padding:30px;color:#444;font-size:13px}
 
 /* ── HOME ── */
 .next-show-card{background:#121212;border:1px solid #1e1e1e;border-radius:12px;padding:20px;margin-bottom:20px;display:flex;align-items:center;gap:20px;transition:border-color .15s;max-width:800px}
@@ -764,8 +754,6 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   /* ── Próximo show ── */
   .next-show-card { flex-direction: column; gap: 12px; align-items: flex-start; }
 
-  /* ── Event cards com botões manuais ── */
-  .event-card { flex-wrap: wrap; gap: 8px; }
 
   /* ── Perfil ── */
   .prf-cover { height: 130px; }
@@ -1099,9 +1087,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
           <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div>Show / ensaio confirmado</div>
           <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Proposta pendente</div>
         </div>
-        <div id="agenda-day-detail" style="display:none;margin-bottom:20px;background:#0d0d0d;border:1px solid #2e1f55;border-radius:12px;overflow:hidden"></div>
-        <div class="events-title">Próximos eventos</div>
-        <div id="events-list"></div>
+        <div id="agenda-day-detail" style="display:none;margin-top:4px;background:#0d0d0d;border:1px solid #2e1f55;border-radius:12px;overflow:hidden"></div>
       </div>
 
       <div class="view" id="view-descobrir">
@@ -1963,6 +1949,7 @@ function normalizeProposal(p){
     metodo: p.metodo || '—',
     descricao: p.descricao || '—',
     counterMsg: counterMsg,
+    source: 'proposal',
     _raw: p,
   };
 }
@@ -2287,7 +2274,7 @@ function renderCalendar(){
     var hasEvent=conf.indexOf(d)>-1||pend.indexOf(d)>-1;
     if(conf.indexOf(d)>-1) cls+=' cal-confirmed';
     else if(pend.indexOf(d)>-1) cls+=' cal-pending';
-    var click=hasEvent?' onclick="showDayEvents('+calYear+','+calMonth+','+d+')"':'';
+    var click=' onclick="showDayEvents('+calYear+','+calMonth+','+d+')"';
     html+='<div class="'+cls+'"'+click+'>'+d+'</div>';
   }
   document.getElementById('cal-grid').innerHTML=html;
@@ -2301,14 +2288,6 @@ function renderCalendar(){
   var totalAno=confAno.reduce(function(acc,p){return acc+(parseFloat(p.cache)||0);},0);
   document.getElementById('fat-ano-valor').textContent=fmtMoeda(totalAno);
   document.getElementById('fat-ano-sub').textContent=confAno.length+' show(s) acumulado(s) em '+calYear;
-  /* ── Lista de eventos ── */
-  var evts=all.filter(function(p){return (p.status==='confirmed'||p.status==='pending')&&p.mes===calMonth&&p.ano===calYear;}).sort(function(a,b){return a.dia-b.dia;});
-  document.getElementById('events-list').innerHTML=evts.length?evts.map(function(e){
-    var dc=e.status==='confirmed'?'event-day-green':'event-day-amber';
-    var badge=e.status==='confirmed'?'<span class="prop-badge badge-confirmed">Confirmado</span>':'<span class="prop-badge badge-pending">Pendente</span>';
-    var manualBtns=e.manual?'<div style="display:flex;gap:6px;margin-left:8px"><button class="btn btn-negotiate" style="padding:4px 10px;font-size:11px" onclick="editManualEvent('+e.id+')">Editar</button><button class="btn btn-decline" style="padding:4px 10px;font-size:11px" onclick="removeManualEvent('+e.id+')">Remover</button></div>':'';
-    return '<div class="event-card"><div class="event-day-badge '+dc+'">'+e.dia+'</div><div class="event-info"><div class="event-name">'+e.evento+' — '+e.name+'</div><div class="event-meta">'+e.horario+' · '+e.local.split('—')[0].trim()+'</div></div>'+badge+manualBtns+'</div>';
-  }).join(''):'<div class="empty-events">Nenhum evento neste mês</div>';
 }
 function changeMonth(dir){
   calMonth+=dir;
@@ -2320,55 +2299,186 @@ function changeMonth(dir){
 }
 
 var _cancelEventTarget = null; // { id, manual }
+var _panelEditId = null;
 
 function showDayEvents(year,month,day){
   var panel=document.getElementById('agenda-day-detail');
   var key=year+'-'+month+'-'+day;
   if(_selectedCalDay===key){
     _selectedCalDay=null;
+    _panelEditId=null;
     panel.style.display='none';
     return;
   }
   _selectedCalDay=key;
+  _panelEditId=null;
+  _renderDayPanel(year,month,day);
+}
+
+function _renderDayPanel(year,month,day){
+  var panel=document.getElementById('agenda-day-detail');
+  var statusColors={confirmed:'#4ade80',pending:'#fbbf24',negotiating:'#a78bfa'};
+  var statusLabels={confirmed:'Confirmado',pending:'Pendente',negotiating:'Em negociação'};
   var evts=allProposals().filter(function(p){
     return p.dia===day && p.mes===month && p.ano===year &&
            (p.status==='confirmed'||p.status==='pending'||p.status==='negotiating');
   });
-  if(!evts.length){panel.style.display='none';return;}
-  var statusColors={confirmed:'#4ade80',pending:'#fbbf24',negotiating:'#a78bfa'};
-  var statusLabels={confirmed:'Confirmado',pending:'Pendente',negotiating:'Em negociação'};
-  panel.innerHTML=
+
+  var header=
     '<div style="padding:12px 16px;border-bottom:1px solid #1e1e1e;display:flex;align-items:center;justify-content:space-between">' +
       '<span style="font-size:13px;font-weight:600;color:#fff">'+day+' de '+MONTHS_FULL[month]+'</span>' +
-      '<button onclick="document.getElementById(\'agenda-day-detail\').style.display=\'none\';_selectedCalDay=null;" ' +
-              'style="background:none;border:none;color:#555;cursor:pointer;font-size:16px;line-height:1">&#10005;</button>' +
-    '</div>' +
-    evts.map(function(e){
+      '<button onclick="document.getElementById(\'agenda-day-detail\').style.display=\'none\';_selectedCalDay=null;_panelEditId=null;" ' +
+              'style="background:none;border:none;color:#555;cursor:pointer;font-size:16px;line-height:1;padding:2px 4px">&#10005;</button>' +
+    '</div>';
+
+  var body;
+  if(!evts.length){
+    body=
+      '<div style="padding:28px 16px;text-align:center">' +
+        '<div style="font-size:13px;color:#555;margin-bottom:16px">Nenhum evento neste dia.</div>' +
+        '<button onclick="openAddEventModal()" ' +
+          'style="background:transparent;border:1px solid #4c1d95;border-radius:8px;color:#a78bfa;font-size:12px;font-weight:600;padding:8px 20px;cursor:pointer;font-family:inherit;transition:background .15s" ' +
+          'onmouseover="this.style.background=\'#1a0a3a\'" onmouseout="this.style.background=\'transparent\'">+ Adicionar evento</button>' +
+      '</div>';
+  } else {
+    body=evts.map(function(e){
       var sc=statusColors[e.status]||'#888';
       var sl=statusLabels[e.status]||e.status;
-      var isManual=!!e.manual;
-      var cancelBtn='<div style="padding:10px 16px 14px">' +
-        '<button onclick="cancelEventClick(\''+e.id+'\','+isManual+')" ' +
-          'style="background:transparent;border:1px solid #7f1d1d;border-radius:8px;color:#f87171;font-size:12px;font-weight:600;padding:7px 14px;cursor:pointer;font-family:inherit;transition:all .15s" ' +
-          'onmouseover="this.style.background=\'#2a0a0a\'" onmouseout="this.style.background=\'transparent\'">Cancelar evento</button>' +
+      var isManual=(e.source==='manual');
+      var infoGrid=
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+          '<div><div style="font-size:10px;color:#555;margin-bottom:2px">HORÁRIO</div><div style="font-size:13px;color:#ccc">'+(e.horario||'—')+'</div></div>' +
+          '<div><div style="font-size:10px;color:#555;margin-bottom:2px">CACHÊ</div><div style="font-size:13px;color:#c4b5fd;font-weight:600">'+fmtCache(e.cache||0)+'</div></div>' +
+          '<div style="grid-column:1/-1"><div style="font-size:10px;color:#555;margin-bottom:2px">LOCAL</div><div style="font-size:13px;color:#ccc">'+_escHtml(e.local||'—')+'</div></div>' +
+          (!isManual && e.name && e.name!=='(Manual)' ? '<div style="grid-column:1/-1"><div style="font-size:10px;color:#555;margin-bottom:2px">CONTRATANTE</div><div style="font-size:13px;color:#ccc">'+_escHtml(e.name)+'</div></div>' : '') +
         '</div>';
-      return '<div style="border-bottom:1px solid #141414">' +
+      var btns;
+      if(isManual){
+        btns=
+          '<div style="padding:10px 16px 14px;display:flex;gap:8px">' +
+            '<button onclick="openPanelEdit(\''+e.id+'\')" ' +
+              'style="flex:1;background:transparent;border:1px solid #4c1d95;border-radius:8px;color:#a78bfa;font-size:12px;font-weight:600;padding:8px 0;cursor:pointer;font-family:inherit;transition:background .15s" ' +
+              'onmouseover="this.style.background=\'#1a0a3a\'" onmouseout="this.style.background=\'transparent\'">Editar</button>' +
+            '<button onclick="cancelEventClick(\''+e.id+'\',true)" ' +
+              'style="flex:1;background:transparent;border:1px solid #7f1d1d;border-radius:8px;color:#f87171;font-size:12px;font-weight:600;padding:8px 0;cursor:pointer;font-family:inherit;transition:background .15s" ' +
+              'onmouseover="this.style.background=\'#2a0a0a\'" onmouseout="this.style.background=\'transparent\'">Cancelar</button>' +
+          '</div>';
+      } else {
+        btns=
+          '<div style="padding:10px 16px 14px">' +
+            '<button onclick="cancelEventClick(\''+e.id+'\',false)" ' +
+              'style="width:100%;background:transparent;border:1px solid #7f1d1d;border-radius:8px;color:#f87171;font-size:12px;font-weight:600;padding:8px 0;cursor:pointer;font-family:inherit;transition:background .15s" ' +
+              'onmouseover="this.style.background=\'#2a0a0a\'" onmouseout="this.style.background=\'transparent\'">Cancelar evento</button>' +
+          '</div>';
+      }
+      return '<div id="panel-evt-'+e.id+'" style="border-bottom:1px solid #141414">' +
         '<div style="padding:14px 16px 10px">' +
           '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">' +
-            '<span style="font-size:14px;font-weight:600;color:#fff">'+e.evento+'</span>' +
+            '<span style="font-size:14px;font-weight:600;color:#fff">'+_escHtml(e.evento)+'</span>' +
             '<span style="font-size:11px;font-weight:600;color:'+sc+';background:'+sc+'18;border:1px solid '+sc+'44;border-radius:20px;padding:2px 10px">'+sl+'</span>' +
           '</div>' +
-          '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
-            '<div><div style="font-size:10px;color:#555;margin-bottom:2px">HORÁRIO</div><div style="font-size:13px;color:#ccc">'+(e.horario||'—')+'</div></div>' +
-            '<div><div style="font-size:10px;color:#555;margin-bottom:2px">CACHÊ</div><div style="font-size:13px;color:#c4b5fd;font-weight:600">'+fmtCache(e.cache||0)+'</div></div>' +
-            '<div style="grid-column:1/-1"><div style="font-size:10px;color:#555;margin-bottom:2px">LOCAL</div><div style="font-size:13px;color:#ccc">'+e.local+'</div></div>' +
-          '</div>' +
+          infoGrid +
         '</div>' +
-        cancelBtn +
+        btns +
       '</div>';
     }).join('');
+  }
+
+  panel.innerHTML=header+body;
   panel.style.display='block';
   panel.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+function openPanelEdit(id){
+  var ev=allProposals().find(function(e){return String(e.id)===String(id);});
+  if(!ev) return;
+  _panelEditId=id;
+  var wrap=document.getElementById('panel-evt-'+id);
+  if(!wrap) return;
+  var pad=function(n){return String(n).padStart(2,'0');};
+  var dateStr=ev.ano+'-'+pad(ev.mes+1)+'-'+pad(ev.dia);
+  var localVal=ev.local==='Local não informado'?'':ev.local||'';
+  wrap.innerHTML=
+    '<div style="padding:14px 16px 16px">' +
+      '<div style="font-size:11px;font-weight:700;color:#a78bfa;letter-spacing:.5px;margin-bottom:14px">EDITAR EVENTO</div>' +
+      '<div style="display:flex;flex-direction:column;gap:10px">' +
+        '<div>' +
+          '<div style="font-size:10px;color:#555;margin-bottom:4px">TÍTULO *</div>' +
+          '<input id="pe-nome" value="'+_escHtml(ev.evento)+'" ' +
+            'style="width:100%;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:13px;padding:8px 10px;font-family:inherit;box-sizing:border-box">' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
+          '<div>' +
+            '<div style="font-size:10px;color:#555;margin-bottom:4px">DATA *</div>' +
+            '<input id="pe-data" type="date" value="'+dateStr+'" ' +
+              'style="width:100%;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:13px;padding:8px 10px;font-family:inherit;box-sizing:border-box">' +
+          '</div>' +
+          '<div>' +
+            '<div style="font-size:10px;color:#555;margin-bottom:4px">CACHÊ (€)</div>' +
+            '<input id="pe-cache" type="number" min="0" value="'+(ev.cache>0?ev.cache:'')+'" ' +
+              'style="width:100%;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:13px;padding:8px 10px;font-family:inherit;box-sizing:border-box">' +
+          '</div>' +
+          '<div>' +
+            '<div style="font-size:10px;color:#555;margin-bottom:4px">INÍCIO</div>' +
+            '<input id="pe-inicio" type="time" value="'+(ev.time_start||'')+'" ' +
+              'style="width:100%;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:13px;padding:8px 10px;font-family:inherit;box-sizing:border-box">' +
+          '</div>' +
+          '<div>' +
+            '<div style="font-size:10px;color:#555;margin-bottom:4px">FIM</div>' +
+            '<input id="pe-fim" type="time" value="'+(ev.time_end||'')+'" ' +
+              'style="width:100%;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:13px;padding:8px 10px;font-family:inherit;box-sizing:border-box">' +
+          '</div>' +
+        '</div>' +
+        '<div>' +
+          '<div style="font-size:10px;color:#555;margin-bottom:4px">LOCAL</div>' +
+          '<input id="pe-local" value="'+_escHtml(localVal)+'" ' +
+            'style="width:100%;background:#111;border:1px solid #2a2a2a;border-radius:8px;color:#fff;font-size:13px;padding:8px 10px;font-family:inherit;box-sizing:border-box">' +
+        '</div>' +
+      '</div>' +
+      '<div style="display:flex;gap:8px;margin-top:14px">' +
+        '<button onclick="closePanelEdit()" ' +
+          'style="flex:1;background:transparent;border:1px solid #333;border-radius:8px;color:#888;font-size:12px;font-weight:600;padding:9px 0;cursor:pointer;font-family:inherit">Cancelar</button>' +
+        '<button onclick="savePanelEdit(\''+id+'\')" ' +
+          'style="flex:2;background:#4c1d95;border:none;border-radius:8px;color:#fff;font-size:12px;font-weight:600;padding:9px 0;cursor:pointer;font-family:inherit;transition:background .15s" ' +
+          'onmouseover="this.style.background=\'#5b21b6\'" onmouseout="this.style.background=\'#4c1d95\'">Guardar alterações</button>' +
+      '</div>' +
+    '</div>';
+}
+
+function closePanelEdit(){
+  _panelEditId=null;
+  if(_selectedCalDay){
+    var pts=_selectedCalDay.split('-');
+    _renderDayPanel(parseInt(pts[0]),parseInt(pts[1]),parseInt(pts[2]));
+  }
+}
+
+async function savePanelEdit(id){
+  var nome=(document.getElementById('pe-nome').value||'').trim();
+  var dataVal=document.getElementById('pe-data').value;
+  if(!nome){showToast('Título obrigatório','info');return;}
+  if(!dataVal){showToast('Data obrigatória','info');return;}
+  var payload={
+    title:nome,
+    date:dataVal,
+    time_start:document.getElementById('pe-inicio').value||null,
+    time_end:document.getElementById('pe-fim').value||null,
+    location:document.getElementById('pe-local').value.trim()||null,
+    value:parseFloat(document.getElementById('pe-cache').value)||0,
+  };
+  try {
+    var resp=await apiCall('PUT','/api/events/'+id,payload);
+    var updated=normalizeManualEvent(resp.event);
+    var idx=manualEvents.findIndex(function(e){return String(e.id)===String(id);});
+    if(idx>-1) manualEvents[idx]=updated; else manualEvents.push(updated);
+    renderCalendar();
+    _panelEditId=null;
+    _selectedCalDay=updated.ano+'-'+updated.mes+'-'+updated.dia;
+    _renderDayPanel(updated.ano,updated.mes,updated.dia);
+    showToast('✓ Evento atualizado!','success');
+  } catch(e){
+    showToast('Erro ao guardar: '+e.message,'info');
+  }
 }
 
 function cancelEventClick(id, isManual){
@@ -2639,7 +2749,7 @@ function normalizeManualEvent(row){
     metodo:'Evento cadastrado manualmente.',
     descricao:descricao,
     time_start:inicio,time_end:termino,
-    manual:true
+    manual:true,source:'manual'
   };
 }
 
@@ -2674,8 +2784,10 @@ async function removeManualEvent(id){
   } catch(e){ console.warn('[removeManualEvent] API error:',e.message); }
   manualEvents=manualEvents.filter(function(e){return String(e.id)!==String(id);});
   _selectedCalDay=null;
+  _panelEditId=null;
   document.getElementById('agenda-day-detail').style.display='none';
-  renderCalendar();renderHome();
+  renderCalendar();
+  renderHome();
   showToast('Evento removido','info');
 }
 
