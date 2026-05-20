@@ -221,9 +221,10 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .cal-grid{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px}
 .cal-dow{text-align:center;font-size:12px;color:#555;padding:4px 0 10px;font-weight:500}
 .cal-day{text-align:center;padding:7px 4px;border-radius:8px;font-size:13px;color:#666;cursor:pointer;transition:all .15s;min-height:34px;display:flex;align-items:center;justify-content:center}
-.cal-day:hover:not(.cal-empty):not(.cal-confirmed):not(.cal-pending){background:#1e1e1e;color:#ccc}
+.cal-day:hover:not(.cal-empty):not(.cal-confirmed):not(.cal-pending):not(.cal-contractor){background:#1e1e1e;color:#ccc}
 .cal-empty{cursor:default}
 .cal-confirmed{background:#1a3326;color:#4ade80;font-weight:600}
+.cal-contractor{background:#1e1535;color:#a78bfa;font-weight:600}
 .cal-pending{background:#2e2510;color:#fbbf24;font-weight:600}
 .cal-legend{display:flex;align-items:center;gap:20px;margin-bottom:20px;flex-wrap:wrap}
 .legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:#888}
@@ -1063,15 +1064,15 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
             Adicionar Evento
           </button>
         </div>
-        <div class="ganhos-row">
+        <div class="ganhos-row" id="fat-row">
           <div class="faturamento-widget">
-            <div class="fat-label">Total do Mês</div>
-            <div class="fat-value" id="fat-mes-valor">R$ 0,00</div>
+            <div class="fat-label" id="fat-mes-label">Total do Mês</div>
+            <div class="fat-value" id="fat-mes-valor">€ 0,00</div>
             <div class="fat-sub" id="fat-mes-sub">0 show(s) confirmado(s)</div>
           </div>
           <div class="faturamento-widget anual">
-            <div class="fat-label">Total do Ano</div>
-            <div class="fat-value" id="fat-ano-valor">R$ 0,00</div>
+            <div class="fat-label" id="fat-ano-label">Total do Ano</div>
+            <div class="fat-value" id="fat-ano-valor">€ 0,00</div>
             <div class="fat-sub" id="fat-ano-sub">Total acumulado</div>
           </div>
         </div>
@@ -1083,9 +1084,11 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
           </div>
           <div class="cal-grid" id="cal-grid"></div>
         </div>
-        <div class="cal-legend">
-          <div class="legend-item"><div class="legend-dot" style="background:#4ade80"></div>Show / ensaio confirmado</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#fbbf24"></div>Proposta pendente</div>
+        <div class="cal-legend" id="cal-legend">
+          <div class="legend-item" id="leg-musician" style="display:none"><div class="legend-dot" style="background:#4ade80"></div>Show confirmado</div>
+          <div class="legend-item" id="leg-contractor" style="display:none"><div class="legend-dot" style="background:#a78bfa"></div>Compromisso confirmado</div>
+          <div class="legend-item" id="leg-pending" style="display:none"><div class="legend-dot" style="background:#fbbf24"></div>Pendente / Negociação</div>
+          <div class="legend-item" id="leg-manual" style="display:none"><div class="legend-dot" style="background:#4ade80;opacity:.5"></div>Evento manual</div>
         </div>
         <div id="agenda-day-detail" style="display:none;margin-top:4px;background:#0d0d0d;border:1px solid #2e1f55;border-radius:12px;overflow:hidden"></div>
       </div>
@@ -2140,32 +2143,43 @@ async function markNotifRead(id, el){
 
 function renderHome(){
   var all=allProposals();
-  var nx=all.filter(function(p){
+  var isPureContractor=(userProfile.role==='contractor');
+  // "Próximo show": para músico = onde está como performer; para contratante = qualquer
+  var upcoming=all.filter(function(p){
     if(p.status!=='confirmed') return false;
+    if(!isPureContractor && p.iAmContractor) return false; // músico não quer ver os seus como contratante aqui
     return new Date(p.ano,p.mes,p.dia)>=TODAY;
-  }).sort(function(a,b){return new Date(a.ano,a.mes,a.dia)-new Date(b.ano,b.mes,b.dia);})[0]||null;
+  }).sort(function(a,b){return new Date(a.ano,a.mes,a.dia)-new Date(b.ano,b.mes,b.dia);});
+  var nx=upcoming[0]||null;
   var proxEl=document.getElementById('home-proximo');
+  var nextLabel = isPureContractor ? 'Próximo compromisso' : 'Próximo show';
   if(nx){
     proxEl.innerHTML='<div class="next-show-card">'+
       '<div class="next-show-date"><div class="next-show-day">'+String(nx.dia).padStart(2,'0')+'</div><div class="next-show-month">'+MONTHS_SHORT[nx.mes]+'</div></div>'+
-      '<div class="next-show-body"><div class="next-show-label">Sua próxima agenda</div>'+
-      '<div class="next-show-title">'+nx.evento+'</div>'+
+      '<div class="next-show-body"><div class="next-show-label">'+nextLabel+'</div>'+
+      '<div class="next-show-title">'+_escHtml(nx.evento)+'</div>'+
       '<div class="next-show-meta">'+
-        '<div class="nsm-item"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5"><circle cx="8" cy="7" r="3.5"/><path d="M8 13.5S3 9.2 3 6.5a5 5 0 0110 0c0 2.7-5 7-5 7z"/></svg>'+nx.local.split('—')[0].trim()+'</div>'+
+        '<div class="nsm-item"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5"><circle cx="8" cy="7" r="3.5"/><path d="M8 13.5S3 9.2 3 6.5a5 5 0 0110 0c0 2.7-5 7-5 7z"/></svg>'+(nx.local||'').split('—')[0].trim()+'</div>'+
         '<div class="nsm-item"><svg width="12" height="12" viewBox="0 0 16 16" fill="none" stroke="#888" stroke-width="1.5"><circle cx="8" cy="8" r="6"/><path d="M8 5v3.5l2 2"/></svg>'+nx.horario+'</div>'+
         '<div class="nsm-item" style="color:#666">'+nx.repertorio+'</div>'+
       '</div></div>'+
     '</div>';
   } else {
-    proxEl.innerHTML='<div class="empty-home"><div class="empty-home-icon">&#127925;</div><div class="empty-home-text">Nenhum show marcado para os próximos dias.</div><div class="empty-home-sub">Que tal descobrir novos músicos e fechar novos trabalhos?</div></div>';
+    var emptyMsg = isPureContractor ? 'Nenhum compromisso marcado.' : 'Nenhum show marcado para os próximos dias.';
+    var emptySub = isPureContractor ? 'Envie propostas para músicos disponíveis.' : 'Que tal descobrir novos músicos e fechar novos trabalhos?';
+    proxEl.innerHTML='<div class="empty-home"><div class="empty-home-icon">'+(isPureContractor?'📋':'🎵')+'</div><div class="empty-home-text">'+emptyMsg+'</div><div class="empty-home-sub">'+emptySub+'</div></div>';
   }
+  // Estatísticas: separar papel de músico do de contratante
   var pendCount=proposals.filter(function(p){return p.status==='pending';}).length;
-  var confCount=proposals.filter(function(p){return p.status==='confirmed';}).length;
-  var negCount=proposals.filter(function(p){return p.status==='negotiating';}).length;
+  var confCount=proposals.filter(function(p){return p.status==='confirmed'&&!p.iAmContractor;}).length;
+  var negCount =proposals.filter(function(p){return p.status==='negotiating';}).length;
+  var confLabel    = isPureContractor ? 'Confirmados' : 'Shows confirmados';
+  var confHint     = isPureContractor ? 'Comprometidos' : 'Na agenda';
+  var confColor    = isPureContractor ? '#a78bfa' : '#4ade80';
   document.getElementById('home-stats').innerHTML=
     '<div class="home-stat"><div class="home-stat-label">Pendentes</div><div class="home-stat-num">'+pendCount+'</div><div class="home-stat-hint" style="color:#fbbf24">Aguardando resposta</div></div>'+
     '<div class="home-stat"><div class="home-stat-label">Em negociação</div><div class="home-stat-num">'+negCount+'</div><div class="home-stat-hint" style="color:#818cf8">Contrapropostas</div></div>'+
-    '<div class="home-stat"><div class="home-stat-label">Confirmados</div><div class="home-stat-num">'+confCount+'</div><div class="home-stat-hint" style="color:#4ade80">Na agenda</div></div>';
+    '<div class="home-stat"><div class="home-stat-label">'+confLabel+'</div><div class="home-stat-num">'+confCount+'</div><div class="home-stat-hint" style="color:'+confColor+'">'+confHint+'</div></div>';
   var pending=proposals.filter(function(p){return p.status==='pending';});
   var notifsEl=document.getElementById('home-notifs');
   if(pending.length){
@@ -2349,31 +2363,74 @@ async function setFilter(f,el){
 function renderCalendar(){
   var all=allProposals();
   document.getElementById('cal-month-label').textContent=MONTHS_FULL[calMonth]+' '+calYear;
-  var conf=all.filter(function(p){return p.status==='confirmed'&&p.mes===calMonth&&p.ano===calYear;}).map(function(p){return p.dia;});
-  var pend=all.filter(function(p){return p.status==='pending'&&p.mes===calMonth&&p.ano===calYear;}).map(function(p){return p.dia;});
+
+  // Separa confirmados por papel: músico (verde) vs contratante (roxo)
+  var confMusician   = all.filter(function(p){ return p.status==='confirmed' && !p.iAmContractor && p.mes===calMonth && p.ano===calYear; }).map(function(p){ return p.dia; });
+  var confContractor = all.filter(function(p){ return p.status==='confirmed' && p.iAmContractor  && p.mes===calMonth && p.ano===calYear; }).map(function(p){ return p.dia; });
+  var pend           = all.filter(function(p){ return (p.status==='pending'||p.status==='negotiating') && p.mes===calMonth && p.ano===calYear; }).map(function(p){ return p.dia; });
+
   var firstDay=new Date(calYear,calMonth,1).getDay();
   var daysInMonth=new Date(calYear,calMonth+1,0).getDate();
   var html=['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'].map(function(d){return '<div class="cal-dow">'+d+'</div>';}).join('');
   for(var i=0;i<firstDay;i++) html+='<div class="cal-day cal-empty"></div>';
   for(var d=1;d<=daysInMonth;d++){
     var cls='cal-day';
-    var hasEvent=conf.indexOf(d)>-1||pend.indexOf(d)>-1;
-    if(conf.indexOf(d)>-1) cls+=' cal-confirmed';
-    else if(pend.indexOf(d)>-1) cls+=' cal-pending';
+    // Prioridade: músico (verde) > contratante (roxo) > pendente (âmbar)
+    if(confMusician.indexOf(d)>-1)        cls+=' cal-confirmed';
+    else if(confContractor.indexOf(d)>-1) cls+=' cal-contractor';
+    else if(pend.indexOf(d)>-1)           cls+=' cal-pending';
     var click=' onclick="showDayEvents('+calYear+','+calMonth+','+d+')"';
     html+='<div class="'+cls+'"'+click+'>'+d+'</div>';
   }
   document.getElementById('cal-grid').innerHTML=html;
-  /* ── Faturamento: Total do Mês e Total do Ano ── */
+
+  /* ── Faturamento: só conta onde o utilizador é o MÚSICO que recebe ── */
   var fmtMoeda=function(v){return '€ '+v.toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});};
-  var confMes=all.filter(function(p){return p.status==='confirmed'&&p.mes===calMonth&&p.ano===calYear;});
-  var totalMes=confMes.reduce(function(acc,p){return acc+(parseFloat(p.cache)||0);},0);
+  var earnerMes = all.filter(function(p){ return p.status==='confirmed' && !p.iAmContractor && p.mes===calMonth && p.ano===calYear; });
+  var earnerAno = all.filter(function(p){ return p.status==='confirmed' && !p.iAmContractor && p.ano===calYear; });
+  var totalMes  = earnerMes.reduce(function(acc,p){ return acc+(parseFloat(p.cache)||0); }, 0);
+  var totalAno  = earnerAno.reduce(function(acc,p){ return acc+(parseFloat(p.cache)||0); }, 0);
+
+  // Labels adaptativos: contratante puro vê "comprometido", músico vê cachê
+  var isPureContractor = (userProfile.role==='contractor');
+  var mesLabel = isPureContractor ? 'Comprometido (mês)' : 'Cachê do Mês';
+  var anoLabel = isPureContractor ? 'Comprometido (ano)' : 'Cachê do Ano';
+  var showsLabel = isPureContractor ? 'evento(s) confirmado(s)' : 'show(s) confirmado(s)';
+  // Para contratante: somar o que prometeu pagar
+  if(isPureContractor){
+    var payMes = all.filter(function(p){ return p.status==='confirmed' && p.iAmContractor && p.mes===calMonth && p.ano===calYear; });
+    var payAno = all.filter(function(p){ return p.status==='confirmed' && p.iAmContractor && p.ano===calYear; });
+    totalMes = payMes.reduce(function(acc,p){ return acc+(parseFloat(p.cache)||0); }, 0);
+    totalAno = payAno.reduce(function(acc,p){ return acc+(parseFloat(p.cache)||0); }, 0);
+    document.getElementById('fat-mes-sub').textContent=payMes.length+' '+showsLabel+' em '+MONTHS_SHORT[calMonth];
+    document.getElementById('fat-ano-sub').textContent=payAno.length+' '+showsLabel+' em '+calYear;
+  } else {
+    document.getElementById('fat-mes-sub').textContent=earnerMes.length+' '+showsLabel+' em '+MONTHS_SHORT[calMonth];
+    document.getElementById('fat-ano-sub').textContent=earnerAno.length+' '+showsLabel+' em '+calYear;
+  }
+  var mesEl=document.getElementById('fat-mes-label');
+  var anoEl=document.getElementById('fat-ano-label');
+  if(mesEl) mesEl.textContent=mesLabel;
+  if(anoEl) anoEl.textContent=anoLabel;
   document.getElementById('fat-mes-valor').textContent=fmtMoeda(totalMes);
-  document.getElementById('fat-mes-sub').textContent=confMes.length+' show(s) confirmado(s) em '+MONTHS_SHORT[calMonth];
-  var confAno=all.filter(function(p){return p.status==='confirmed'&&p.ano===calYear;});
-  var totalAno=confAno.reduce(function(acc,p){return acc+(parseFloat(p.cache)||0);},0);
   document.getElementById('fat-ano-valor').textContent=fmtMoeda(totalAno);
-  document.getElementById('fat-ano-sub').textContent=confAno.length+' show(s) acumulado(s) em '+calYear;
+
+  /* ── Legenda dinâmica ── */
+  var hasMusician   = all.some(function(p){ return p.status==='confirmed' && !p.iAmContractor && p.mes===calMonth && p.ano===calYear; });
+  var hasContractor = all.some(function(p){ return p.status==='confirmed' && p.iAmContractor  && p.mes===calMonth && p.ano===calYear; });
+  var hasPending    = all.some(function(p){ return (p.status==='pending'||p.status==='negotiating') && p.mes===calMonth && p.ano===calYear; });
+  var hasManual     = all.some(function(p){ return p.source==='manual' && p.mes===calMonth && p.ano===calYear; });
+  var legM=document.getElementById('leg-musician');
+  var legC=document.getElementById('leg-contractor');
+  var legP=document.getElementById('leg-pending');
+  var legMn=document.getElementById('leg-manual');
+  if(legM)  legM.style.display  = hasMusician   ? 'flex' : 'none';
+  if(legC)  legC.style.display  = hasContractor ? 'flex' : 'none';
+  if(legP)  legP.style.display  = hasPending    ? 'flex' : 'none';
+  if(legMn) legMn.style.display = hasManual     ? 'flex' : 'none';
+  // Sempre mostrar a legenda principal do papel do utilizador mesmo sem eventos
+  if(legM  && !isPureContractor) legM.style.display  = 'flex';
+  if(legC  && isPureContractor)  legC.style.display  = 'flex';
 }
 function changeMonth(dir){
   calMonth+=dir;
@@ -2404,7 +2461,7 @@ function showDayEvents(year,month,day){
 function _renderDayPanel(year,month,day){
   var panel=document.getElementById('agenda-day-detail');
   var statusColors={confirmed:'#4ade80',pending:'#fbbf24',negotiating:'#a78bfa'};
-  var statusLabels={confirmed:'Confirmado',pending:'Pendente',negotiating:'Em negociação'};
+  var statusLabels={confirmed:'Confirmado',pending:'Pendente',negotiating:'Em negociação',contractor_confirmed:'Confirmado (contratante)'};
   var evts=allProposals().filter(function(p){
     return p.dia===day && p.mes===month && p.ano===year &&
            (p.status==='confirmed'||p.status==='pending'||p.status==='negotiating');
@@ -2429,14 +2486,21 @@ function _renderDayPanel(year,month,day){
   } else {
     body=evts.map(function(e){
       var sc=statusColors[e.status]||'#888';
-      var sl=statusLabels[e.status]||e.status;
+      // Cor e label adaptados ao papel: roxo para compromisso de contratante
+      var sc = (e.iAmContractor && e.status==='confirmed') ? '#a78bfa' : (statusColors[e.status]||'#888');
+      var sl = (e.iAmContractor && e.status==='confirmed') ? 'Compromisso' : (statusLabels[e.status]||e.status);
       var isManual=(e.source==='manual');
+      // Label da coluna de cachê: "CACHÊ" para músico/manual, "VALOR" para contratante
+      var cacheLabel = e.iAmContractor ? 'VALOR' : 'CACHÊ';
+      // Label da "outra parte" no painel
+      var partyLabel = e.iAmContractor ? 'MÚSICO' : (isManual ? '' : 'CONTRATANTE');
+      var partyName  = e.iAmContractor ? _escHtml(e.musicianName||e.name||'') : _escHtml(e.name||'');
       var infoGrid=
         '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">' +
           '<div><div style="font-size:10px;color:#555;margin-bottom:2px">HORÁRIO</div><div style="font-size:13px;color:#ccc">'+(e.horario||'—')+'</div></div>' +
-          '<div><div style="font-size:10px;color:#555;margin-bottom:2px">CACHÊ</div><div style="font-size:13px;color:#c4b5fd;font-weight:600">'+fmtCache(e.cache||0)+'</div></div>' +
+          '<div><div style="font-size:10px;color:#555;margin-bottom:2px">'+cacheLabel+'</div><div style="font-size:13px;color:#c4b5fd;font-weight:600">'+fmtCache(e.cache||0)+'</div></div>' +
           '<div style="grid-column:1/-1"><div style="font-size:10px;color:#555;margin-bottom:2px">LOCAL</div><div style="font-size:13px;color:#ccc">'+_escHtml(e.local||'—')+'</div></div>' +
-          (!isManual && e.name && e.name!=='(Manual)' ? '<div style="grid-column:1/-1"><div style="font-size:10px;color:#555;margin-bottom:2px">CONTRATANTE</div><div style="font-size:13px;color:#ccc">'+_escHtml(e.name)+'</div></div>' : '') +
+          (partyLabel && partyName ? '<div style="grid-column:1/-1"><div style="font-size:10px;color:#555;margin-bottom:2px">'+partyLabel+'</div><div style="font-size:13px;color:#ccc">'+partyName+'</div></div>' : '') +
         '</div>';
       var btns;
       if(isManual){
