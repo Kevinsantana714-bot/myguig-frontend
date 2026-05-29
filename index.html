@@ -99,6 +99,27 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .btn-register:hover{border-color:#555;color:#fff}
 .login-terms{font-size:12px;color:#555;text-align:center;margin-top:4px}
 .login-terms a{color:#a78bfa;text-decoration:underline;cursor:pointer}
+.login-forgot{font-size:12px;color:#666;text-align:right;margin-top:-8px;margin-bottom:0}
+.login-forgot a{color:#a78bfa;cursor:pointer;text-decoration:none}
+.login-forgot a:hover{text-decoration:underline}
+
+/* ── Modais Recuperação / Redefinição de Senha ── */
+.pw-modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.pw-modal{background:#141414;border:1px solid #252525;border-radius:14px;padding:32px;width:100%;max-width:400px;animation:fadeInUp .25s ease both}
+.pw-modal-title{font-size:18px;font-weight:700;color:#fff;margin-bottom:6px}
+.pw-modal-sub{font-size:13px;color:#666;margin-bottom:24px;line-height:1.5}
+.pw-field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+.pw-label{font-size:12px;color:#999;font-weight:500;text-transform:uppercase;letter-spacing:.4px}
+.pw-input{background:#0e0e0e;border:1px solid #252525;border-radius:8px;padding:11px 14px;color:#fff;font-size:14px;font-family:inherit;outline:none;transition:border-color .15s;width:100%;box-sizing:border-box}
+.pw-input:focus{border-color:#7B52F0}
+.pw-input.error{border-color:#f87171}
+.pw-error{font-size:12px;color:#f87171;margin-top:-10px;margin-bottom:4px;min-height:16px}
+.pw-success{font-size:13px;color:#4ade80;background:#0d2016;border:1px solid #1a3326;border-radius:8px;padding:12px 14px;margin-bottom:16px;line-height:1.5}
+.pw-btn{width:100%;background:#7B52F0;border:none;border-radius:8px;padding:13px;color:#fff;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s}
+.pw-btn:hover{background:#6940e0}
+.pw-btn:disabled{opacity:.5;cursor:default}
+.pw-btn-ghost{width:100%;background:none;border:1px solid #252525;border-radius:8px;padding:11px;color:#888;font-size:13px;cursor:pointer;font-family:inherit;margin-top:10px;transition:all .15s}
+.pw-btn-ghost:hover{border-color:#444;color:#ccc}
 
 /* Animação de entrada */
 @keyframes fadeInUp{
@@ -932,6 +953,8 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
           onkeydown="if(event.key==='Enter')handleLogin()">
       </div>
 
+      <div class="login-forgot"><a onclick="openForgotModal()">Esqueceste a senha?</a></div>
+
       <div class="login-error-msg" id="login-error"></div>
 
       <button class="btn-login" onclick="handleLogin()">Entrar</button>
@@ -946,6 +969,48 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 
       <p class="login-terms">Ao entrar você concorda com os <a onclick="showToast('Termos em breve!','info')">Termos de uso</a></p>
     </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL — ESQUECI A SENHA
+══════════════════════════════════════════ -->
+<div id="forgot-modal" class="pw-modal-overlay" style="display:none" onclick="if(event.target===this)closeForgotModal()">
+  <div class="pw-modal">
+    <div class="pw-modal-title">Recuperar senha</div>
+    <div class="pw-modal-sub">Introduz o teu e-mail e enviaremos um link para redefinires a senha.</div>
+    <div id="forgot-success" class="pw-success" style="display:none"></div>
+    <div class="pw-field">
+      <label class="pw-label">E-mail</label>
+      <input class="pw-input" id="forgot-email" type="email" placeholder="seu@email.com"
+        onkeydown="if(event.key==='Enter')handleForgotPassword()">
+    </div>
+    <div class="pw-error" id="forgot-error"></div>
+    <button class="pw-btn" id="forgot-btn" onclick="handleForgotPassword()">Enviar link de recuperação</button>
+    <button class="pw-btn-ghost" onclick="closeForgotModal()">Cancelar</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODAL — REDEFINIR SENHA
+══════════════════════════════════════════ -->
+<div id="reset-modal" class="pw-modal-overlay" style="display:none">
+  <div class="pw-modal">
+    <div class="pw-modal-title">Nova senha</div>
+    <div class="pw-modal-sub">Define a tua nova senha. Deve ter pelo menos 8 caracteres.</div>
+    <div id="reset-success" class="pw-success" style="display:none"></div>
+    <div class="pw-field">
+      <label class="pw-label">Nova senha</label>
+      <input class="pw-input" id="reset-pass1" type="password" placeholder="Mínimo 8 caracteres"
+        onkeydown="if(event.key==='Enter')document.getElementById('reset-pass2').focus()">
+    </div>
+    <div class="pw-field">
+      <label class="pw-label">Confirmar nova senha</label>
+      <input class="pw-input" id="reset-pass2" type="password" placeholder="Repete a senha"
+        onkeydown="if(event.key==='Enter')handleResetPassword()">
+    </div>
+    <div class="pw-error" id="reset-error"></div>
+    <button class="pw-btn" id="reset-btn" onclick="handleResetPassword()">Confirmar nova senha</button>
   </div>
 </div>
 
@@ -1883,8 +1948,125 @@ async function _migrateBase64Avatar(dataUrl){
   }
 }
 
+/* ══════════════════════════════════════════
+   RECUPERAÇÃO DE SENHA — Forgot / Reset
+══════════════════════════════════════════ */
+
+function openForgotModal(){
+  document.getElementById('forgot-email').value = document.getElementById('login-email').value || '';
+  document.getElementById('forgot-error').textContent = '';
+  document.getElementById('forgot-success').style.display = 'none';
+  document.getElementById('forgot-btn').disabled = false;
+  document.getElementById('forgot-modal').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('forgot-email').focus(); }, 80);
+}
+
+function closeForgotModal(){
+  document.getElementById('forgot-modal').style.display = 'none';
+}
+
+async function handleForgotPassword(){
+  var email = (document.getElementById('forgot-email').value || '').trim();
+  var errEl = document.getElementById('forgot-error');
+  var sucEl = document.getElementById('forgot-success');
+  var btn   = document.getElementById('forgot-btn');
+
+  errEl.textContent = '';
+  sucEl.style.display = 'none';
+
+  if(!email){ errEl.textContent = 'Introduz o teu e-mail.'; return; }
+  if(!/\S+@\S+\.\S+/.test(email)){ errEl.textContent = 'E-mail inválido.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'A enviar…';
+  try {
+    await fetch(API + '/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: email }),
+    });
+    // Sempre mostra sucesso (não revela se o email existe)
+    sucEl.textContent = 'Se este e-mail estiver registado, receberás um link em breve. Verifica também a pasta de spam.';
+    sucEl.style.display = 'block';
+    btn.style.display = 'none';
+  } catch(e) {
+    errEl.textContent = 'Erro de rede. Tenta novamente.';
+    btn.disabled = false;
+    btn.textContent = 'Enviar link de recuperação';
+  }
+}
+
+var _resetToken = null; // token lido do URL
+
+function openResetModal(token){
+  _resetToken = token;
+  document.getElementById('reset-pass1').value = '';
+  document.getElementById('reset-pass2').value = '';
+  document.getElementById('reset-error').textContent = '';
+  document.getElementById('reset-success').style.display = 'none';
+  document.getElementById('reset-btn').disabled = false;
+  document.getElementById('reset-btn').textContent = 'Confirmar nova senha';
+  document.getElementById('reset-modal').style.display = 'flex';
+  setTimeout(function(){ document.getElementById('reset-pass1').focus(); }, 80);
+}
+
+async function handleResetPassword(){
+  var p1    = document.getElementById('reset-pass1').value;
+  var p2    = document.getElementById('reset-pass2').value;
+  var errEl = document.getElementById('reset-error');
+  var sucEl = document.getElementById('reset-success');
+  var btn   = document.getElementById('reset-btn');
+
+  errEl.textContent = '';
+  sucEl.style.display = 'none';
+
+  if(!p1)        { errEl.textContent = 'Introduz a nova senha.'; return; }
+  if(p1.length < 8){ errEl.textContent = 'A senha deve ter pelo menos 8 caracteres.'; return; }
+  if(p1 !== p2)  { errEl.textContent = 'As senhas não coincidem.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'A guardar…';
+  try {
+    var r    = await fetch(API + '/auth/reset-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ token: _resetToken, new_password: p1 }),
+    });
+    var json = await r.json();
+    if(!r.ok) throw new Error(json.error || 'Erro desconhecido.');
+
+    // Limpa o token do URL sem recarregar a página
+    var clean = window.location.pathname + window.location.hash;
+    window.history.replaceState({}, '', clean);
+
+    sucEl.textContent = '✓ Senha alterada com sucesso! Podes fazer login agora.';
+    sucEl.style.display = 'block';
+    btn.style.display = 'none';
+
+    // Fecha modal e vai para login após 2 s
+    setTimeout(function(){
+      document.getElementById('reset-modal').style.display = 'none';
+      _resetToken = null;
+    }, 2200);
+  } catch(e) {
+    errEl.textContent = e.message;
+    btn.disabled = false;
+    btn.textContent = 'Confirmar nova senha';
+  }
+}
+
 /* ── Verifica token ao carregar ── */
 (async function(){
+  // 1. Detetar reset_token no URL → abrir modal de redefinição
+  var urlParams   = new URLSearchParams(window.location.search);
+  var resetToken  = urlParams.get('reset_token');
+  if(resetToken){
+    openResetModal(resetToken);
+    // Não auto-logar; mostra o ecrã de login por baixo
+    return;
+  }
+
+  // 2. Auto-login se tiver JWT válido
   var token = getToken();
   if(!token) return;
   try {
