@@ -120,6 +120,18 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .pw-btn:disabled{opacity:.5;cursor:default}
 .pw-btn-ghost{width:100%;background:none;border:1px solid #252525;border-radius:8px;padding:11px;color:#888;font-size:13px;cursor:pointer;font-family:inherit;margin-top:10px;transition:all .15s}
 .pw-btn-ghost:hover{border-color:#444;color:#ccc}
+.pw-code-row{display:flex;gap:10px;justify-content:center;margin:4px 0 6px}
+.pw-code-inp{width:44px;height:52px;background:#0e0e0e;border:1px solid #2a2a2a;border-radius:10px;color:#a78bfa;font-size:22px;font-weight:700;text-align:center;outline:none;caret-color:#a78bfa;transition:border-color .15s;font-family:inherit}
+.pw-code-inp:focus{border-color:#7B52F0;background:#0b0918}
+.pw-timer{font-size:12px;color:#555;text-align:center;margin-top:10px}
+.pw-timer strong{color:#888}
+.pw-resend{font-size:12px;color:#555;text-align:center;margin-top:6px}
+.pw-resend a{color:#a78bfa;cursor:pointer;text-decoration:none}
+.pw-resend a:hover{text-decoration:underline}
+.pw-eye{position:relative}
+.pw-eye .pw-input{padding-right:40px}
+.pw-eye-btn{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:#555;cursor:pointer;padding:0;line-height:1;font-size:16px}
+.pw-eye-btn:hover{color:#aaa}
 
 /* Animação de entrada */
 @keyframes fadeInUp{
@@ -975,42 +987,70 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 <!-- ══════════════════════════════════════════
      MODAL — ESQUECI A SENHA
 ══════════════════════════════════════════ -->
+<!-- ══════════════════════════════════════════
+     MODAL — RECUPERAÇÃO DE SENHA (3 passos)
+══════════════════════════════════════════ -->
 <div id="forgot-modal" class="pw-modal-overlay" style="display:none" onclick="if(event.target===this)closeForgotModal()">
   <div class="pw-modal">
-    <div class="pw-modal-title">Recuperar senha</div>
-    <div class="pw-modal-sub">Introduz o teu e-mail e enviaremos um link para redefinires a senha.</div>
-    <div id="forgot-success" class="pw-success" style="display:none"></div>
-    <div class="pw-field">
-      <label class="pw-label">E-mail</label>
-      <input class="pw-input" id="forgot-email" type="email" placeholder="seu@email.com"
-        onkeydown="if(event.key==='Enter')handleForgotPassword()">
-    </div>
-    <div class="pw-error" id="forgot-error"></div>
-    <button class="pw-btn" id="forgot-btn" onclick="handleForgotPassword()">Enviar link de recuperação</button>
-    <button class="pw-btn-ghost" onclick="closeForgotModal()">Cancelar</button>
-  </div>
-</div>
 
-<!-- ══════════════════════════════════════════
-     MODAL — REDEFINIR SENHA
-══════════════════════════════════════════ -->
-<div id="reset-modal" class="pw-modal-overlay" style="display:none">
-  <div class="pw-modal">
-    <div class="pw-modal-title">Nova senha</div>
-    <div class="pw-modal-sub">Define a tua nova senha. Deve ter pelo menos 8 caracteres.</div>
-    <div id="reset-success" class="pw-success" style="display:none"></div>
-    <div class="pw-field">
-      <label class="pw-label">Nova senha</label>
-      <input class="pw-input" id="reset-pass1" type="password" placeholder="Mínimo 8 caracteres"
-        onkeydown="if(event.key==='Enter')document.getElementById('reset-pass2').focus()">
+    <!-- PASSO 1 — Email -->
+    <div id="fw-step1">
+      <div class="pw-modal-title">Recuperar senha</div>
+      <div class="pw-modal-sub">Introduz o teu e-mail e enviaremos um código de 6 dígitos.</div>
+      <div class="pw-field">
+        <label class="pw-label">E-mail</label>
+        <input class="pw-input" id="fw-email" type="email" placeholder="seu@email.com"
+          onkeydown="if(event.key==='Enter')handleForgotPassword()">
+      </div>
+      <div class="pw-error" id="fw-err1"></div>
+      <button class="pw-btn" id="fw-btn1" onclick="handleForgotPassword()">Enviar código</button>
+      <button class="pw-btn-ghost" onclick="closeForgotModal()">Cancelar</button>
     </div>
-    <div class="pw-field">
-      <label class="pw-label">Confirmar nova senha</label>
-      <input class="pw-input" id="reset-pass2" type="password" placeholder="Repete a senha"
-        onkeydown="if(event.key==='Enter')handleResetPassword()">
+
+    <!-- PASSO 2 — Código -->
+    <div id="fw-step2" style="display:none">
+      <div class="pw-modal-title">Código de verificação</div>
+      <div class="pw-modal-sub" id="fw-sub2">Enviámos um código de 6 dígitos para o teu e-mail.</div>
+      <div class="pw-code-row">
+        <input class="pw-code-inp" id="fw-c0" maxlength="1" inputmode="numeric" autocomplete="one-time-code"
+          oninput="fwCodeInput(this,0)" onkeydown="fwCodeKey(event,0)" onpaste="fwCodePaste(event)">
+        <input class="pw-code-inp" id="fw-c1" maxlength="1" inputmode="numeric"
+          oninput="fwCodeInput(this,1)" onkeydown="fwCodeKey(event,1)">
+        <input class="pw-code-inp" id="fw-c2" maxlength="1" inputmode="numeric"
+          oninput="fwCodeInput(this,2)" onkeydown="fwCodeKey(event,2)">
+        <input class="pw-code-inp" id="fw-c3" maxlength="1" inputmode="numeric"
+          oninput="fwCodeInput(this,3)" onkeydown="fwCodeKey(event,3)">
+        <input class="pw-code-inp" id="fw-c4" maxlength="1" inputmode="numeric"
+          oninput="fwCodeInput(this,4)" onkeydown="fwCodeKey(event,4)">
+        <input class="pw-code-inp" id="fw-c5" maxlength="1" inputmode="numeric"
+          oninput="fwCodeInput(this,5)" onkeydown="fwCodeKey(event,5)">
+      </div>
+      <div class="pw-error" id="fw-err2"></div>
+      <div class="pw-timer">Expira em <strong id="fw-timer">15:00</strong></div>
+      <div class="pw-resend">Não recebeste? <a onclick="handleResendCode()">Reenviar código</a></div>
+      <button class="pw-btn" style="margin-top:18px" id="fw-btn2" onclick="handleVerifyCode()">Continuar</button>
     </div>
-    <div class="pw-error" id="reset-error"></div>
-    <button class="pw-btn" id="reset-btn" onclick="handleResetPassword()">Confirmar nova senha</button>
+
+    <!-- PASSO 3 — Nova senha -->
+    <div id="fw-step3" style="display:none">
+      <div class="pw-modal-title">Nova senha</div>
+      <div class="pw-modal-sub">Define a tua nova senha. Deve ter pelo menos 8 caracteres.</div>
+      <div class="pw-field pw-eye">
+        <label class="pw-label">Nova senha</label>
+        <input class="pw-input" id="fw-pass1" type="password" placeholder="Mínimo 8 caracteres"
+          onkeydown="if(event.key==='Enter')document.getElementById('fw-pass2').focus()">
+        <button class="pw-eye-btn" type="button" onclick="fwToggleEye('fw-pass1',this)" tabindex="-1">👁</button>
+      </div>
+      <div class="pw-field pw-eye">
+        <label class="pw-label">Confirmar nova senha</label>
+        <input class="pw-input" id="fw-pass2" type="password" placeholder="Repete a senha"
+          onkeydown="if(event.key==='Enter')handleResetPassword()">
+        <button class="pw-eye-btn" type="button" onclick="fwToggleEye('fw-pass2',this)" tabindex="-1">👁</button>
+      </div>
+      <div class="pw-error" id="fw-err3"></div>
+      <button class="pw-btn" id="fw-btn3" onclick="handleResetPassword()">Redefinir senha</button>
+    </div>
+
   </div>
 </div>
 
@@ -1949,124 +1989,181 @@ async function _migrateBase64Avatar(dataUrl){
 }
 
 /* ══════════════════════════════════════════
-   RECUPERAÇÃO DE SENHA — Forgot / Reset
+   RECUPERAÇÃO DE SENHA — Fluxo 3 passos
 ══════════════════════════════════════════ */
 
+var _fwEmail        = '';   // email guardado entre passos
+var _fwTimerSecs    = 0;    // segundos restantes no countdown
+var _fwTimerHandle  = null; // setInterval handle
+
+/* ── Helpers de navegação entre passos ── */
+function _fwShow(step){
+  ['fw-step1','fw-step2','fw-step3'].forEach(function(id){
+    document.getElementById(id).style.display = id==='fw-step'+step ? '' : 'none';
+  });
+}
+function _fwClearTimer(){
+  if(_fwTimerHandle){ clearInterval(_fwTimerHandle); _fwTimerHandle=null; }
+}
+function _fwStartTimer(secs){
+  _fwClearTimer();
+  _fwTimerSecs = secs;
+  function tick(){
+    _fwTimerSecs--;
+    if(_fwTimerSecs<=0){
+      _fwClearTimer();
+      document.getElementById('fw-timer').textContent='00:00';
+      return;
+    }
+    var m=Math.floor(_fwTimerSecs/60), s=_fwTimerSecs%60;
+    document.getElementById('fw-timer').textContent=(m<10?'0':'')+m+':'+(s<10?'0':'')+s;
+  }
+  _fwTimerHandle=setInterval(tick,1000);
+  tick();
+}
+function fwToggleEye(inputId,btn){
+  var inp=document.getElementById(inputId);
+  inp.type = inp.type==='password' ? 'text' : 'password';
+  btn.textContent = inp.type==='password' ? '👁' : '🙈';
+}
+
+/* ── Abrir / Fechar modal ── */
 function openForgotModal(){
-  document.getElementById('forgot-email').value = document.getElementById('login-email').value || '';
-  document.getElementById('forgot-error').textContent = '';
-  document.getElementById('forgot-success').style.display = 'none';
-  document.getElementById('forgot-btn').disabled = false;
-  document.getElementById('forgot-modal').style.display = 'flex';
-  setTimeout(function(){ document.getElementById('forgot-email').focus(); }, 80);
+  // Reset ao passo 1
+  _fwClearTimer();
+  _fwEmail='';
+  document.getElementById('fw-email').value = document.getElementById('login-email').value||'';
+  document.getElementById('fw-err1').textContent='';
+  document.getElementById('fw-btn1').disabled=false;
+  document.getElementById('fw-btn1').textContent='Enviar código';
+  _fwShow(1);
+  document.getElementById('forgot-modal').style.display='flex';
+  setTimeout(function(){ document.getElementById('fw-email').focus(); },80);
 }
-
 function closeForgotModal(){
-  document.getElementById('forgot-modal').style.display = 'none';
+  _fwClearTimer();
+  document.getElementById('forgot-modal').style.display='none';
 }
 
+/* ── PASSO 1: enviar código ── */
 async function handleForgotPassword(){
-  var email = (document.getElementById('forgot-email').value || '').trim();
-  var errEl = document.getElementById('forgot-error');
-  var sucEl = document.getElementById('forgot-success');
-  var btn   = document.getElementById('forgot-btn');
-
-  errEl.textContent = '';
-  sucEl.style.display = 'none';
-
-  if(!email){ errEl.textContent = 'Introduz o teu e-mail.'; return; }
-  if(!/\S+@\S+\.\S+/.test(email)){ errEl.textContent = 'E-mail inválido.'; return; }
-
-  btn.disabled = true;
-  btn.textContent = 'A enviar…';
+  var email=(document.getElementById('fw-email').value||'').trim();
+  var errEl=document.getElementById('fw-err1');
+  var btn=document.getElementById('fw-btn1');
+  errEl.textContent='';
+  if(!email){ errEl.textContent='Introduz o teu e-mail.'; return; }
+  if(!/\S+@\S+\.\S+/.test(email)){ errEl.textContent='E-mail inválido.'; return; }
+  btn.disabled=true; btn.textContent='A enviar…';
   try {
-    await fetch(API + '/auth/forgot-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email }),
+    await fetch(API+'/auth/forgot-password',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:email}),
     });
-    // Sempre mostra sucesso (não revela se o email existe)
-    sucEl.textContent = 'Se este e-mail estiver registado, receberás um link em breve. Verifica também a pasta de spam.';
-    sucEl.style.display = 'block';
-    btn.style.display = 'none';
+    _fwEmail=email;
+    // Avança sempre — não revela se email existe
+    document.getElementById('fw-sub2').textContent='Enviámos um código de 6 dígitos para '+email+'. Verifica também o spam.';
+    [0,1,2,3,4,5].forEach(function(i){ document.getElementById('fw-c'+i).value=''; });
+    document.getElementById('fw-err2').textContent='';
+    document.getElementById('fw-btn2').disabled=false;
+    _fwShow(2);
+    _fwStartTimer(15*60);
+    setTimeout(function(){ document.getElementById('fw-c0').focus(); },80);
   } catch(e) {
-    errEl.textContent = 'Erro de rede. Tenta novamente.';
-    btn.disabled = false;
-    btn.textContent = 'Enviar link de recuperação';
+    errEl.textContent='Erro de rede. Tenta novamente.';
+    btn.disabled=false; btn.textContent='Enviar código';
   }
 }
 
-var _resetToken = null; // token lido do URL
-
-function openResetModal(token){
-  _resetToken = token;
-  document.getElementById('reset-pass1').value = '';
-  document.getElementById('reset-pass2').value = '';
-  document.getElementById('reset-error').textContent = '';
-  document.getElementById('reset-success').style.display = 'none';
-  document.getElementById('reset-btn').disabled = false;
-  document.getElementById('reset-btn').textContent = 'Confirmar nova senha';
-  document.getElementById('reset-modal').style.display = 'flex';
-  setTimeout(function(){ document.getElementById('reset-pass1').focus(); }, 80);
+/* ── Reenviar código (passo 2) ── */
+async function handleResendCode(){
+  if(!_fwEmail) return;
+  _fwClearTimer();
+  [0,1,2,3,4,5].forEach(function(i){ document.getElementById('fw-c'+i).value=''; });
+  document.getElementById('fw-err2').textContent='';
+  try {
+    await fetch(API+'/auth/forgot-password',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:_fwEmail}),
+    });
+    _fwStartTimer(15*60);
+    showToast('Novo código enviado!','success');
+    document.getElementById('fw-c0').focus();
+  } catch(e) {
+    document.getElementById('fw-err2').textContent='Erro ao reenviar. Tenta novamente.';
+  }
 }
 
+/* ── Inputs de código: navegação automática ── */
+function fwCodeInput(el,idx){
+  // Aceitar apenas dígito
+  el.value=el.value.replace(/\D/g,'').slice(-1);
+  if(el.value && idx<5) document.getElementById('fw-c'+(idx+1)).focus();
+}
+function fwCodeKey(e,idx){
+  if(e.key==='Backspace'&&!e.target.value&&idx>0){
+    document.getElementById('fw-c'+(idx-1)).focus();
+  }
+  if(e.key==='ArrowLeft'&&idx>0) document.getElementById('fw-c'+(idx-1)).focus();
+  if(e.key==='ArrowRight'&&idx<5) document.getElementById('fw-c'+(idx+1)).focus();
+  if(e.key==='Enter') handleVerifyCode();
+}
+function fwCodePaste(e){
+  // Colar 6 dígitos de uma vez
+  var text=(e.clipboardData||window.clipboardData).getData('text').replace(/\D/g,'').substring(0,6);
+  e.preventDefault();
+  for(var i=0;i<text.length;i++) document.getElementById('fw-c'+i).value=text[i];
+  if(text.length===6) handleVerifyCode();
+  else if(text.length>0) document.getElementById('fw-c'+Math.min(text.length,5)).focus();
+}
+
+/* ── PASSO 2: verificar código (formato) ── */
+function handleVerifyCode(){
+  var code=[0,1,2,3,4,5].map(function(i){ return document.getElementById('fw-c'+i).value; }).join('');
+  var errEl=document.getElementById('fw-err2');
+  errEl.textContent='';
+  if(code.length<6){ errEl.textContent='Introduz todos os 6 dígitos.'; return; }
+  // Avança para passo 3 — a verificação real acontece no submit final
+  document.getElementById('fw-pass1').value='';
+  document.getElementById('fw-pass2').value='';
+  document.getElementById('fw-err3').textContent='';
+  document.getElementById('fw-btn3').disabled=false;
+  document.getElementById('fw-btn3').textContent='Redefinir senha';
+  _fwShow(3);
+  setTimeout(function(){ document.getElementById('fw-pass1').focus(); },80);
+}
+
+/* ── PASSO 3: redefinir senha ── */
 async function handleResetPassword(){
-  var p1    = document.getElementById('reset-pass1').value;
-  var p2    = document.getElementById('reset-pass2').value;
-  var errEl = document.getElementById('reset-error');
-  var sucEl = document.getElementById('reset-success');
-  var btn   = document.getElementById('reset-btn');
-
-  errEl.textContent = '';
-  sucEl.style.display = 'none';
-
-  if(!p1)        { errEl.textContent = 'Introduz a nova senha.'; return; }
-  if(p1.length < 8){ errEl.textContent = 'A senha deve ter pelo menos 8 caracteres.'; return; }
-  if(p1 !== p2)  { errEl.textContent = 'As senhas não coincidem.'; return; }
-
-  btn.disabled = true;
-  btn.textContent = 'A guardar…';
+  var code=[0,1,2,3,4,5].map(function(i){ return document.getElementById('fw-c'+i).value; }).join('');
+  var p1=document.getElementById('fw-pass1').value;
+  var p2=document.getElementById('fw-pass2').value;
+  var errEl=document.getElementById('fw-err3');
+  var btn=document.getElementById('fw-btn3');
+  errEl.textContent='';
+  if(!p1)         { errEl.textContent='Introduz a nova senha.'; return; }
+  if(p1.length<8) { errEl.textContent='A senha deve ter pelo menos 8 caracteres.'; return; }
+  if(p1!==p2)     { errEl.textContent='As senhas não coincidem.'; return; }
+  btn.disabled=true; btn.textContent='A guardar…';
   try {
-    var r    = await fetch(API + '/auth/reset-password', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ token: _resetToken, new_password: p1 }),
+    var r=await fetch(API+'/auth/reset-password',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({email:_fwEmail, code:code, new_password:p1}),
     });
-    var json = await r.json();
-    if(!r.ok) throw new Error(json.error || 'Erro desconhecido.');
-
-    // Limpa o token do URL sem recarregar a página
-    var clean = window.location.pathname + window.location.hash;
-    window.history.replaceState({}, '', clean);
-
-    sucEl.textContent = '✓ Senha alterada com sucesso! Podes fazer login agora.';
-    sucEl.style.display = 'block';
-    btn.style.display = 'none';
-
-    // Fecha modal e vai para login após 2 s
-    setTimeout(function(){
-      document.getElementById('reset-modal').style.display = 'none';
-      _resetToken = null;
-    }, 2200);
+    var json=await r.json();
+    if(!r.ok) throw new Error(json.error||'Erro desconhecido.');
+    // Sucesso
+    _fwClearTimer();
+    closeForgotModal();
+    showToast('✓ Senha alterada com sucesso! Faz login agora.','success');
   } catch(e) {
-    errEl.textContent = e.message;
-    btn.disabled = false;
-    btn.textContent = 'Confirmar nova senha';
+    errEl.textContent=e.message;
+    btn.disabled=false; btn.textContent='Redefinir senha';
   }
 }
 
 /* ── Verifica token ao carregar ── */
 (async function(){
-  // 1. Detetar reset_token no URL → abrir modal de redefinição
-  var urlParams   = new URLSearchParams(window.location.search);
-  var resetToken  = urlParams.get('reset_token');
-  if(resetToken){
-    openResetModal(resetToken);
-    // Não auto-logar; mostra o ecrã de login por baixo
-    return;
-  }
-
-  // 2. Auto-login se tiver JWT válido
+  // Auto-login se tiver JWT válido
   var token = getToken();
   if(!token) return;
   try {
