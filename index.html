@@ -81,6 +81,16 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 }
 .btn-login:hover{background:#6940e0}
 .btn-login:active{transform:scale(.98)}
+.btn-google{
+  width:100%;padding:11px 16px;border-radius:8px;
+  background:#fff;border:1px solid #dadce0;
+  color:#3c4043;font-size:14px;font-weight:500;
+  cursor:pointer;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  transition:box-shadow .15s,background .15s;
+}
+.btn-google:hover{background:#f8f8f8;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.btn-google img{width:18px;height:18px;flex-shrink:0}
 .login-divider{
   display:flex;align-items:center;gap:12px;
   margin:4px 0;width:100%;
@@ -979,6 +989,11 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
         <div class="login-divider-line"></div>
       </div>
 
+      <button class="btn-google" onclick="loginComGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Continuar com Google
+      </button>
+
       <button class="btn-register" onclick="handleRegister()">Criar conta gratuita</button>
 
       <p class="login-terms">Ao entrar você concorda com os <a onclick="showToast('Termos em breve!','info')">Termos de uso</a></p>
@@ -1294,7 +1309,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
         <div class="cfg-section">
           <div class="cfg-section-title">Conta</div>
           <div class="cfg-card">
-            <div class="cfg-row">
+            <div class="cfg-row" id="cfg-row-senha">
               <div><div class="cfg-label">Alterar senha</div><div class="cfg-sub">Modifica a senha de acesso à conta</div></div>
               <button class="cfg-btn" onclick="showToast('Em breve','info')">Alterar senha</button>
             </div>
@@ -1742,6 +1757,15 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
       </div>
       <div class="register-error" id="reg-error"></div>
       <button class="btn-register-confirm" id="reg-btn" onclick="submitRegister()">Criar conta</button>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
+        <div style="flex:1;height:1px;background:#2a2a2a"></div>
+        <span style="font-size:12px;color:#555">ou</span>
+        <div style="flex:1;height:1px;background:#2a2a2a"></div>
+      </div>
+      <button class="btn-google" onclick="closeRegisterModal();loginComGoogle()">
+        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+        Registar com Google
+      </button>
     </div>
   </div>
 </div>
@@ -1922,6 +1946,10 @@ function applyUserToUI(user){
   if(user.phone      != null && user.phone !== '') userProfile.tel       = user.phone;
   if(user.avatar_url != null && user.avatar_url !== '') userProfile.imgPerfil = user.avatar_url;
   if(user.role       != null) userProfile.role = user.role;
+  if(user.google_id  != null) userProfile.google_id = user.google_id;
+  // Ocultar "Alterar senha" para contas Google (não têm password)
+  var cfgSenha = document.getElementById('cfg-row-senha');
+  if(cfgSenha) cfgSenha.style.display = user.google_id ? 'none' : '';
 
   saveProfile();
   syncSidebar();
@@ -1988,6 +2016,14 @@ async function _migrateBase64Avatar(dataUrl){
   } catch(e){
     console.warn('[migração] não foi possível migrar foto local:', e.message);
   }
+}
+
+/* ══════════════════════════════════════════
+   GOOGLE OAUTH
+══════════════════════════════════════════ */
+
+function loginComGoogle(){
+  window.location.href = API + '/auth/google';
 }
 
 /* ══════════════════════════════════════════
@@ -2165,7 +2201,30 @@ async function handleResetPassword(){
 
 /* ── Verifica token ao carregar ── */
 (async function(){
-  // Auto-login se tiver JWT válido
+  var urlParams = new URLSearchParams(window.location.search);
+
+  // 1. Callback do Google OAuth — backend redireciona com ?token=&user=
+  var gToken = urlParams.get('token');
+  var gUser  = urlParams.get('user');
+  if(gToken && gUser){
+    try {
+      var user = JSON.parse(decodeURIComponent(gUser));
+      saveToken(gToken);
+      applyUserToUI(user);
+      // Limpar ?token=&user= do URL
+      window.history.replaceState({}, '', window.location.pathname);
+      showApp();
+      return;
+    } catch(e) { /* JSON inválido — ignora e segue para auto-login normal */ }
+  }
+
+  // Erro no OAuth Google
+  if(urlParams.get('google_error')){
+    window.history.replaceState({}, '', window.location.pathname);
+    showToast('Erro ao entrar com Google. Tenta novamente.','error');
+  }
+
+  // 2. Auto-login se tiver JWT válido
   var token = getToken();
   if(!token) return;
   try {
