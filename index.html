@@ -150,6 +150,36 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 }
 .login-box{animation:fadeInUp .35s ease both}
 
+/* ── Onboarding pós-Google ── */
+#onboarding-screen{position:fixed;inset:0;background:#080808;z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.ob-box{width:100%;max-width:440px;animation:fadeInUp .35s ease both}
+.ob-logo{display:flex;align-items:center;gap:10px;justify-content:center;margin-bottom:32px}
+.ob-logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#7B52F0,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff}
+.ob-logo-text{font-size:20px;font-weight:600;color:#fff}
+.ob-logo-text em{color:#a78bfa;font-style:normal}
+.ob-progress{display:flex;justify-content:center;gap:8px;margin-bottom:32px}
+.ob-dot{width:8px;height:8px;border-radius:50%;background:#2a2a2a;transition:background .3s}
+.ob-dot.active{background:#7B52F0}
+.ob-dot.done{background:#4ade80}
+.ob-step{display:none}
+.ob-step.visible{display:block}
+.ob-title{font-size:22px;font-weight:700;color:#fff;margin-bottom:8px;text-align:center}
+.ob-sub{font-size:14px;color:#666;text-align:center;margin-bottom:28px;line-height:1.5}
+.ob-input{width:100%;background:#0e0e0e;border:1px solid #252525;border-radius:10px;padding:13px 16px;color:#fff;font-size:15px;font-family:inherit;outline:none;transition:border-color .15s;box-sizing:border-box}
+.ob-input:focus{border-color:#7B52F0}
+.ob-roles{display:flex;flex-direction:column;gap:10px;margin-bottom:8px}
+.ob-role-card{background:#0e0e0e;border:1.5px solid #252525;border-radius:12px;padding:16px 20px;cursor:pointer;transition:border-color .15s,background .15s;display:flex;align-items:center;gap:16px;text-align:left}
+.ob-role-card:hover{border-color:#3d2f7a;background:#0b0918}
+.ob-role-card.selected{border-color:#7B52F0;background:#0f0b1f}
+.ob-role-icon{font-size:26px;flex-shrink:0;width:36px;text-align:center}
+.ob-role-name{font-size:14px;font-weight:600;color:#fff;margin-bottom:2px}
+.ob-role-desc{font-size:12px;color:#666}
+.ob-btn{width:100%;background:#7B52F0;border:none;border-radius:10px;padding:14px;color:#fff;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit;transition:background .15s;margin-top:20px}
+.ob-btn:hover{background:#6940e0}
+.ob-btn:disabled{opacity:.45;cursor:default}
+.ob-done-icon{font-size:52px;text-align:center;margin-bottom:16px}
+.ob-err{font-size:12px;color:#f87171;text-align:center;margin-top:8px;min-height:16px}
+
 /* ══════════════════════════════════════════
    DASHBOARD (v13 original, sem alterações)
 ══════════════════════════════════════════ */
@@ -1072,6 +1102,75 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 </div>
 
 <!-- ══════════════════════════════════════════
+     ONBOARDING PÓS-GOOGLE
+══════════════════════════════════════════ -->
+<div id="onboarding-screen">
+  <div class="ob-box">
+    <div class="ob-logo">
+      <div class="ob-logo-icon">G</div>
+      <span class="ob-logo-text">My<em>GUIG</em></span>
+    </div>
+
+    <!-- Progress dots -->
+    <div class="ob-progress">
+      <div class="ob-dot active" id="ob-dot-1"></div>
+      <div class="ob-dot" id="ob-dot-2"></div>
+      <div class="ob-dot" id="ob-dot-3"></div>
+    </div>
+
+    <!-- PASSO 1 — Nome -->
+    <div class="ob-step visible" id="ob-step1">
+      <div class="ob-title">Como te chamas?</div>
+      <div class="ob-sub">Confirma ou edita o teu nome para a plataforma.</div>
+      <input class="ob-input" id="ob-name" type="text" placeholder="Teu nome completo"
+        onkeydown="if(event.key==='Enter')obNext(2)">
+      <div class="ob-err" id="ob-err1"></div>
+      <button class="ob-btn" onclick="obNext(2)">Continuar →</button>
+    </div>
+
+    <!-- PASSO 2 — Papel -->
+    <div class="ob-step" id="ob-step2">
+      <div class="ob-title">O que melhor te descreve?</div>
+      <div class="ob-sub">Isto personaliza a tua experiência na plataforma.</div>
+      <div class="ob-roles">
+        <div class="ob-role-card" id="ob-role-musician" onclick="selectObRole('musician')">
+          <div class="ob-role-icon">🎵</div>
+          <div>
+            <div class="ob-role-name">Músico</div>
+            <div class="ob-role-desc">Instrumentista, cantor ou compositor</div>
+          </div>
+        </div>
+        <div class="ob-role-card" id="ob-role-artist" onclick="selectObRole('artist')">
+          <div class="ob-role-icon">🎤</div>
+          <div>
+            <div class="ob-role-name">Artista / Banda</div>
+            <div class="ob-role-desc">Grupo musical, DJ ou performer</div>
+          </div>
+        </div>
+        <div class="ob-role-card" id="ob-role-contractor" onclick="selectObRole('contractor')">
+          <div class="ob-role-icon">🏢</div>
+          <div>
+            <div class="ob-role-name">Contratante</div>
+            <div class="ob-role-desc">Dono de bar, promotor, empresa ou eventos</div>
+          </div>
+        </div>
+      </div>
+      <div class="ob-err" id="ob-err2"></div>
+      <button class="ob-btn" onclick="obNext(3)">Continuar →</button>
+    </div>
+
+    <!-- PASSO 3 — Concluído -->
+    <div class="ob-step" id="ob-step3">
+      <div class="ob-done-icon">🎉</div>
+      <div class="ob-title" id="ob-done-title">Tudo pronto!</div>
+      <div class="ob-sub">Bem-vindo ao MyGUIG. A tua conta está configurada e pronta a usar.</div>
+      <div class="ob-err" id="ob-err3"></div>
+      <button class="ob-btn" id="ob-done-btn" onclick="finishOnboarding()">Entrar na plataforma</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
      DASHBOARD PRINCIPAL
 ══════════════════════════════════════════ -->
 <div id="main-app">
@@ -1946,7 +2045,8 @@ function applyUserToUI(user){
   if(user.phone      != null && user.phone !== '') userProfile.tel       = user.phone;
   if(user.avatar_url != null && user.avatar_url !== '') userProfile.imgPerfil = user.avatar_url;
   if(user.role       != null) userProfile.role = user.role;
-  if(user.google_id  != null) userProfile.google_id = user.google_id;
+  if(user.google_id           != null) userProfile.google_id           = user.google_id;
+  if(user.onboarding_complete != null) userProfile.onboarding_complete = user.onboarding_complete;
   // Ocultar "Alterar senha" para contas Google (não têm password)
   var cfgSenha = document.getElementById('cfg-row-senha');
   if(cfgSenha) cfgSenha.style.display = user.google_id ? 'none' : '';
@@ -2024,6 +2124,83 @@ async function _migrateBase64Avatar(dataUrl){
 
 function loginComGoogle(){
   window.location.href = API + '/auth/google';
+}
+
+/* ══════════════════════════════════════════
+   ONBOARDING PÓS-GOOGLE
+══════════════════════════════════════════ */
+
+var _obRole = null; // role selecionado no passo 2
+
+function showOnboarding(user){
+  // Pré-preencher nome com o do Google
+  document.getElementById('ob-name').value = (user && user.name) || '';
+  // Reset estado
+  _obRole = null;
+  _obGoStep(1);
+  document.getElementById('ob-err1').textContent = '';
+  document.getElementById('ob-err2').textContent = '';
+  document.getElementById('ob-err3').textContent = '';
+  document.getElementById('ob-done-btn').disabled = false;
+  document.getElementById('ob-done-btn').textContent = 'Entrar na plataforma';
+  ['musician','artist','contractor'].forEach(function(r){
+    document.getElementById('ob-role-'+r).classList.remove('selected');
+  });
+  // Mostrar ecrã
+  document.getElementById('login-screen').style.display     = 'none';
+  document.getElementById('main-app').style.display         = 'none';
+  document.getElementById('onboarding-screen').style.display = 'flex';
+}
+
+function _obGoStep(n){
+  [1,2,3].forEach(function(i){
+    document.getElementById('ob-step'+i).className = 'ob-step'+(i===n?' visible':'');
+    var dot = document.getElementById('ob-dot-'+i);
+    dot.className = 'ob-dot'+(i<n?' done':i===n?' active':'');
+  });
+}
+
+function obNext(step){
+  if(step===2){
+    var name = (document.getElementById('ob-name').value||'').trim();
+    if(!name){ document.getElementById('ob-err1').textContent='Introduz o teu nome.'; return; }
+    document.getElementById('ob-err1').textContent='';
+    // Actualizar título do passo 3
+    document.getElementById('ob-done-title').textContent='Tudo pronto, '+name.split(' ')[0]+'!';
+  }
+  if(step===3){
+    if(!_obRole){ document.getElementById('ob-err2').textContent='Seleciona uma opção.'; return; }
+    document.getElementById('ob-err2').textContent='';
+  }
+  _obGoStep(step);
+}
+
+function selectObRole(role){
+  _obRole = role;
+  ['musician','artist','contractor'].forEach(function(r){
+    document.getElementById('ob-role-'+r).classList.toggle('selected', r===role);
+  });
+}
+
+async function finishOnboarding(){
+  var name = (document.getElementById('ob-name').value||'').trim();
+  var btn  = document.getElementById('ob-done-btn');
+  var err  = document.getElementById('ob-err3');
+  err.textContent='';
+  btn.disabled=true; btn.textContent='A guardar…';
+  try {
+    var r = await apiCall('PUT', '/auth/profile', {
+      name:                name,
+      role:                _obRole || 'musician',
+      onboarding_complete: true,
+    });
+    applyUserToUI(r.user);
+    document.getElementById('onboarding-screen').style.display='none';
+    showApp();
+  } catch(e){
+    err.textContent = e.message || 'Erro ao guardar. Tenta novamente.';
+    btn.disabled=false; btn.textContent='Entrar na plataforma';
+  }
 }
 
 /* ══════════════════════════════════════════
@@ -2211,9 +2388,12 @@ async function handleResetPassword(){
       var user = JSON.parse(decodeURIComponent(gUser));
       saveToken(gToken);
       applyUserToUI(user);
-      // Limpar ?token=&user= do URL
       window.history.replaceState({}, '', window.location.pathname);
-      showApp();
+      if(user.onboarding_complete === false){
+        showOnboarding(user);
+      } else {
+        showApp();
+      }
       return;
     } catch(e) { /* JSON inválido — ignora e segue para auto-login normal */ }
   }
@@ -2232,7 +2412,11 @@ async function handleResetPassword(){
     if(res.ok){
       var data = await res.json();
       applyUserToUI(data.user);
-      showApp();
+      if(data.user.onboarding_complete === false){
+        showOnboarding(data.user);
+      } else {
+        showApp();
+      }
     } else {
       clearToken();
     }
