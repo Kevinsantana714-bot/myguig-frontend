@@ -2085,6 +2085,7 @@ function applyUserToUI(user){
   // Novos campos
   if(user.phone      != null && user.phone !== '') userProfile.tel       = user.phone;
   if(user.avatar_url != null && user.avatar_url !== '') userProfile.imgPerfil = user.avatar_url;
+  if(user.cover_url  != null && user.cover_url  !== '') userProfile.imgCapa   = user.cover_url;
   if(user.role       != null) userProfile.role = user.role;
   if(user.google_id           != null) userProfile.google_id           = user.google_id;
   if(user.onboarding_complete != null) userProfile.onboarding_complete = user.onboarding_complete;
@@ -2116,6 +2117,9 @@ function applyUserToUI(user){
   // re-envia para Cloudinary silenciosamente para que fique visível para outros utilizadores.
   if(!user.avatar_url && userProfile.imgPerfil && userProfile.imgPerfil.startsWith('data:')){
     _migrateBase64Avatar(userProfile.imgPerfil);
+  }
+  if(!user.cover_url && userProfile.imgCapa && userProfile.imgCapa.startsWith('data:')){
+    _migrateBase64Cover(userProfile.imgCapa);
   }
 }
 
@@ -2156,6 +2160,37 @@ async function _migrateBase64Avatar(dataUrl){
     console.info('[migração] foto migrada para Cloudinary:', data.avatar_url.slice(0, 60));
   } catch(e){
     console.warn('[migração] não foi possível migrar foto local:', e.message);
+  }
+}
+
+async function _migrateBase64Cover(dataUrl){
+  try {
+    var parts  = dataUrl.split(',');
+    var mime   = (parts[0].match(/:(.*?);/) || [])[1] || 'image/jpeg';
+    var binary = atob(parts[1]);
+    var bytes  = new Uint8Array(binary.length);
+    for(var i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    var blob   = new Blob([bytes], { type: mime });
+    if(blob.size > 8 * 1024 * 1024){
+      console.warn('[migração] capa local demasiado grande para upload automático:', blob.size);
+      return;
+    }
+    var ext      = mime.split('/')[1] || 'jpg';
+    var formData = new FormData();
+    formData.append('cover', blob, 'cover.' + ext);
+    var res  = await fetch(API + '/api/users/cover', {
+      method:  'POST',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      body:    formData,
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'upload falhou');
+    userProfile.imgCapa = data.cover_url;
+    saveProfile();
+    renderPerfil();
+    console.info('[migração] capa migrada para Cloudinary:', data.cover_url.slice(0, 60));
+  } catch(e){
+    console.warn('[migração] não foi possível migrar capa local:', e.message);
   }
 }
 
@@ -3454,12 +3489,29 @@ async function handleAvatarUpload(evt){
     showToast('Erro ao enviar foto: '+e.message,'info');
   }
 }
-function handleCapaUpload(evt){
-  var f=evt.target.files[0];if(!f) return;
-  if(f.size>8*1024*1024){showToast('Imagem muito grande (máx. 8 MB)','info');return;}
-  var r=new FileReader();
-  r.onload=function(e){userProfile.imgCapa=e.target.result;saveProfile();renderPerfil();showToast('✓ Foto de capa atualizada!','success');};
-  r.readAsDataURL(f);evt.target.value='';
+async function handleCapaUpload(evt){
+  var f = evt.target.files[0];
+  evt.target.value = '';
+  if(!f) return;
+  if(f.size > 8*1024*1024){ showToast('Imagem muito grande (máx. 8 MB)','info'); return; }
+  showToast('A enviar foto…','info');
+  try {
+    var formData = new FormData();
+    formData.append('cover', f);
+    var res = await fetch(API + '/api/users/cover', {
+      method:  'POST',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      body:    formData,
+    });
+    var data = await res.json();
+    if(!res.ok) throw new Error(data.error || 'Erro no upload');
+    userProfile.imgCapa = data.cover_url;
+    saveProfile();
+    renderPerfil();
+    showToast('✓ Foto de capa atualizada!','success');
+  } catch(e){
+    showToast('Erro ao enviar foto: '+e.message,'info');
+  }
 }
 
 /* ── AGENDAMENTO MANUAL ── */
@@ -3714,8 +3766,17 @@ function _renderMusicianProfile(musician){
   var cacheStr = cache > 0 ? '€ '+cache.toLocaleString('pt-PT',{minimumFractionDigits:2}) : 'A combinar';
 
   // ── Capa ──
-  document.getElementById('vmp-cover').style.background =
-    'linear-gradient(135deg,'+color+'33 0%,#0e0e1a 55%,#141414 100%)';
+  var vmpCover = document.getElementById('vmp-cover');
+  vmpCover.style.background = 'linear-gradient(135deg,'+color+'33 0%,#0e0e1a 55%,#141414 100%)';
+  var vmpCoverImg = document.getElementById('vmp-cover-img');
+  if(!vmpCoverImg){
+    vmpCoverImg = document.createElement('img');
+    vmpCoverImg.id = 'vmp-cover-img';
+    vmpCoverImg.className = 'prf-cover-img';
+    vmpCover.insertBefore(vmpCoverImg, vmpCover.firstChild);
+  }
+  if(musician.cover_url){ vmpCoverImg.src = musician.cover_url; vmpCoverImg.style.display = 'block'; }
+  else { vmpCoverImg.style.display = 'none'; }
 
   // ── Avatar (foto ou iniciais) ──
   var av = document.getElementById('vmp-avatar');
@@ -3877,7 +3938,7 @@ function prefillProposalDate(iso){
 async function openMusicianProfile(id){
   // Usa dados já em cache para render imediato enquanto busca dados completos
   var cached = _musiciansList.find(function(m){ return m.id === id; });
-  var seed   = cached || { id: id, name: '', bio: '', estilos: [], instagram: '', cache_minimo: 0, cidade: '', avatar_url: null, phone: '', shows_confirmed: 0 };
+  var seed   = cached || { id: id, name: '', bio: '', estilos: [], instagram: '', cache_minimo: 0, cidade: '', avatar_url: null, cover_url: null, phone: '', shows_confirmed: 0 };
   _profileMusician = seed;
 
   _renderMusicianProfile(seed);
