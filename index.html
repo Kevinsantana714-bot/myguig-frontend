@@ -430,6 +430,26 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .prf-section-title{font-size:13px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 .prf-tags-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 .prf-tag{font-size:12px;background:#1e1535;color:#a78bfa;border:1px solid #2e1f55;padding:5px 14px;border-radius:20px;font-weight:500}
+.avail-cal-wrap{background:#111;border:1px solid #1e1e2e;border-radius:12px;padding:14px;margin-top:10px;margin-bottom:6px}
+.avail-cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.avail-cal-title{font-size:13px;font-weight:600;color:#c4b5fd}
+.avail-cal-btn{background:none;border:none;color:#888;font-size:20px;cursor:pointer;padding:0 6px;line-height:1;font-family:inherit}
+.avail-cal-btn:hover{color:#a78bfa}
+.avail-cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.avail-cal-dow{text-align:center;font-size:10px;color:#555;padding-bottom:6px;font-weight:600}
+.avail-cal-day{aspect-ratio:1;display:flex;align-items:center;justify-content:center;border-radius:6px;font-size:12px;cursor:pointer;position:relative;transition:background .15s;user-select:none}
+.avail-cal-day.empty,.avail-cal-day.past{cursor:default}
+.avail-cal-day.occupied{background:#3b1010;color:#f87171;cursor:default}
+.avail-cal-day.occupied::after{content:'';position:absolute;width:55%;height:1.5px;background:#f87171;transform:rotate(-45deg);border-radius:2px;pointer-events:none}
+.avail-cal-day.today{background:#2e1f55;color:#c4b5fd;font-weight:700}
+.avail-cal-day.today:hover{background:#3b2a6a}
+.avail-cal-day.free{color:#d4d4d4}
+.avail-cal-day.free:hover{background:#1a2a1a;color:#4ade80}
+.avail-cal-day.past{color:#2e2e2e}
+.avail-legend{display:flex;gap:16px;font-size:12px;color:#666;align-items:center;margin-top:8px}
+.avail-legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.avail-loading{text-align:center;color:#555;font-size:13px;padding:20px 0}
+.avail-empty-msg{text-align:center;font-size:12px;color:#4ade80;margin-top:10px}
 .prf-contact-card{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:12px;overflow:hidden;margin-bottom:24px}
 .prf-contact-row{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid #141414;transition:background .12s}
 .prf-contact-row:last-child{border-bottom:none}
@@ -1556,8 +1576,25 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
           <div class="prf-section-title">Estilos musicais</div>
           <div class="prf-tags-row" id="vmp-estilos-row"></div>
 
+          <!-- Disponibilidade -->
+          <div class="prf-section-title">Disponibilidade</div>
+          <div class="avail-cal-wrap">
+            <div class="avail-cal-nav">
+              <button class="avail-cal-btn" onclick="navigateAvailMonth(-1)">&#8249;</button>
+              <div class="avail-cal-title" id="avail-cal-title">…</div>
+              <button class="avail-cal-btn" onclick="navigateAvailMonth(1)">&#8250;</button>
+            </div>
+            <div id="avail-cal-body">
+              <div class="avail-loading">A carregar…</div>
+            </div>
+          </div>
+          <div class="avail-legend">
+            <div class="avail-legend-dot" style="background:#4ade80"></div> Disponível
+            <div class="avail-legend-dot" style="background:#f87171"></div> Ocupado
+          </div>
+
           <!-- Contato & links -->
-          <div class="prf-section-title">Contato &amp; links</div>
+          <div class="prf-section-title" style="margin-top:20px">Contato &amp; links</div>
           <div class="prf-contact-card">
             <!-- Cachê mínimo -->
             <div class="prf-contact-row">
@@ -3750,6 +3787,89 @@ function _renderMusicianProfile(musician){
   }
 }
 
+var _availCalYear    = 0;
+var _availCalMonth   = 0;
+var _availOccupied   = [];
+var _availMusicianId = 0;
+
+async function loadAvailability(musicianId, year, month){
+  _availMusicianId = musicianId;
+  _availCalYear    = year;
+  _availCalMonth   = month;
+  var titleEl = document.getElementById('avail-cal-title');
+  var bodyEl  = document.getElementById('avail-cal-body');
+  if(!titleEl || !bodyEl) return;
+  var MONTH_NAMES = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho',
+                     'Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+  titleEl.textContent = MONTH_NAMES[month-1]+' '+year;
+  bodyEl.innerHTML = '<div class="avail-loading">A carregar…</div>';
+  try {
+    var ms   = year+'-'+String(month).padStart(2,'0');
+    var data = await apiCall('GET', '/api/users/'+musicianId+'/availability?month='+ms);
+    _availOccupied = data.occupied || [];
+    renderAvailCal(year, month, _availOccupied);
+  } catch(e){
+    bodyEl.innerHTML = '<div class="avail-loading" style="color:#f87171">Erro ao carregar disponibilidade.</div>';
+  }
+}
+
+function renderAvailCal(year, month, occupied){
+  var bodyEl = document.getElementById('avail-cal-body');
+  if(!bodyEl) return;
+  var today   = new Date();
+  var todayY  = today.getFullYear();
+  var todayM  = today.getMonth()+1;
+  var todayD  = today.getDate();
+  var daysInMonth = new Date(year, month, 0).getDate();
+  var firstDow    = (new Date(year, month-1, 1).getDay()+6) % 7; // Mon=0
+  var occSet = {};
+  occupied.forEach(function(d){ occSet[d] = true; });
+  var html = '<div class="avail-cal-grid">';
+  ['Seg','Ter','Qua','Qui','Sex','Sáb','Dom'].forEach(function(d){
+    html += '<div class="avail-cal-dow">'+d+'</div>';
+  });
+  for(var i=0; i<firstDow; i++) html += '<div class="avail-cal-day empty"></div>';
+  for(var d=1; d<=daysInMonth; d++){
+    var iso = year+'-'+String(month).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    var isOcc   = occSet[iso];
+    var isToday = (year===todayY && month===todayM && d===todayD);
+    var isPast  = new Date(year,month-1,d) < new Date(todayY,todayM-1,todayD);
+    var cls, onClick='';
+    if(isOcc){
+      cls = 'avail-cal-day occupied';
+    } else if(isToday){
+      cls = 'avail-cal-day today';
+      onClick = 'onclick="prefillProposalDate(\''+iso+'\')"';
+    } else if(isPast){
+      cls = 'avail-cal-day past';
+    } else {
+      cls = 'avail-cal-day free';
+      onClick = 'onclick="prefillProposalDate(\''+iso+'\')"';
+    }
+    html += '<div class="'+cls+'" '+onClick+'>'+d+'</div>';
+  }
+  html += '</div>';
+  if(occupied.length === 0){
+    html += '<div class="avail-empty-msg">Disponível este mês</div>';
+  }
+  bodyEl.innerHTML = html;
+}
+
+function navigateAvailMonth(delta){
+  var m = _availCalMonth + delta;
+  var y = _availCalYear;
+  if(m < 1){ m = 12; y--; }
+  if(m > 12){ m = 1;  y++; }
+  loadAvailability(_availMusicianId, y, m);
+}
+
+function prefillProposalDate(iso){
+  if(!_profileMusician) return;
+  openSendProposalModal(_profileMusician);
+  var el = document.getElementById('sp-data');
+  if(el) el.value = iso;
+}
+
 async function openMusicianProfile(id){
   // Usa dados já em cache para render imediato enquanto busca dados completos
   var cached = _musiciansList.find(function(m){ return m.id === id; });
@@ -3758,6 +3878,10 @@ async function openMusicianProfile(id){
 
   _renderMusicianProfile(seed);
   navigate('musico-perfil', null);
+
+  // Carrega disponibilidade do mês actual
+  var now = new Date();
+  loadAvailability(id, now.getFullYear(), now.getMonth()+1);
 
   // Busca dados completos da API
   try {
