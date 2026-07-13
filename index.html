@@ -2792,7 +2792,7 @@ function renderHome(){
   }
   // Estatísticas: separar papel de músico do de contratante
   var pendCount=proposals.filter(function(p){return p.status==='pending';}).length;
-  var confCount=proposals.filter(function(p){return p.status==='confirmed'&&!p.iAmContractor;}).length;
+  var confCount=all.filter(function(p){return p.status==='confirmed'&&!p.iAmContractor;}).length;
   var negCount =proposals.filter(function(p){return p.status==='negotiating';}).length;
   var confLabel    = isPureContractor ? 'Confirmados' : 'Shows confirmados';
   var confHint     = isPureContractor ? 'Comprometidos' : 'Na agenda';
