@@ -1118,13 +1118,13 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
         <label class="pw-label">Nova senha</label>
         <input class="pw-input" id="fw-pass1" type="password" placeholder="Mínimo 8 caracteres"
           onkeydown="if(event.key==='Enter')document.getElementById('fw-pass2').focus()">
-        <button class="pw-eye-btn" type="button" onclick="fwToggleEye('fw-pass1',this)" tabindex="-1">👁</button>
+        <button class="pw-eye-btn" type="button" onclick="fwToggleEye('fw-pass1',this)" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
       </div>
       <div class="pw-field pw-eye">
         <label class="pw-label">Confirmar nova senha</label>
         <input class="pw-input" id="fw-pass2" type="password" placeholder="Repete a senha"
           onkeydown="if(event.key==='Enter')handleResetPassword()">
-        <button class="pw-eye-btn" type="button" onclick="fwToggleEye('fw-pass2',this)" tabindex="-1">👁</button>
+        <button class="pw-eye-btn" type="button" onclick="fwToggleEye('fw-pass2',this)" tabindex="-1"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
       </div>
       <div class="pw-error" id="fw-err3"></div>
       <button class="pw-btn" id="fw-btn3" onclick="handleResetPassword()">Redefinir senha</button>
@@ -1166,21 +1166,21 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
       <div class="ob-sub">Isto personaliza a tua experiência na plataforma.</div>
       <div class="ob-roles">
         <div class="ob-role-card" id="ob-role-musician" onclick="selectObRole('musician')">
-          <div class="ob-role-icon">🎵</div>
+          <div class="ob-role-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg></div>
           <div>
             <div class="ob-role-name">Músico</div>
             <div class="ob-role-desc">Instrumentista, cantor ou compositor</div>
           </div>
         </div>
         <div class="ob-role-card" id="ob-role-artist" onclick="selectObRole('artist')">
-          <div class="ob-role-icon">🎤</div>
+          <div class="ob-role-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></div>
           <div>
             <div class="ob-role-name">Artista / Banda</div>
             <div class="ob-role-desc">Grupo musical, DJ ou performer</div>
           </div>
         </div>
         <div class="ob-role-card" id="ob-role-contractor" onclick="selectObRole('contractor')">
-          <div class="ob-role-icon">🏢</div>
+          <div class="ob-role-icon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path><line x1="9" y1="9" x2="9" y2="9.01"></line><line x1="9" y1="12" x2="9" y2="12.01"></line><line x1="9" y1="15" x2="9" y2="15.01"></line></svg></div>
           <div>
             <div class="ob-role-name">Contratante</div>
             <div class="ob-role-desc">Dono de bar, promotor, empresa ou eventos</div>
@@ -1193,7 +1193,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 
     <!-- PASSO 3 — Concluído -->
     <div class="ob-step" id="ob-step3">
-      <div class="ob-done-icon">🎉</div>
+      <div class="ob-done-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
       <div class="ob-title" id="ob-done-title">Tudo pronto!</div>
       <div class="ob-sub">Bem-vindo ao MyGUIG. A tua conta está configurada e pronta a usar.</div>
       <div class="ob-err" id="ob-err3"></div>
@@ -1374,7 +1374,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
         <div class="conv-toolbar">
           <div style="font-size:13px;color:#555" id="conv-select-count"></div>
           <div class="conv-toolbar-actions">
-            <button class="btn-conv-delete" id="btn-conv-delete" onclick="deleteSelectedConvs()">🗑 Excluir selecionadas</button>
+            <button class="btn-conv-delete" id="btn-conv-delete" onclick="deleteSelectedConvs()" style="display:inline-flex;align-items:center;gap:6px"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg> Excluir selecionadas</button>
             <button class="btn-conv-select" id="btn-conv-select" onclick="toggleSelectMode()">Selecionar</button>
           </div>
         </div>
@@ -1531,7 +1531,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
             </div>
             <div style="display:flex;gap:10px;margin-bottom:4px">
               <button class="btn-mp-proposta" onclick="openSendProposalFromProfile()">
-                📋 Enviar proposta
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>Enviar proposta
               </button>
               <button onclick="openChatFromProfile()"
                       style="padding:9px 18px;background:#1e1535;border:1px solid #2e1f55;
@@ -1539,7 +1539,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
                              cursor:pointer;font-family:inherit;transition:all .15s;display:inline-flex;align-items:center;gap:7px"
                       onmouseover="this.style.background='#2a1a45';this.style.borderColor='var(--primary)'"
                       onmouseout="this.style.background='#1e1535';this.style.borderColor='#2e1f55'">
-                💬 Enviar mensagem
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px;margin-right:5px"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>Enviar mensagem
               </button>
             </div>
           </div>
@@ -1859,8 +1859,8 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
       <div class="register-field">
         <label class="register-label">Você é…</label>
         <div class="role-selector">
-          <button class="role-btn active" id="role-musician" onclick="selectRole('musician')">🎵 Sou Músico / Cantor</button>
-          <button class="role-btn" id="role-contractor" onclick="selectRole('contractor')">🎪 Sou Contratante / Bar</button>
+          <button class="role-btn active" id="role-musician" onclick="selectRole('musician')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>Sou Músico / Cantor</button>
+          <button class="role-btn" id="role-contractor" onclick="selectRole('contractor')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path><line x1="9" y1="9" x2="9" y2="9.01"></line><line x1="9" y1="12" x2="9" y2="12.01"></line><line x1="9" y1="15" x2="9" y2="15.01"></line></svg>Sou Contratante / Bar</button>
         </div>
       </div>
       <div class="register-field">
@@ -2303,7 +2303,9 @@ function _fwStartTimer(secs){
 function fwToggleEye(inputId,btn){
   var inp=document.getElementById(inputId);
   inp.type = inp.type==='password' ? 'text' : 'password';
-  btn.textContent = inp.type==='password' ? '👁' : '🙈';
+  btn.innerHTML = inp.type==='password'
+    ? '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>'
+    : '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.94 10.94 0 0 1 12 20c-7 0-11-8-11-8a18.5 18.5 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path><line x1="1" y1="1" x2="23" y2="23"></line></svg>';
 }
 
 /* ── Abrir / Fechar modal ── */
@@ -2784,7 +2786,9 @@ function renderHome(){
   } else {
     var emptyMsg = isPureContractor ? 'Nenhum compromisso marcado.' : 'Nenhum show marcado para os próximos dias.';
     var emptySub = isPureContractor ? 'Envie propostas para músicos disponíveis.' : 'Que tal descobrir novos músicos e fechar novos trabalhos?';
-    proxEl.innerHTML='<div class="empty-home"><div class="empty-home-icon">'+(isPureContractor?'📋':'🎵')+'</div><div class="empty-home-text">'+emptyMsg+'</div><div class="empty-home-sub">'+emptySub+'</div></div>';
+    proxEl.innerHTML='<div class="empty-home"><div class="empty-home-icon">'+(isPureContractor
+      ? '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>'
+      : '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path></svg>')+'</div><div class="empty-home-text">'+emptyMsg+'</div><div class="empty-home-sub">'+emptySub+'</div></div>';
   }
   // Estatísticas: separar papel de músico do de contratante
   var pendCount=proposals.filter(function(p){return p.status==='pending';}).length;
@@ -3688,7 +3692,7 @@ async function loadMusicians(append){
     if(!append){ grid.innerHTML=''; _musiciansList=[]; }
 
     if(!musicians.length && !append){
-      grid.innerHTML = '<div class="disc-empty"><div class="disc-empty-icon">🎸</div><div>Nenhum músico encontrado.</div></div>';
+      grid.innerHTML = '<div class="disc-empty"><div class="disc-empty-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></div><div>Nenhum músico encontrado.</div></div>';
       if(btn) btn.style.display='none';
       return;
     }
@@ -3710,7 +3714,7 @@ async function loadMusicians(append){
       card.innerHTML =
         avatarHtml+
         '<div class="mc-name">'+m.name+'</div>'+
-        (m.cidade ? '<div class="mc-cidade">📍 '+m.cidade+'</div>' : '')+
+        (m.cidade ? '<div class="mc-cidade"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>'+m.cidade+'</div>' : '')+
         (estilos  ? '<div class="mc-estilos">'+estilos+'</div>' : '')+
         '<div class="mc-cache">'+cacheStr+'</div>'+
         '<button class="btn-mc-proposta" onclick="openMusicianProfile('+m.id+')">Ver perfil</button>';
@@ -3722,7 +3726,7 @@ async function loadMusicians(append){
     _discPage++;
 
   } catch(e){
-    if(!append) grid.innerHTML = '<div class="disc-empty"><div class="disc-empty-icon">⚠️</div><div>Erro ao carregar músicos.</div></div>';
+    if(!append) grid.innerHTML = '<div class="disc-empty"><div class="disc-empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div><div>Erro ao carregar músicos.</div></div>';
   } finally {
     _discLoading = false;
   }
@@ -4050,7 +4054,7 @@ function _convTimestamp(iso){
 
 async function loadConversations(){
   var list=document.getElementById('conversations-list');
-  list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon">💬</div>A carregar…</div>';
+  list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>A carregar…</div>';
   // reset select mode on reload
   _selectMode=false; _selectedConvs=[];
   _updateSelectUI();
@@ -4064,7 +4068,7 @@ async function loadConversations(){
     if(badgeDrawer){ badgeDrawer.textContent=totalUnread; badgeDrawer.style.display=totalUnread>0?'flex':'none'; }
 
     if(!convs.length){
-      list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon">💬</div>Nenhuma conversa ainda.<br><span style="font-size:12px;color:#333">Envia uma proposta a um músico para começar.</span></div>';
+      list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>Nenhuma conversa ainda.<br><span style="font-size:12px;color:#333">Envia uma proposta a um músico para começar.</span></div>';
       return;
     }
     list.innerHTML='';
@@ -4096,7 +4100,7 @@ async function loadConversations(){
       list.appendChild(el);
     });
   } catch(e){
-    list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon">⚠️</div>Erro ao carregar conversas.</div>';
+    list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div>Erro ao carregar conversas.</div>';
   }
 }
 
