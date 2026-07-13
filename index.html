@@ -1372,29 +1372,6 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 
       <!-- CONFIGURAÇÕES -->
       <div class="view" id="view-configuracoes">
-        <!-- 1. Preferências de exibição -->
-        <div class="cfg-section">
-          <div class="cfg-section-title">Preferências de exibição</div>
-          <div class="cfg-card">
-            <div class="cfg-row">
-              <div><div class="cfg-label">Moeda</div><div class="cfg-sub">Afeta como os valores de cachê são exibidos</div></div>
-              <select class="cfg-select" id="cfg-moeda" onchange="saveCfg()">
-                <option value="BRL">BRL (R$)</option>
-                <option value="USD">USD ($)</option>
-                <option value="EUR">EUR (€)</option>
-              </select>
-            </div>
-            <div class="cfg-row">
-              <div><div class="cfg-label">Idioma</div><div class="cfg-sub">Apenas visual, sem tradução real</div></div>
-              <select class="cfg-select" id="cfg-idioma" onchange="saveCfg()">
-                <option value="pt-BR">PT-BR</option>
-                <option value="en">EN</option>
-                <option value="es">ES</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
         <!-- 2. Notificações -->
         <div class="cfg-section">
           <div class="cfg-section-title">Notificações</div>
@@ -2611,21 +2588,16 @@ async function loadAndRenderProposals(append){
 /* \u2500\u2500 CONFIGURA\u00c7\u00d5ES \u2500\u2500 */
 var LS_CFG = 'myguig_settings';
 var _cfg = {
-  moeda: 'EUR', idioma: 'pt-PT',
   notifPropostas: true, notifMensagens: true,
   showCache: true, allowMsgs: true
 };
 (function(){ try{ var s=localStorage.getItem(LS_CFG); if(s) _cfg=Object.assign(_cfg,JSON.parse(s)); }catch(e){} })();
 
 function saveCfg(){
-  var mo=document.getElementById('cfg-moeda');
-  var id=document.getElementById('cfg-idioma');
   var np=document.getElementById('cfg-notif-propostas');
   var nm=document.getElementById('cfg-notif-mensagens');
   var sc=document.getElementById('cfg-show-cache');
   var am=document.getElementById('cfg-allow-msgs');
-  if(mo) _cfg.moeda=mo.value;
-  if(id) _cfg.idioma=id.value;
   if(np) _cfg.notifPropostas=np.checked;
   if(nm) _cfg.notifMensagens=nm.checked;
   if(sc) _cfg.showCache=sc.checked;
@@ -2635,8 +2607,6 @@ function saveCfg(){
 }
 
 function renderCfgView(){
-  var mo=document.getElementById('cfg-moeda'); if(mo) mo.value=_cfg.moeda;
-  var id=document.getElementById('cfg-idioma'); if(id) id.value=_cfg.idioma;
   var np=document.getElementById('cfg-notif-propostas'); if(np) np.checked=_cfg.notifPropostas;
   var nm=document.getElementById('cfg-notif-mensagens'); if(nm) nm.checked=_cfg.notifMensagens;
   var sc=document.getElementById('cfg-show-cache'); if(sc) sc.checked=_cfg.showCache;
