@@ -1348,6 +1348,22 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════
+     MODAL — RECORTAR FOTO (perfil / capa)
+══════════════════════════════════════════ -->
+<div id="crop-modal" class="pw-modal-overlay" style="display:none">
+  <div class="pw-modal" style="max-width:420px">
+    <div class="pw-modal-title" id="crop-title">Ajustar foto</div>
+    <div class="pw-modal-sub">Arrasta para posicionar, usa o controlo para dar zoom.</div>
+    <div id="crop-frame" style="position:relative;overflow:hidden;background:#000;margin:16px auto;touch-action:none;cursor:grab">
+      <img id="crop-img" style="position:absolute;left:0;top:0;transform-origin:0 0;user-select:none" draggable="false">
+    </div>
+    <input type="range" id="crop-zoom" min="100" max="300" value="100" style="width:100%;margin:4px 0 18px">
+    <button class="pw-btn" onclick="confirmCrop()">Usar esta foto</button>
+    <button class="pw-btn-ghost" onclick="closeCropModal()">Cancelar</button>
+  </div>
+</div>
+
 <div id="onboarding-screen">
   <div class="ob-box">
     <div class="ob-logo">
@@ -1676,14 +1692,14 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
             </div>
           </div>
-          <input type="file" accept="image/*" id="input-capa" style="display:none;position:absolute;left:-9999px" onchange="handleCapaUpload(event)">
+          <input type="file" accept="image/*" id="input-capa" style="display:none;position:absolute;left:-9999px" onchange="openCropper(event,'cover')">
 
           <div class="prf-header-row">
             <div class="prf-avatar-wrap">
               <div class="prf-avatar" id="prf-avatar-el">PA</div>
               <label class="prf-avatar-cam" title="Alterar foto de perfil">
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"><path d="M23 19a2 2 0 01-2 2H3a2 2 0 01-2-2V8a2 2 0 012-2h4l2-3h6l2 3h4a2 2 0 012 2z"/><circle cx="12" cy="13" r="4"/></svg>
-                <input type="file" accept="image/*" id="input-avatar" style="display:none" onchange="handleAvatarUpload(event)">
+                <input type="file" accept="image/*" id="input-avatar" style="display:none" onchange="openCropper(event,'avatar')">
               </label>
             </div>
             <button class="prf-edit-btn" onclick="openEditPerfil()">
@@ -3893,28 +3909,139 @@ async function salvarPerfil(){
     showToast('Perfil guardado localmente.', 'info');
   }
 }
-async function handleAvatarUpload(evt){
+var _cropKind = null;
+var _cropImgNatural = {w:0,h:0};
+var _cropFrameSize = {w:0,h:0};
+var _cropState = {scale:1, minScale:1, x:0, y:0, dragging:false, startX:0, startY:0};
+
+function openCropper(evt, kind){
   var f = evt.target.files[0];
   evt.target.value = '';
   if(!f) return;
-  if(f.size > 5*1024*1024){ showToast('Imagem muito grande (máx. 5 MB)','info'); return; }
+  var maxSize = kind==='avatar' ? 5*1024*1024 : 8*1024*1024;
+  if(f.size > maxSize){ showToast('Imagem muito grande (máx. '+(kind==='avatar'?'5':'8')+' MB)','info'); return; }
 
+  _cropKind = kind;
+  var frame = document.getElementById('crop-frame');
+  if(kind==='avatar'){
+    frame.style.width='260px'; frame.style.height='260px'; frame.style.borderRadius='50%';
+    document.getElementById('crop-title').textContent='Ajustar foto de perfil';
+  } else {
+    frame.style.width='330px'; frame.style.height='110px'; frame.style.borderRadius='8px';
+    document.getElementById('crop-title').textContent='Ajustar foto de capa';
+  }
+
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = document.getElementById('crop-img');
+    img.onload = function(){
+      _cropImgNatural = { w: img.naturalWidth, h: img.naturalHeight };
+      document.getElementById('crop-modal').style.display='flex';
+      _cropFrameSize = { w: frame.offsetWidth, h: frame.offsetHeight };
+      var minScale = Math.max(_cropFrameSize.w / _cropImgNatural.w, _cropFrameSize.h / _cropImgNatural.h);
+      _cropState.minScale = minScale;
+      _cropState.scale = minScale;
+      _cropState.x = (_cropFrameSize.w - _cropImgNatural.w*minScale)/2;
+      _cropState.y = (_cropFrameSize.h - _cropImgNatural.h*minScale)/2;
+      document.getElementById('crop-zoom').value = 100;
+      _applyCropTransform();
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(f);
+}
+
+function _applyCropTransform(){
+  var img = document.getElementById('crop-img');
+  img.style.width = _cropImgNatural.w+'px';
+  img.style.height = _cropImgNatural.h+'px';
+  img.style.transform = 'translate('+_cropState.x+'px,'+_cropState.y+'px) scale('+_cropState.scale+')';
+}
+
+function _clampCropPosition(){
+  var w = _cropImgNatural.w*_cropState.scale, h = _cropImgNatural.h*_cropState.scale;
+  _cropState.x = Math.min(0, Math.max(_cropFrameSize.w - w, _cropState.x));
+  _cropState.y = Math.min(0, Math.max(_cropFrameSize.h - h, _cropState.y));
+}
+
+function closeCropModal(){
+  document.getElementById('crop-modal').style.display='none';
+  document.getElementById('crop-img').src='';
+}
+
+async function confirmCrop(){
+  var outW = _cropKind==='avatar' ? 500 : 1200;
+  var outH = _cropKind==='avatar' ? 500 : 400;
+  var canvas = document.createElement('canvas');
+  canvas.width = outW; canvas.height = outH;
+  var ctx = canvas.getContext('2d');
+  var img = document.getElementById('crop-img');
+  var ratio = outW / _cropFrameSize.w;
+  ctx.drawImage(
+    img, 0, 0, _cropImgNatural.w, _cropImgNatural.h,
+    _cropState.x*ratio, _cropState.y*ratio,
+    _cropImgNatural.w*_cropState.scale*ratio, _cropImgNatural.h*_cropState.scale*ratio
+  );
+  canvas.toBlob(async function(blob){
+    if(!blob){ showToast('Erro ao processar imagem.','error'); return; }
+    var kind = _cropKind;
+    closeCropModal();
+    if(kind==='avatar') await uploadAvatarBlob(blob);
+    else await uploadCoverBlob(blob);
+  }, 'image/jpeg', 0.9);
+}
+
+(function(){
+  var frame = document.getElementById('crop-frame');
+  frame.addEventListener('pointerdown', function(e){
+    _cropState.dragging = true;
+    _cropState.startX = e.clientX - _cropState.x;
+    _cropState.startY = e.clientY - _cropState.y;
+    frame.setPointerCapture(e.pointerId);
+    frame.style.cursor='grabbing';
+  });
+  frame.addEventListener('pointermove', function(e){
+    if(!_cropState.dragging) return;
+    _cropState.x = e.clientX - _cropState.startX;
+    _cropState.y = e.clientY - _cropState.startY;
+    _clampCropPosition();
+    _applyCropTransform();
+  });
+  ['pointerup','pointerleave','pointercancel'].forEach(function(ev){
+    frame.addEventListener(ev, function(){ _cropState.dragging=false; frame.style.cursor='grab'; });
+  });
+  frame.addEventListener('wheel', function(e){
+    e.preventDefault();
+    var slider = document.getElementById('crop-zoom');
+    slider.value = Math.min(300, Math.max(100, parseFloat(slider.value) - e.deltaY*0.2));
+    slider.dispatchEvent(new Event('input'));
+  }, {passive:false});
+  document.getElementById('crop-zoom').addEventListener('input', function(){
+    var pct = parseFloat(this.value)/100;
+    var oldScale = _cropState.scale;
+    var newScale = _cropState.minScale * pct;
+    var cx = _cropFrameSize.w/2, cy = _cropFrameSize.h/2;
+    var imgCx = (cx - _cropState.x)/oldScale, imgCy = (cy - _cropState.y)/oldScale;
+    _cropState.scale = newScale;
+    _cropState.x = cx - imgCx*newScale;
+    _cropState.y = cy - imgCy*newScale;
+    _clampCropPosition();
+    _applyCropTransform();
+  });
+})();
+
+async function uploadAvatarBlob(blob){
   showToast('A enviar foto…','info');
-
   try {
     var formData = new FormData();
-    formData.append('avatar', f);
-
+    formData.append('avatar', blob, 'avatar.jpg');
     var res = await fetch(API + '/api/users/avatar', {
       method:  'POST',
       headers: { 'Authorization': 'Bearer ' + getToken() },
-      // Sem Content-Type — o browser define automaticamente com o boundary
       body: formData,
     });
     var data = await res.json();
     if(!res.ok) throw new Error(data.error || 'Erro no upload');
-
-    // Guarda URL Cloudinary (nunca base64)
     userProfile.imgPerfil = data.avatar_url;
     saveProfile();
     renderPerfil();
@@ -3924,19 +4051,15 @@ async function handleAvatarUpload(evt){
     showToast('Erro ao enviar foto: '+e.message,'info');
   }
 }
-async function handleCapaUpload(evt){
-  var f = evt.target.files[0];
-  evt.target.value = '';
-  if(!f) return;
-  if(f.size > 8*1024*1024){ showToast('Imagem muito grande (máx. 8 MB)','info'); return; }
+async function uploadCoverBlob(blob){
   showToast('A enviar foto…','info');
   try {
     var formData = new FormData();
-    formData.append('cover', f);
+    formData.append('cover', blob, 'cover.jpg');
     var res = await fetch(API + '/api/users/cover', {
       method:  'POST',
       headers: { 'Authorization': 'Bearer ' + getToken() },
-      body:    formData,
+      body: formData,
     });
     var data = await res.json();
     if(!res.ok) throw new Error(data.error || 'Erro no upload');
