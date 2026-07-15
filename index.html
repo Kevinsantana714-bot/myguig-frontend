@@ -2055,7 +2055,7 @@ async function submitRegister(){
     applyUserToUI(data.user);
     closeRegisterModal();
     showApp();
-    showToast('Conta criada com sucesso! Bem-vindo(a) 🎵','success');
+    showToast('Conta criada com sucesso! Bem-vindo(a).','success');
   } catch(e) {
     errEl.textContent='Servidor offline. Certifique-se de que npm run dev está rodando.';
   } finally {
@@ -2082,7 +2082,7 @@ async function handleLogout(){
     } catch(e) { /* silently ignore if server is down */ }
   }
   clearToken();
-  showToast('Até logo! 👋','info');
+  showToast('Até logo.','info');
   setTimeout(showLogin, 800);
 }
 
@@ -4245,7 +4245,7 @@ async function fetchMessages(){
     var msgs=data.data||[];
     var el=document.getElementById('chat-messages');
     if(!msgs.length){
-      el.innerHTML='<div class="chat-empty">Ainda não há mensagens. Diz olá! 👋</div>';
+      el.innerHTML='<div class="chat-empty">Ainda não há mensagens. Envia a primeira.</div>';
       return;
     }
     el.innerHTML='';
