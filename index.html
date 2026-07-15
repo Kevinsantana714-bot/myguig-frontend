@@ -2192,7 +2192,17 @@ function disconnectRealtime(){
 /* ── Utilitários de token ── */
 function saveToken(token){ localStorage.setItem('myguig_token', token); }
 function getToken(){ return localStorage.getItem('myguig_token'); }
-function clearToken(){ localStorage.removeItem('myguig_token'); }
+function clearToken(){
+  localStorage.removeItem('myguig_token');
+  localStorage.removeItem('myguig_profile');
+  localStorage.removeItem('myguig_settings');
+  if(typeof PRF_DEFAULT !== 'undefined'){
+    userProfile = Object.assign({}, PRF_DEFAULT);
+  }
+  if(typeof _cfg !== 'undefined'){
+    _cfg = { notifPropostas: true, notifMensagens: true, showCache: true, allowMsgs: true };
+  }
+}
 
 function authHeaders(){
   return { 'Content-Type':'application/json', 'Authorization':'Bearer '+getToken() };
