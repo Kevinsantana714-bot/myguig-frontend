@@ -2713,11 +2713,39 @@ async function handleResetPassword(){
   }
 }
 
-// Corrige o Safari/iOS "bfcache": ao voltar a uma página guardada em memória
-// (em vez de recarregar de verdade), força o ecrã de volta ao Início se a app já estava aberta.
+// Reconfirma com o servidor quem está autenticado, usando o token atual do localStorage.
+// Usado tanto no arranque normal como quando o Safari/iOS restaura a página da memória (bfcache)
+// em vez de a recarregar de verdade — sem isto, a app podia continuar a mostrar a conta antiga.
+async function reAuthFromToken(){
+  var token = getToken();
+  if(!token){
+    document.getElementById('main-app').style.display = 'none';
+    showLogin();
+    return;
+  }
+  try {
+    var res = await fetch(API+'/auth/me', { headers: authHeaders(), cache: 'no-store' });
+    if(res.ok){
+      var data = await res.json();
+      applyUserToUI(data.user);
+      if(data.user.onboarding_complete === false){
+        showOnboarding(data.user);
+      } else {
+        showApp();
+      }
+    } else {
+      clearToken();
+      showLogin();
+    }
+  } catch(e) {
+    /* Servidor offline — não tenta auto-login, mostra tela de login */
+    clearToken();
+  }
+}
+
 window.addEventListener('pageshow', function(event){
-  if(event.persisted && document.getElementById('main-app').style.display === 'block'){
-    navigate('inicio', document.getElementById('nav-inicio'));
+  if(event.persisted){
+    reAuthFromToken();
   }
 });
 
@@ -2746,29 +2774,12 @@ window.addEventListener('pageshow', function(event){
   // Erro no OAuth Google
   if(urlParams.get('google_error')){
     window.history.replaceState({}, '', window.location.pathname);
+    showLogin();
     showToast('Erro ao entrar com Google. Tenta novamente.','error');
   }
 
   // 2. Auto-login se tiver JWT válido
-  var token = getToken();
-  if(!token) return;
-  try {
-    var res = await fetch(API+'/auth/me', { headers: authHeaders(), cache: 'no-store' });
-    if(res.ok){
-      var data = await res.json();
-      applyUserToUI(data.user);
-      if(data.user.onboarding_complete === false){
-        showOnboarding(data.user);
-      } else {
-        showApp();
-      }
-    } else {
-      clearToken();
-    }
-  } catch(e) {
-    /* Servidor offline — não tenta auto-login, mostra tela de login */
-    clearToken();
-  }
+  await reAuthFromToken();
 })();
 
 /* ════════════════════════════════════════════
