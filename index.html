@@ -603,6 +603,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   transform:translateY(100%);transition:transform .25s ease-out;
   padding-bottom:env(safe-area-inset-bottom,0px);
   box-shadow:0 -4px 32px rgba(0,0,0,.6);
+  max-height:85vh;overflow-y:auto;
 }
 #more-drawer.open{transform:translateY(0)}
 .more-drawer-handle{width:40px;height:4px;background:#333;border-radius:2px;margin:14px auto 4px}
@@ -4488,45 +4489,57 @@ document.getElementById('login-senha').addEventListener('input',function(){this.
     </div>
   </div>
 
-  <div class="more-drawer-title">Notificações</div>
-  <div class="more-drawer-list">
-    <div class="cfg-row" style="padding:12px 20px">
-      <div><div class="cfg-label">Novas propostas</div></div>
-      <label class="cfg-toggle"><input type="checkbox" id="menu-notif-propostas" onchange="toggleCfg('notifPropostas',this.checked)"><span class="cfg-toggle-slider"></span></label>
+  <div style="padding:22px 20px 4px">
+    <div class="cfg-section" style="margin-bottom:20px">
+      <div class="cfg-section-title">Notificações</div>
+      <div class="cfg-card">
+        <div class="cfg-row">
+          <div class="cfg-label">Novas propostas</div>
+          <label class="cfg-toggle"><input type="checkbox" id="menu-notif-propostas" onchange="toggleCfg('notifPropostas',this.checked)"><span class="cfg-toggle-slider"></span></label>
+        </div>
+        <div class="cfg-row" style="border-bottom:none">
+          <div class="cfg-label">Mensagens</div>
+          <label class="cfg-toggle"><input type="checkbox" id="menu-notif-mensagens" onchange="toggleCfg('notifMensagens',this.checked)"><span class="cfg-toggle-slider"></span></label>
+        </div>
+      </div>
     </div>
-    <div class="cfg-row" style="padding:12px 20px">
-      <div><div class="cfg-label">Mensagens</div></div>
-      <label class="cfg-toggle"><input type="checkbox" id="menu-notif-mensagens" onchange="toggleCfg('notifMensagens',this.checked)"><span class="cfg-toggle-slider"></span></label>
+
+    <div class="cfg-section" style="margin-bottom:20px">
+      <div class="cfg-section-title">Privacidade</div>
+      <div class="cfg-card">
+        <div class="cfg-row">
+          <div class="cfg-label">Mostrar cachê mínimo no perfil</div>
+          <label class="cfg-toggle"><input type="checkbox" id="menu-show-cache" onchange="toggleCfg('showCache',this.checked)"><span class="cfg-toggle-slider"></span></label>
+        </div>
+        <div class="cfg-row" style="border-bottom:none">
+          <div class="cfg-label">Mensagens de desconhecidos</div>
+          <label class="cfg-toggle"><input type="checkbox" id="menu-allow-msgs" onchange="toggleCfg('allowMsgs',this.checked)"><span class="cfg-toggle-slider"></span></label>
+        </div>
+      </div>
+    </div>
+
+    <div class="cfg-section" style="margin-bottom:4px">
+      <div class="cfg-section-title">Conta</div>
+      <div class="cfg-card">
+        <div class="cfg-row" id="menu-row-senha">
+          <div class="cfg-label">Alterar senha</div>
+          <button class="cfg-btn" style="padding:7px 14px;font-size:12px" onclick="closeMoreDrawer();showToast('Em breve','info')">Alterar</button>
+        </div>
+        <div class="cfg-row" style="border-bottom:none">
+          <div class="cfg-label">Eliminar conta</div>
+          <button class="cfg-btn cfg-btn-danger" style="padding:7px 14px;font-size:12px" onclick="closeMoreDrawer();confirmDeleteAccount()">Eliminar</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="more-drawer-title">Privacidade</div>
-  <div class="more-drawer-list">
-    <div class="cfg-row" style="padding:12px 20px">
-      <div><div class="cfg-label">Mostrar cachê mínimo no perfil</div></div>
-      <label class="cfg-toggle"><input type="checkbox" id="menu-show-cache" onchange="toggleCfg('showCache',this.checked)"><span class="cfg-toggle-slider"></span></label>
-    </div>
-    <div class="cfg-row" style="padding:12px 20px">
-      <div><div class="cfg-label">Mensagens de desconhecidos</div></div>
-      <label class="cfg-toggle"><input type="checkbox" id="menu-allow-msgs" onchange="toggleCfg('allowMsgs',this.checked)"><span class="cfg-toggle-slider"></span></label>
-    </div>
-  </div>
-
-  <div class="more-drawer-title">Conta</div>
-  <div class="more-drawer-list">
-    <div class="cfg-row" id="menu-row-senha" style="padding:12px 20px">
-      <div><div class="cfg-label">Alterar senha</div></div>
-      <button class="cfg-btn" onclick="closeMoreDrawer();showToast('Em breve','info')">Alterar</button>
-    </div>
-    <div class="cfg-row" style="padding:12px 20px">
-      <div><div class="cfg-label">Eliminar conta</div></div>
-      <button class="cfg-btn cfg-btn-danger" onclick="closeMoreDrawer();confirmDeleteAccount()">Eliminar</button>
-    </div>
-    <div class="more-drawer-item more-drawer-logout" onclick="closeMoreDrawer();handleLogout()">
+  <div class="more-drawer-list" style="margin-top:6px;border-top:1px solid #222">
+    <div class="more-drawer-item more-drawer-logout" style="border-top:none" onclick="closeMoreDrawer();handleLogout()">
       <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2H3a1 1 0 00-1 1v10a1 1 0 001 1h3M10 11l4-4-4-4M14 7H6"/></svg>
       Sair
     </div>
   </div>
+
   <button class="more-drawer-close" onclick="closeMoreDrawer()">Fechar</button>
 </div>
 </body>
