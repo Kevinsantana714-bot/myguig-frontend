@@ -2188,6 +2188,11 @@ async function showApp(){
   document.getElementById('main-app').style.display='block';
   syncSidebar();
   renderHome();
+  loadManualEvents().then(function(){
+    // Eventos manuais só ficam disponíveis depois disto — recalcula qualquer stat já visível
+    if(document.getElementById('view-perfil').classList.contains('active')) renderPerfil();
+    if(document.getElementById('view-inicio').classList.contains('active')) renderHome();
+  });
   loadAndRenderProposals(false);
   connectRealtime();
   // Estado inicial da topbar mobile — a app abre direto no Início
