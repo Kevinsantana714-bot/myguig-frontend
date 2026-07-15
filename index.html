@@ -879,18 +879,16 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 
   /* Esconde tudo que não é nav */
   .sb-top, .sb-divider, .sb-footer, .sb-section-label { display: none !important; }
-  #sb-section-conta { display: none !important; }
 
-  /* A secção principal ocupa 100% */
+  /* As secções (Principal e Conta) deixam de existir como caixa —
+     os nav-item lá dentro (incluindo o Perfil) passam a ser filhos
+     diretos da barra, para ficarem todos na mesma linha, espaçados igualmente */
   .sb-section {
-    display: flex;
-    flex-direction: row;
-    flex: 1;
-    padding: 0;
-    margin: 0;
-    height: 100%;
+    display: contents;
+  }
+
+  .sidebar {
     justify-content: space-around;
-    align-items: stretch;
   }
 
   /* Esconde TODOS os nav-item por defeito */
