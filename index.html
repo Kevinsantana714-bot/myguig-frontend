@@ -6,6 +6,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <title>MyGUIG — Conecte-se à sua música</title>
 <meta name="description" content="Marketplace que liga músicos, artistas e contratantes. Envie e receba propostas, geriras a tua agenda e fecha shows numa única plataforma.">
 
@@ -2117,6 +2118,7 @@ async function showApp(){
   syncSidebar();
   renderHome();
   loadAndRenderProposals(false);
+  connectRealtime();
   // Estado inicial da topbar mobile — a app abre direto no Início
   var msgBtn=document.getElementById('btn-topbar-messages');
   if(msgBtn) msgBtn.style.display='inline-flex';
@@ -2142,6 +2144,38 @@ function showLogin(){
 }
 
 var API = 'https://myguig-backend-production.up.railway.app';
+
+var _socket = null;
+function connectRealtime(){
+  if(_socket) return;
+  _socket = io(API, { auth: { token: getToken() } });
+
+  _socket.on('notification:new', function(payload){
+    if(document.getElementById('view-inicio').classList.contains('active')) renderHome();
+    showToast(payload.message, 'info');
+  });
+
+  _socket.on('proposal:update', function(){
+    loadAndRenderProposals(false);
+  });
+
+  _socket.on('message:new', function(payload){
+    if(_activeConvId && payload.conversation_id === _activeConvId){
+      fetchMessages();
+    }
+    if(document.getElementById('view-mensagens') && document.getElementById('view-mensagens').classList.contains('active')){
+      loadConversations();
+    }
+    apiCall('GET','/api/conversations').then(function(data){
+      var convs=(data&&data.data)||[];
+      var totalUnread=convs.reduce(function(acc,c){return acc+(c.unread_count||0);},0);
+      _updateMsgBadges(totalUnread);
+    }).catch(function(){});
+  });
+}
+function disconnectRealtime(){
+  if(_socket){ _socket.disconnect(); _socket=null; }
+}
 
 /* ── Utilitários de token ── */
 function saveToken(token){ localStorage.setItem('myguig_token', token); }
@@ -2267,6 +2301,7 @@ async function handleLogout(){
       await fetch(API+'/auth/logout', { method:'POST', headers: authHeaders() });
     } catch(e) { /* silently ignore if server is down */ }
   }
+  disconnectRealtime();
   clearToken();
   showToast('Até logo.','info');
   setTimeout(showLogin, 800);
