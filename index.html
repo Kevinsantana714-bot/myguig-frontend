@@ -2766,9 +2766,11 @@ window.addEventListener('pageshow', function(event){
   // 1. Callback do Google OAuth — backend redireciona com ?token=&user=
   var gToken = urlParams.get('token');
   var gUser  = urlParams.get('user');
-  if(gToken && gUser){
+  var alreadyConsumed = gToken && sessionStorage.getItem('oauth_consumed') === gToken;
+  if(gToken && gUser && !alreadyConsumed){
     try {
       var user = JSON.parse(decodeURIComponent(gUser));
+      sessionStorage.setItem('oauth_consumed', gToken);
       saveToken(gToken);
       applyUserToUI(user);
       window.history.replaceState({}, '', window.location.pathname);
