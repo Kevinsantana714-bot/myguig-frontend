@@ -2117,6 +2117,11 @@ async function showApp(){
   syncSidebar();
   renderHome();
   loadAndRenderProposals(false);
+  // Estado inicial da topbar mobile — a app abre direto no Início
+  var msgBtn=document.getElementById('btn-topbar-messages');
+  if(msgBtn) msgBtn.style.display='inline-flex';
+  var menuBtn=document.getElementById('btn-topbar-menu');
+  if(menuBtn) menuBtn.style.display='none';
   apiCall('GET','/api/conversations').then(function(data){
     var convs=(data&&data.data)||[];
     var totalUnread=convs.reduce(function(acc,c){return acc+(c.unread_count||0);},0);
