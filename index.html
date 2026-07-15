@@ -95,6 +95,8 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .landing-cta-lg{padding:13px 26px;font-size:15px}
 .landing-features{
   max-width:1000px;margin:0 auto;padding:20px 24px 90px;
+}
+.landing-features-grid{
   display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
 }
 .landing-feature-card{
@@ -135,7 +137,8 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   .landing-hero{padding:56px 20px 48px}
   .landing-hero-title{font-size:30px}
   .landing-hero-sub{font-size:15px}
-  .landing-features{grid-template-columns:1fr;padding:10px 20px 60px}
+  .landing-features{padding:10px 20px 60px}
+  .landing-features-grid{grid-template-columns:1fr}
 }
 #login-screen{
   display:none;
@@ -1150,7 +1153,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   <section class="landing-features">
     <div class="landing-section-eyebrow">Como funciona</div>
     <div class="landing-section-title">Da tua primeira proposta ao show marcado.</div>
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px" class="landing-features-grid">
+    <div class="landing-features-grid">
     <div class="landing-feature-card">
       <span class="landing-feature-step">01</span>
       <div class="landing-feature-icon">
