@@ -106,6 +106,19 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   background:#1a1230;color:var(--primary-light);
   display:flex;align-items:center;justify-content:center;margin-bottom:16px;
 }
+.landing-feature-step{
+  position:absolute;top:20px;right:20px;
+  font-size:12px;font-weight:800;color:#2a2438;
+}
+.landing-feature-card{position:relative}
+.landing-section-eyebrow{
+  text-align:center;font-size:12px;font-weight:700;letter-spacing:1.2px;
+  color:var(--primary-light);text-transform:uppercase;margin-bottom:8px;
+}
+.landing-section-title{
+  text-align:center;font-size:24px;font-weight:800;color:#fff;margin-bottom:36px;
+}
+.landing-hero-note{font-size:13px;color:#555;margin-top:18px}
 .landing-feature-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px}
 .landing-feature-text{font-size:13.5px;color:#888;line-height:1.55}
 .landing-footer{
@@ -1121,35 +1134,43 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   </nav>
 
   <section class="landing-hero">
-    <h1 class="landing-hero-title">Conecte-se à sua música.</h1>
-    <p class="landing-hero-sub">Uma conta. Todos os papéis.<br>Músico, artista ou contratante — você decide na hora.</p>
+    <h1 class="landing-hero-title">O lugar onde músicos são contratados.</h1>
+    <p class="landing-hero-sub">Cria o teu perfil e aparece para quem contrata música — bares, casas de show, casamentos e organizadores de eventos.<br>Recebe propostas reais, negoceia e mantém a tua agenda sempre em dia.</p>
     <div class="landing-hero-cta">
-      <button class="btn-landing-primary landing-cta-lg" onclick="handleRegister()">Criar conta grátis</button>
+      <button class="btn-landing-primary landing-cta-lg" onclick="handleRegister()">Criar perfil grátis</button>
       <button class="btn-landing-ghost landing-cta-lg" onclick="showLogin()">Já tenho conta</button>
     </div>
+    <p class="landing-hero-note">Também usado por bares, casas de show e organizadores para encontrar músicos.</p>
   </section>
 
   <section class="landing-features">
+    <div class="landing-section-eyebrow">Como funciona</div>
+    <div class="landing-section-title">Da tua primeira proposta ao show marcado.</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px" class="landing-features-grid">
     <div class="landing-feature-card">
+      <span class="landing-feature-step">01</span>
       <div class="landing-feature-icon">
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"></circle><path d="M4 21v-1a8 8 0 0 1 16 0v1"></path></svg>
       </div>
-      <div class="landing-feature-title">Descobre talento</div>
-      <div class="landing-feature-text">Explora perfis reais de músicos e artistas, com disponibilidade e cachê visíveis antes de falar.</div>
+      <div class="landing-feature-title">O teu perfil fica visível</div>
+      <div class="landing-feature-text">Cria o teu perfil com estilo musical, cachê e disponibilidade. Quem contrata música te encontra diretamente — sem teres de andar atrás de trabalho.</div>
     </div>
     <div class="landing-feature-card">
+      <span class="landing-feature-step">02</span>
       <div class="landing-feature-icon">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
       </div>
-      <div class="landing-feature-title">Negoceia sem fricção</div>
-      <div class="landing-feature-text">Envia propostas, recebe contrapropostas e fecha o acordo tudo dentro da plataforma.</div>
+      <div class="landing-feature-title">Recebes propostas reais</div>
+      <div class="landing-feature-text">Bares, casas de show e organizadores enviam propostas diretamente para ti. Aceita, recusa ou faz contraproposta em segundos.</div>
     </div>
     <div class="landing-feature-card">
+      <span class="landing-feature-step">03</span>
       <div class="landing-feature-icon">
         <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
       </div>
-      <div class="landing-feature-title">Organiza a agenda</div>
-      <div class="landing-feature-text">Shows confirmados e eventos manuais numa agenda só, sem depender de mensagens soltas.</div>
+      <div class="landing-feature-title">A tua agenda atualiza-se sozinha</div>
+      <div class="landing-feature-text">Cada show confirmado entra automaticamente na tua agenda. Sem confusão entre WhatsApp, papel e memória.</div>
+    </div>
     </div>
   </section>
 
