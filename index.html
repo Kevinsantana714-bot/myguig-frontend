@@ -1677,6 +1677,18 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
     </div>
   </div>
 
+  <!-- MODAL: CONFIRMAÇÃO GENÉRICA (substitui confirm() nativo) -->
+  <div class="modal-overlay" id="generic-confirm-modal">
+    <div class="modal">
+      <div class="modal-title" id="gc-title">Confirmar ação</div>
+      <div class="modal-sub" id="gc-message"></div>
+      <div class="modal-actions">
+        <button class="btn-modal-cancel" id="gc-cancel-btn">Cancelar</button>
+        <button class="btn-modal-confirm" id="gc-confirm-btn">Confirmar</button>
+      </div>
+    </div>
+  </div>
+
   <div class="toast" id="toast"></div>
 
   <!-- MODAL: ADICIONAR EVENTO MANUAL -->
@@ -2648,8 +2660,8 @@ function renderCfgView(){
   var am=document.getElementById('cfg-allow-msgs'); if(am) am.checked=_cfg.allowMsgs;
 }
 
-function confirmDeleteAccount(){
-  if(!confirm('Tens a certeza que queres eliminar a tua conta? Esta a\u00e7\u00e3o \u00e9 irrevers\u00edvel.')) return;
+async function confirmDeleteAccount(){
+  if(!(await customConfirm('Tens a certeza que queres eliminar a tua conta? Esta a\u00e7\u00e3o \u00e9 irrevers\u00edvel.', {title:'Eliminar conta', confirmText:'Eliminar conta'}))) return;
   showToast('Em breve', 'info');
 }
 
@@ -2968,6 +2980,34 @@ function openDeclineModal(id){
   document.getElementById('decline-modal').classList.add('open');
 }
 function closeDeclineModal(){document.getElementById('decline-modal').classList.remove('open');}
+
+function customConfirm(message, opts){
+  opts = opts || {};
+  return new Promise(function(resolve){
+    document.getElementById('gc-title').textContent = opts.title || 'Confirmar ação';
+    document.getElementById('gc-message').textContent = message;
+    var confirmBtn = document.getElementById('gc-confirm-btn');
+    var cancelBtn  = document.getElementById('gc-cancel-btn');
+    confirmBtn.textContent = opts.confirmText || 'Confirmar';
+    var overlay = document.getElementById('generic-confirm-modal');
+    overlay.classList.add('open');
+
+    function cleanup(result){
+      overlay.classList.remove('open');
+      confirmBtn.removeEventListener('click', onConfirm);
+      cancelBtn.removeEventListener('click', onCancel);
+      overlay.removeEventListener('click', onOverlayClick);
+      resolve(result);
+    }
+    function onConfirm(){ cleanup(true); }
+    function onCancel(){ cleanup(false); }
+    function onOverlayClick(e){ if(e.target===overlay) cleanup(false); }
+
+    confirmBtn.addEventListener('click', onConfirm);
+    cancelBtn.addEventListener('click', onCancel);
+    overlay.addEventListener('click', onOverlayClick);
+  });
+}
 function selectReason(el){
   document.querySelectorAll('.reason-option').forEach(function(r){r.classList.remove('selected');r.querySelector('.reason-radio').style.cssText='';});
   el.classList.add('selected');el.querySelector('.reason-radio').style.cssText='background:var(--primary);border-color:var(--primary)';
@@ -3280,9 +3320,9 @@ async function savePanelEdit(id){
   }
 }
 
-function cancelEventClick(id, isManual){
+async function cancelEventClick(id, isManual){
   if(isManual){
-    if(!confirm('Remover este evento manual?')) return;
+    if(!(await customConfirm('Remover este evento manual?', {title:'Remover evento', confirmText:'Remover'}))) return;
     removeManualEvent(id);
   } else {
     _cancelEventTarget={id:id, manual:false};
@@ -4168,7 +4208,7 @@ function toggleConvSelect(id, el){
 async function deleteSelectedConvs(){
   if(!_selectedConvs.length) return;
   var n=_selectedConvs.length;
-  if(!confirm('Apagar '+(n===1?'1 conversa':n+' conversas')+'? Esta ação não pode ser desfeita.')) return;
+  if(!(await customConfirm('Apagar '+(n===1?'1 conversa':n+' conversas')+'? Esta ação não pode ser desfeita.', {title:'Excluir conversas', confirmText:'Excluir'}))) return;
   var ids=_selectedConvs.slice();
   try {
     await Promise.all(ids.map(function(id){ return apiCall('DELETE','/api/conversations/'+id); }));
