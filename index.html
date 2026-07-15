@@ -2753,7 +2753,7 @@ window.addEventListener('pageshow', function(event){
   var token = getToken();
   if(!token) return;
   try {
-    var res = await fetch(API+'/auth/me', { headers: authHeaders() });
+    var res = await fetch(API+'/auth/me', { headers: authHeaders(), cache: 'no-store' });
     if(res.ok){
       var data = await res.json();
       applyUserToUI(data.user);
@@ -2788,7 +2788,7 @@ var _upcomingShows = [];  // lista de eventos futuros confirmados, ordenada
 function allProposals(){ return proposals.concat(manualEvents); }
 
 async function apiCall(method, path, body){
-  var opts = { method: method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() } };
+  var opts = { method: method, headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() }, cache: 'no-store' };
   if(body) opts.body = JSON.stringify(body);
   var r = await fetch(API + path, opts);
   var json = await r.json().catch(function(){ return {}; });
