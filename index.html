@@ -338,6 +338,9 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .topbar{display:flex;align-items:center;justify-content:space-between;padding:14px 24px;border-bottom:1px solid #1a1a1a;flex-shrink:0}
 .topbar-title{font-size:16px;font-weight:500;color:#fff}
 .topbar-right{display:flex;align-items:center;gap:12px}
+@media(min-width:769px){
+  .topbar-mobile-only{display:none!important}
+}
 .skeleton-card{height:120px;border-radius:12px;background:#111;margin-bottom:12px;animation:pulse 1.4s ease-in-out infinite}
 .content{padding:0;overflow:auto;flex:1;display:flex;justify-content:center}
 .view{display:none;width:100%;max-width:1080px;padding:28px 32px;align-self:flex-start}.view.active{display:block}
@@ -1455,7 +1458,15 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
         <span class="topbar-title" id="topbar-title">Início</span>
       </div>
       <div class="topbar-right">
-        <button id="btn-topbar-menu" onclick="openMoreDrawer()"
+        <button id="btn-topbar-messages" class="topbar-mobile-only" onclick="navigate('mensagens',document.getElementById('nav-perfil'))"
+                style="display:none;position:relative;background:transparent;border:none;color:#ccc;cursor:pointer;
+                       padding:6px;align-items:center;justify-content:center;transition:color .15s"
+                onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'"
+                title="Mensagens">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+          <span class="nav-badge" id="msg-badge-topbar" style="display:none;position:absolute;top:2px;right:2px">0</span>
+        </button>
+        <button id="btn-topbar-menu" class="topbar-mobile-only" onclick="openMoreDrawer()"
                 style="display:none;background:transparent;border:none;color:#ccc;cursor:pointer;
                        padding:6px;align-items:center;justify-content:center;transition:color .15s"
                 onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#ccc'"
@@ -2104,6 +2115,11 @@ async function showApp(){
   syncSidebar();
   renderHome();
   loadAndRenderProposals(false);
+  apiCall('GET','/api/conversations').then(function(data){
+    var convs=(data&&data.data)||[];
+    var totalUnread=convs.reduce(function(acc,c){return acc+(c.unread_count||0);},0);
+    _updateMsgBadges(totalUnread);
+  }).catch(function(){});
 }
 
 function showLogin(){
@@ -3532,6 +3548,8 @@ function navigate(viewId,el){
   if(backBtn) backBtn.style.display = viewId==='musico-perfil' ? 'inline-flex' : 'none';
   var menuBtn=document.getElementById('btn-topbar-menu');
   if(menuBtn) menuBtn.style.display = viewId==='perfil' ? 'inline-flex' : 'none';
+  var msgBtn=document.getElementById('btn-topbar-messages');
+  if(msgBtn) msgBtn.style.display = viewId==='inicio' ? 'inline-flex' : 'none';
   if(viewId==='agenda')       { loadManualEvents().then(function(){ loadAndRenderProposals(false).then(renderCalendar); }); }
   if(viewId==='inicio')       renderHome();
   if(viewId==='perfil')       renderPerfil();
@@ -4290,6 +4308,12 @@ function _convTimestamp(iso){
   return d.getDate()+'/'+(d.getMonth()+1);
 }
 
+function _updateMsgBadges(totalUnread){
+  ['msg-badge','msg-badge-drawer','msg-badge-topbar'].forEach(function(id){
+    var el=document.getElementById(id);
+    if(el){ el.textContent=totalUnread; el.style.display=totalUnread>0?'flex':'none'; }
+  });
+}
 async function loadConversations(){
   var list=document.getElementById('conversations-list');
   list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>A carregar…</div>';
@@ -4300,10 +4324,7 @@ async function loadConversations(){
     var data=await apiCall('GET','/api/conversations');
     var convs=data.data||[];
     var totalUnread=convs.reduce(function(acc,c){return acc+(c.unread_count||0);},0);
-    var badge=document.getElementById('msg-badge');
-    if(badge){ badge.textContent=totalUnread; badge.style.display=totalUnread>0?'flex':'none'; }
-    var badgeDrawer=document.getElementById('msg-badge-drawer');
-    if(badgeDrawer){ badgeDrawer.textContent=totalUnread; badgeDrawer.style.display=totalUnread>0?'flex':'none'; }
+    _updateMsgBadges(totalUnread);
 
     if(!convs.length){
       list.innerHTML='<div class="conv-empty"><div class="conv-empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg></div>Nenhuma conversa ainda.<br><span style="font-size:12px;color:#333">Envia uma proposta a um músico para começar.</span></div>';
