@@ -1321,6 +1321,33 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 <!-- ══════════════════════════════════════════
      ONBOARDING PÓS-GOOGLE
 ══════════════════════════════════════════ -->
+
+<!-- ══════════════════════════════════════════
+     MODAL — ALTERAR SENHA (dentro da conta, já logado)
+══════════════════════════════════════════ -->
+<div id="change-pw-modal" class="pw-modal-overlay" style="display:none" onclick="if(event.target===this)closeChangePasswordModal()">
+  <div class="pw-modal">
+    <div class="pw-modal-title">Alterar senha</div>
+    <div class="pw-modal-sub">Introduz a tua senha atual e a nova senha.</div>
+    <div class="pw-field">
+      <label class="pw-label">Senha atual</label>
+      <input class="pw-input" id="cpw-current" type="password" placeholder="Senha atual">
+    </div>
+    <div class="pw-field">
+      <label class="pw-label">Nova senha</label>
+      <input class="pw-input" id="cpw-new1" type="password" placeholder="Mínimo 8 caracteres">
+    </div>
+    <div class="pw-field">
+      <label class="pw-label">Confirmar nova senha</label>
+      <input class="pw-input" id="cpw-new2" type="password" placeholder="Repete a nova senha"
+        onkeydown="if(event.key==='Enter')handleChangePassword()">
+    </div>
+    <div class="pw-error" id="cpw-err"></div>
+    <button class="pw-btn" id="cpw-btn" onclick="handleChangePassword()">Guardar nova senha</button>
+    <button class="pw-btn-ghost" onclick="closeChangePasswordModal()">Cancelar</button>
+  </div>
+</div>
+
 <div id="onboarding-screen">
   <div class="ob-box">
     <div class="ob-logo">
@@ -1619,7 +1646,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
           <div class="cfg-card">
             <div class="cfg-row" id="cfg-row-senha">
               <div><div class="cfg-label">Alterar senha</div><div class="cfg-sub">Modifica a senha de acesso à conta</div></div>
-              <button class="cfg-btn" onclick="showToast('Em breve','info')">Alterar senha</button>
+              <button class="cfg-btn" onclick="openChangePasswordModal()">Alterar senha</button>
             </div>
             <div class="cfg-row">
               <div><div class="cfg-label">Eliminar conta</div><div class="cfg-sub">Remove permanentemente a tua conta e dados</div></div>
@@ -2602,6 +2629,40 @@ function openForgotModal(){
   document.getElementById('forgot-modal').style.display='flex';
   setTimeout(function(){ document.getElementById('fw-email').focus(); },80);
 }
+function openChangePasswordModal(){
+  document.getElementById('cpw-current').value='';
+  document.getElementById('cpw-new1').value='';
+  document.getElementById('cpw-new2').value='';
+  document.getElementById('cpw-err').textContent='';
+  document.getElementById('cpw-btn').disabled=false;
+  document.getElementById('cpw-btn').textContent='Guardar nova senha';
+  document.getElementById('change-pw-modal').style.display='flex';
+}
+function closeChangePasswordModal(){
+  document.getElementById('change-pw-modal').style.display='none';
+}
+async function handleChangePassword(){
+  var current = document.getElementById('cpw-current').value;
+  var pass1   = document.getElementById('cpw-new1').value;
+  var pass2   = document.getElementById('cpw-new2').value;
+  var err     = document.getElementById('cpw-err');
+  var btn     = document.getElementById('cpw-btn');
+  err.textContent='';
+  if(!current || !pass1 || !pass2){ err.textContent='Preenche todos os campos.'; return; }
+  if(pass1.length < 8){ err.textContent='A nova senha deve ter no mínimo 8 caracteres.'; return; }
+  if(pass1 !== pass2){ err.textContent='As senhas não coincidem.'; return; }
+  btn.disabled=true; btn.textContent='A guardar…';
+  try {
+    await apiCall('PUT','/auth/change-password',{ currentPassword: current, newPassword: pass1 });
+    closeChangePasswordModal();
+    showToast('Senha alterada com sucesso.','success');
+  } catch(e){
+    err.textContent = e.message || 'Erro ao alterar a senha.';
+  } finally {
+    btn.disabled=false; btn.textContent='Guardar nova senha';
+  }
+}
+
 function closeForgotModal(){
   _fwClearTimer();
   document.getElementById('forgot-modal').style.display='none';
@@ -2967,7 +3028,16 @@ function renderCfgView(){ syncCfgUI(); }
 
 async function confirmDeleteAccount(){
   if(!(await customConfirm('Tens a certeza que queres eliminar a tua conta? Esta a\u00e7\u00e3o \u00e9 irrevers\u00edvel.', {title:'Eliminar conta', confirmText:'Eliminar conta'}))) return;
-  showToast('Em breve', 'info');
+  try {
+    await apiCall('DELETE','/auth/account');
+    disconnectRealtime();
+    clearToken();
+    document.getElementById('main-app').style.display='none';
+    document.getElementById('landing-screen').style.display='block';
+    showToast('A tua conta foi eliminada.', 'info');
+  } catch(e){
+    showToast('Erro ao eliminar conta: '+e.message, 'error');
+  }
 }
 
 function fmtCache(v){
@@ -4670,7 +4740,7 @@ document.getElementById('login-senha').addEventListener('input',function(){this.
       <div class="cfg-card">
         <div class="cfg-row" id="menu-row-senha">
           <div class="cfg-label">Alterar senha</div>
-          <button class="cfg-btn" style="padding:7px 14px;font-size:12px" onclick="closeMoreDrawer();showToast('Em breve','info')">Alterar</button>
+          <button class="cfg-btn" style="padding:7px 14px;font-size:12px" onclick="closeMoreDrawer();openChangePasswordModal()">Alterar</button>
         </div>
         <div class="cfg-row" style="border-bottom:none">
           <div class="cfg-label">Eliminar conta</div>
