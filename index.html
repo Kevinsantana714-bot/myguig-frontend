@@ -50,8 +50,77 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 /* ══════════════════════════════════════════
    TELA DE LOGIN
 ══════════════════════════════════════════ */
+#landing-screen{
+  background:#000;
+  min-height:100vh;
+}
+.landing-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:20px 32px;max-width:1100px;margin:0 auto;
+}
+.landing-nav-logo{display:flex;align-items:center;gap:10px}
+.landing-nav-logo-icon{
+  width:34px;height:34px;border-radius:9px;
+  background:linear-gradient(135deg,var(--primary-hover),var(--primary-light));
+  display:flex;align-items:center;justify-content:center;
+  font-weight:800;color:#fff;font-size:16px;
+}
+.landing-nav-logo-text{font-weight:700;font-size:17px;color:#fff}
+.landing-nav-logo-text em{color:var(--primary-light);font-style:normal}
+.landing-nav-actions{display:flex;gap:10px}
+.btn-landing-ghost{
+  background:transparent;color:#ccc;border:1px solid #2a2a2a;border-radius:8px;
+  padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:all .15s;
+}
+.btn-landing-ghost:hover{border-color:#444;color:#fff}
+.btn-landing-ghost:active{transform:scale(.97)}
+.btn-landing-primary{
+  background:linear-gradient(135deg,var(--primary-hover),var(--primary));color:#fff;border:none;border-radius:8px;
+  padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;
+  transition:all .15s;box-shadow:var(--shadow-sm);
+}
+.btn-landing-primary:hover{box-shadow:var(--shadow-hover);transform:translateY(-1px)}
+.btn-landing-primary:active{transform:scale(.97)}
+.landing-hero{
+  max-width:720px;margin:0 auto;text-align:center;
+  padding:90px 24px 70px;
+}
+.landing-hero-title{
+  font-size:44px;font-weight:800;color:#fff;line-height:1.15;margin-bottom:18px;
+  letter-spacing:-.5px;
+}
+.landing-hero-sub{font-size:17px;color:#999;line-height:1.6;margin-bottom:36px}
+.landing-hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.landing-cta-lg{padding:13px 26px;font-size:15px}
+.landing-features{
+  max-width:1000px;margin:0 auto;padding:20px 24px 90px;
+  display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
+}
+.landing-feature-card{
+  background:#0d0d0d;border:1px solid #1e1e1e;border-radius:14px;
+  padding:26px 22px;box-shadow:var(--shadow-sm);
+}
+.landing-feature-icon{
+  width:44px;height:44px;border-radius:10px;
+  background:#1a1230;color:var(--primary-light);
+  display:flex;align-items:center;justify-content:center;margin-bottom:16px;
+}
+.landing-feature-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px}
+.landing-feature-text{font-size:13.5px;color:#888;line-height:1.55}
+.landing-footer{
+  text-align:center;padding:24px;color:#444;font-size:12.5px;
+  border-top:1px solid #161616;
+}
+@media(max-width:768px){
+  .landing-nav{padding:16px 20px}
+  .landing-hero{padding:56px 20px 48px}
+  .landing-hero-title{font-size:30px}
+  .landing-hero-sub{font-size:15px}
+  .landing-features{grid-template-columns:1fr;padding:10px 20px 60px}
+}
 #login-screen{
-  display:flex;
+  display:none;
   align-items:center;
   justify-content:center;
   min-height:100vh;
@@ -1037,6 +1106,59 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 <body>
 
 <!-- ══════════════════════════════════════════
+     LANDING PAGE (visitantes sem sessão)
+══════════════════════════════════════════ -->
+<div id="landing-screen">
+  <nav class="landing-nav">
+    <div class="landing-nav-logo">
+      <div class="landing-nav-logo-icon">G</div>
+      <span class="landing-nav-logo-text">My<em>GUIG</em></span>
+    </div>
+    <div class="landing-nav-actions">
+      <button class="btn-landing-ghost" onclick="showLogin()">Entrar</button>
+      <button class="btn-landing-primary" onclick="handleRegister()">Criar conta</button>
+    </div>
+  </nav>
+
+  <section class="landing-hero">
+    <h1 class="landing-hero-title">Conecte-se à sua música.</h1>
+    <p class="landing-hero-sub">Uma conta. Todos os papéis.<br>Músico, artista ou contratante — você decide na hora.</p>
+    <div class="landing-hero-cta">
+      <button class="btn-landing-primary landing-cta-lg" onclick="handleRegister()">Criar conta grátis</button>
+      <button class="btn-landing-ghost landing-cta-lg" onclick="showLogin()">Já tenho conta</button>
+    </div>
+  </section>
+
+  <section class="landing-features">
+    <div class="landing-feature-card">
+      <div class="landing-feature-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      </div>
+      <div class="landing-feature-title">Descobre talento</div>
+      <div class="landing-feature-text">Explora perfis reais de músicos e artistas, com disponibilidade e cachê visíveis antes de falar.</div>
+    </div>
+    <div class="landing-feature-card">
+      <div class="landing-feature-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+      </div>
+      <div class="landing-feature-title">Negoceia sem fricção</div>
+      <div class="landing-feature-text">Envia propostas, recebe contrapropostas e fecha o acordo tudo dentro da plataforma.</div>
+    </div>
+    <div class="landing-feature-card">
+      <div class="landing-feature-icon">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+      </div>
+      <div class="landing-feature-title">Organiza a agenda</div>
+      <div class="landing-feature-text">Shows confirmados e eventos manuais numa agenda só, sem depender de mensagens soltas.</div>
+    </div>
+  </section>
+
+  <footer class="landing-footer">
+    &copy; 2026 MyGUIG. Feito para quem vive de música.
+  </footer>
+</div>
+
+<!-- ══════════════════════════════════════════
      TELA DE LOGIN
 ══════════════════════════════════════════ -->
 <div id="login-screen">
@@ -1939,6 +2061,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 ════════════════════════════════════════════ */
 
 async function showApp(){
+  document.getElementById('landing-screen').style.display='none';
   document.getElementById('login-screen').style.display='none';
   document.getElementById('main-app').style.display='block';
   syncSidebar();
@@ -1947,6 +2070,7 @@ async function showApp(){
 }
 
 function showLogin(){
+  document.getElementById('landing-screen').style.display='none';
   document.getElementById('main-app').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   /* Limpa campos do login */
