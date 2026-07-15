@@ -3838,12 +3838,13 @@ function _renderProfileStats(confirmed, pending){
 
 async function loadProfileStats(){
   try {
-    // Usa pagination.total para obter contagens reais sem transferir dados desnecessários
-    var confRes = await apiCall('GET', '/api/proposals?status=confirmed&limit=1&page=1');
+    // "Confirmados" inclui eventos manuais, por isso é calculado localmente (allProposals()),
+    // nunca a partir da API de propostas sozinha — essa não sabe nada sobre eventos manuais.
+    var confirmed = allProposals().filter(function(p){return p.status==='confirmed';}).length;
     var pendRes = await apiCall('GET', '/api/proposals?status=pending&limit=1&page=1');
     var negRes  = await apiCall('GET', '/api/proposals?status=negotiating&limit=1&page=1');
     _renderProfileStats(
-      confRes.pagination.total,
+      confirmed,
       pendRes.pagination.total + negRes.pagination.total
     );
   } catch(e){
