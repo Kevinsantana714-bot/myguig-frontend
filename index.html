@@ -1433,6 +1433,10 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
     <div class="sb-divider"></div>
     <div class="sb-section" id="sb-section-conta">
       <div class="sb-section-label">Conta</div>
+      <div class="nav-item" id="nav-admin" onclick="navigate('admin',this)" style="display:none">
+        <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 1l6 3v4c0 4-2.5 6.5-6 7-3.5-.5-6-3-6-7V4l6-3z"/></svg>
+        Admin
+      </div>
       <div class="nav-item" id="nav-perfil" onclick="navigate('perfil',this)">
         <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="8" cy="5" r="3"/><path d="M2 14c0-3.3 2.7-6 6-6s6 2.7 6 6"/></svg>
         Meu perfil
@@ -1626,6 +1630,14 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
       </div>
 
       <!-- PERFIL -->
+      <div class="view" id="view-admin">
+  <div style="padding:24px">
+    <div id="admin-stats-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:28px"></div>
+    <div class="cfg-section-title" style="margin-bottom:12px">Utilizadores recentes</div>
+    <div class="cfg-card" id="admin-users-list"></div>
+  </div>
+</div>
+
       <div class="view" id="view-perfil">
         <div class="prf-wrap">
           <div style="position:relative;margin-bottom:0">
@@ -2332,6 +2344,8 @@ function applyUserToUI(user){
   if(user.role       != null) userProfile.role = user.role;
   if(user.google_id           != null) userProfile.google_id           = user.google_id;
   if(user.onboarding_complete != null) userProfile.onboarding_complete = user.onboarding_complete;
+  var navAdmin = document.getElementById('nav-admin');
+  if(navAdmin) navAdmin.style.display = user.is_admin ? '' : 'none';
   // Ocultar "Alterar senha" para contas Google (não têm password) — na página e no menu mobile
   ['cfg-row-senha','menu-row-senha'].forEach(function(id){
     var el = document.getElementById(id);
@@ -2829,6 +2843,41 @@ function normalizeProposal(p){
     _timeSort:      p.horario_inicio || '',   // 'HH:MM:SS' — usado para sort secundário por hora
     _raw:           p,
   };
+}
+
+async function loadAdminData(){
+  try {
+    var stats = await apiCall('GET','/api/admin/stats');
+    var roleMap = {}; (stats.users_by_role||[]).forEach(function(r){ roleMap[r.role]=r.total; });
+    var statusMap = {}; (stats.proposals_by_status||[]).forEach(function(s){ statusMap[s.status]=s.total; });
+    var cards = [
+      { label:'Utilizadores totais', value: stats.total_users, color:'#a78bfa' },
+      { label:'Músicos',             value: roleMap.musician || 0, color:'#818cf8' },
+      { label:'Contratantes',        value: roleMap.contractor || 0, color:'#818cf8' },
+      { label:'Novos (7 dias)',      value: stats.new_users_7d, color:'#4ade80' },
+      { label:'Propostas totais',    value: stats.total_proposals, color:'#a78bfa' },
+      { label:'Confirmadas',         value: statusMap.confirmed || 0, color:'#4ade80' },
+      { label:'Pendentes',           value: statusMap.pending || 0, color:'#fbbf24' },
+      { label:'Canceladas',          value: statusMap.cancelled || 0, color:'#f87171' },
+    ];
+    document.getElementById('admin-stats-grid').innerHTML = cards.map(function(c){
+      return '<div class="cfg-card" style="padding:16px"><div style="font-size:12px;color:#888;margin-bottom:6px">'+c.label+'</div><div style="font-size:26px;font-weight:800;color:'+c.color+'">'+c.value+'</div></div>';
+    }).join('');
+
+    var users = await apiCall('GET','/api/admin/users');
+    var list = users.data || [];
+    document.getElementById('admin-users-list').innerHTML = list.map(function(u,i){
+      var roleLabel = u.role==='musician'?'Músico':u.role==='contractor'?'Contratante':u.role==='artist'?'Artista/Banda':u.role;
+      var dt = new Date(u.created_at);
+      var dateStr = dt.toLocaleDateString('pt-PT');
+      return '<div class="cfg-row"'+(i===list.length-1?' style="border-bottom:none"':'')+'>'+
+        '<div><div class="cfg-label">'+u.name+'</div><div class="cfg-sub">'+u.email+' — '+roleLabel+'</div></div>'+
+        '<div style="font-size:12px;color:#666">'+dateStr+'</div>'+
+      '</div>';
+    }).join('') || '<div style="padding:20px;color:#666;font-size:13px">Sem utilizadores.</div>';
+  } catch(e) {
+    document.getElementById('admin-stats-grid').innerHTML = '<div style="color:#f87171;font-size:13px">Erro ao carregar dados: '+e.message+'</div>';
+  }
 }
 
 async function loadAndRenderProposals(append){
@@ -3580,7 +3629,7 @@ async function confirmCancelProposal(){
 function navigate(viewId,el){
   document.querySelectorAll('.nav-item').forEach(function(n){n.classList.remove('active');});
   if(el) el.classList.add('active');
-  var titles={inicio:'Início',descobrir:'Descobrir músicos',mensagens:'Mensagens',propostas:'Propostas',agenda:'Agenda',perfil:'Meu Perfil','musico-perfil':'Perfil do Músico',configuracoes:'Configurações'};
+  var titles={inicio:'Início',descobrir:'Descobrir músicos',mensagens:'Mensagens',propostas:'Propostas',agenda:'Agenda',perfil:'Meu Perfil','musico-perfil':'Perfil do Músico',configuracoes:'Configurações',admin:'Painel de Admin'};
   document.getElementById('topbar-title').textContent=titles[viewId]||viewId;
   document.querySelectorAll('.view').forEach(function(v){v.classList.remove('active');});
   var v=document.getElementById('view-'+viewId);
@@ -3598,6 +3647,7 @@ function navigate(viewId,el){
   if(viewId==='descobrir')    loadMusicians(false);
   if(viewId==='mensagens')       loadConversations();
   if(viewId==='configuracoes')   renderCfgView();
+  if(viewId==='admin')           loadAdminData();
 }
 
 var TOAST_ICONS = {
