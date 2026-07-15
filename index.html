@@ -2713,6 +2713,14 @@ async function handleResetPassword(){
   }
 }
 
+// Corrige o Safari/iOS "bfcache": ao voltar a uma página guardada em memória
+// (em vez de recarregar de verdade), força o ecrã de volta ao Início se a app já estava aberta.
+window.addEventListener('pageshow', function(event){
+  if(event.persisted && document.getElementById('main-app').style.display === 'block'){
+    navigate('inicio', document.getElementById('nav-inicio'));
+  }
+});
+
 /* ── Verifica token ao carregar ── */
 (async function(){
   var urlParams = new URLSearchParams(window.location.search);
