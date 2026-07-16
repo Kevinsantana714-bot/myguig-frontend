@@ -1384,6 +1384,23 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════
+     MODAL — PEDIR CIDADE (contas já existentes sem esse dado)
+══════════════════════════════════════════ -->
+<div id="city-prompt-modal" class="pw-modal-overlay" style="display:none">
+  <div class="pw-modal">
+    <div class="pw-modal-title">Onde estás baseado?</div>
+    <div class="pw-modal-sub">Ajuda quem contrata música a encontrar-te por perto. Podes alterar mais tarde em "Editar informações".</div>
+    <div class="pw-field">
+      <input class="pw-input" id="city-prompt-input" type="text" placeholder="Ex: Lisboa, Porto, Coimbra..."
+        onkeydown="if(event.key==='Enter')saveCityPrompt()">
+    </div>
+    <div class="pw-error" id="city-prompt-err"></div>
+    <button class="pw-btn" id="city-prompt-btn" onclick="saveCityPrompt()">Guardar</button>
+    <button class="pw-btn-ghost" onclick="closeCityPromptModal()">Agora não</button>
+  </div>
+</div>
+
 <div id="onboarding-screen">
   <div class="ob-box">
     <div class="ob-logo">
@@ -1396,6 +1413,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
       <div class="ob-dot active" id="ob-dot-1"></div>
       <div class="ob-dot" id="ob-dot-2"></div>
       <div class="ob-dot" id="ob-dot-3"></div>
+      <div class="ob-dot" id="ob-dot-4"></div>
     </div>
 
     <!-- PASSO 1 — Nome -->
@@ -1439,12 +1457,22 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
       <button class="ob-btn" onclick="obNext(3)">Continuar →</button>
     </div>
 
-    <!-- PASSO 3 — Concluído -->
+    <!-- PASSO 3 — Cidade -->
     <div class="ob-step" id="ob-step3">
+      <div class="ob-title">Onde estás baseado?</div>
+      <div class="ob-sub">Ajuda quem contrata música a encontrar-te por perto.</div>
+      <input class="ob-input" id="ob-cidade" type="text" placeholder="Ex: Lisboa, Porto, Coimbra..."
+        onkeydown="if(event.key==='Enter')obNext(4)">
+      <div class="ob-err" id="ob-err3"></div>
+      <button class="ob-btn" onclick="obNext(4)">Continuar →</button>
+    </div>
+
+    <!-- PASSO 4 — Concluído -->
+    <div class="ob-step" id="ob-step4">
       <div class="ob-done-icon"><svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg></div>
       <div class="ob-title" id="ob-done-title">Tudo pronto!</div>
       <div class="ob-sub">Bem-vindo ao MyGUIG. A tua conta está configurada e pronta a usar.</div>
-      <div class="ob-err" id="ob-err3"></div>
+      <div class="ob-err" id="ob-err4"></div>
       <button class="ob-btn" id="ob-done-btn" onclick="finishOnboarding()">Entrar na plataforma</button>
     </div>
   </div>
@@ -2159,6 +2187,11 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
       <div class="register-field">
         <label class="register-label">E-mail</label>
         <input class="register-input" id="reg-email" type="email" placeholder="seu@email.com"
+          onkeydown="if(event.key==='Enter')document.getElementById('reg-cidade').focus()">
+      </div>
+      <div class="register-field">
+        <label class="register-label">Cidade</label>
+        <input class="register-input" id="reg-cidade" type="text" placeholder="Ex: Lisboa, Porto, Coimbra..."
           onkeydown="if(event.key==='Enter')document.getElementById('reg-senha').focus()">
       </div>
       <div class="register-field">
@@ -2313,6 +2346,7 @@ async function handleLogin(){
     saveToken(data.token);
     applyUserToUI(data.user);
     showApp();
+    maybeShowCityPrompt(data.user);
   } catch(e) {
     errEl.textContent='Servidor offline. Certifique-se de que npm run dev está rodando.';
   } finally {
@@ -2327,7 +2361,7 @@ function handleRegister(){
 }
 function closeRegisterModal(){
   document.getElementById('register-modal').classList.remove('open');
-  ['reg-name','reg-email','reg-senha','reg-confirma'].forEach(function(id){
+  ['reg-name','reg-email','reg-cidade','reg-senha','reg-confirma'].forEach(function(id){
     document.getElementById(id).value='';
     document.getElementById(id).classList.remove('error');
   });
@@ -2338,18 +2372,20 @@ function closeRegisterModal(){
 async function submitRegister(){
   var name     = document.getElementById('reg-name').value.trim();
   var email    = document.getElementById('reg-email').value.trim();
+  var cidade   = document.getElementById('reg-cidade').value.trim();
   var senha    = document.getElementById('reg-senha').value;
   var confirma = document.getElementById('reg-confirma').value;
   var errEl    = document.getElementById('reg-error');
   var btn      = document.getElementById('reg-btn');
 
   errEl.textContent='';
-  ['reg-name','reg-email','reg-senha','reg-confirma'].forEach(function(id){
+  ['reg-name','reg-email','reg-cidade','reg-senha','reg-confirma'].forEach(function(id){
     document.getElementById(id).classList.remove('error');
   });
 
   if(!name)   { document.getElementById('reg-name').classList.add('error');    errEl.textContent='Preencha o nome.'; return; }
   if(!email)  { document.getElementById('reg-email').classList.add('error');   errEl.textContent='Preencha o e-mail.'; return; }
+  if(!cidade) { document.getElementById('reg-cidade').classList.add('error');  errEl.textContent='Indica a tua cidade.'; return; }
   if(senha.length<8){ document.getElementById('reg-senha').classList.add('error'); errEl.textContent='A senha deve ter no mínimo 8 caracteres.'; return; }
   if(senha!==confirma){ document.getElementById('reg-confirma').classList.add('error'); errEl.textContent='As senhas não coincidem.'; return; }
 
@@ -2358,7 +2394,7 @@ async function submitRegister(){
     var res  = await fetch(API+'/auth/register', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name, email, password: senha, role: _selectedRole})
+      body: JSON.stringify({name, email, password: senha, role: _selectedRole, cidade: cidade})
     });
     var data = await res.json();
     if(!res.ok){
@@ -2553,12 +2589,14 @@ var _obRole = null; // role selecionado no passo 2
 function showOnboarding(user){
   // Pré-preencher nome com o do Google
   document.getElementById('ob-name').value = (user && user.name) || '';
+  document.getElementById('ob-cidade').value = (user && user.cidade) || '';
   // Reset estado
   _obRole = null;
   _obGoStep(1);
   document.getElementById('ob-err1').textContent = '';
   document.getElementById('ob-err2').textContent = '';
   document.getElementById('ob-err3').textContent = '';
+  document.getElementById('ob-err4').textContent = '';
   document.getElementById('ob-done-btn').disabled = false;
   document.getElementById('ob-done-btn').textContent = 'Entrar na plataforma';
   ['musician','artist','contractor'].forEach(function(r){
@@ -2571,7 +2609,7 @@ function showOnboarding(user){
 }
 
 function _obGoStep(n){
-  [1,2,3].forEach(function(i){
+  [1,2,3,4].forEach(function(i){
     document.getElementById('ob-step'+i).className = 'ob-step'+(i===n?' visible':'');
     var dot = document.getElementById('ob-dot-'+i);
     dot.className = 'ob-dot'+(i<n?' done':i===n?' active':'');
@@ -2583,12 +2621,16 @@ function obNext(step){
     var name = (document.getElementById('ob-name').value||'').trim();
     if(!name){ document.getElementById('ob-err1').textContent='Introduz o teu nome.'; return; }
     document.getElementById('ob-err1').textContent='';
-    // Actualizar título do passo 3
     document.getElementById('ob-done-title').textContent='Tudo pronto, '+name.split(' ')[0]+'!';
   }
   if(step===3){
     if(!_obRole){ document.getElementById('ob-err2').textContent='Seleciona uma opção.'; return; }
     document.getElementById('ob-err2').textContent='';
+  }
+  if(step===4){
+    var cidade = (document.getElementById('ob-cidade').value||'').trim();
+    if(!cidade){ document.getElementById('ob-err3').textContent='Indica a tua cidade.'; return; }
+    document.getElementById('ob-err3').textContent='';
   }
   _obGoStep(step);
 }
@@ -2601,15 +2643,17 @@ function selectObRole(role){
 }
 
 async function finishOnboarding(){
-  var name = (document.getElementById('ob-name').value||'').trim();
+  var name   = (document.getElementById('ob-name').value||'').trim();
+  var cidade = (document.getElementById('ob-cidade').value||'').trim();
   var btn  = document.getElementById('ob-done-btn');
-  var err  = document.getElementById('ob-err3');
+  var err  = document.getElementById('ob-err4');
   err.textContent='';
   btn.disabled=true; btn.textContent='A guardar…';
   try {
     var r = await apiCall('PUT', '/auth/profile', {
       name:                name,
       role:                _obRole || 'musician',
+      cidade:              cidade,
       onboarding_complete: true,
     });
     applyUserToUI(r.user);
@@ -2706,6 +2750,34 @@ async function handleChangePassword(){
     err.textContent = e.message || 'Erro ao alterar a senha.';
   } finally {
     btn.disabled=false; btn.textContent='Guardar nova senha';
+  }
+}
+
+function maybeShowCityPrompt(user){
+  if(user && user.onboarding_complete && !user.cidade){
+    document.getElementById('city-prompt-input').value='';
+    document.getElementById('city-prompt-err').textContent='';
+    document.getElementById('city-prompt-modal').style.display='flex';
+  }
+}
+function closeCityPromptModal(){
+  document.getElementById('city-prompt-modal').style.display='none';
+}
+async function saveCityPrompt(){
+  var cidade = (document.getElementById('city-prompt-input').value||'').trim();
+  var err = document.getElementById('city-prompt-err');
+  var btn = document.getElementById('city-prompt-btn');
+  if(!cidade){ err.textContent='Escreve a tua cidade.'; return; }
+  btn.disabled=true; btn.textContent='A guardar…';
+  try {
+    var r = await apiCall('PUT','/auth/profile', { cidade: cidade });
+    applyUserToUI(r.user);
+    closeCityPromptModal();
+    showToast('Cidade guardada!','success');
+  } catch(e){
+    err.textContent = e.message || 'Erro ao guardar.';
+  } finally {
+    btn.disabled=false; btn.textContent='Guardar';
   }
 }
 
@@ -2849,6 +2921,7 @@ async function reAuthFromToken(){
         showOnboarding(data.user);
       } else {
         showApp();
+        maybeShowCityPrompt(data.user);
       }
     } else {
       clearToken();
@@ -2885,6 +2958,7 @@ window.addEventListener('pageshow', function(event){
         showOnboarding(user);
       } else {
         showApp();
+        maybeShowCityPrompt(user);
       }
       return;
     } catch(e) { /* JSON inválido — ignora e segue para auto-login normal */ }
