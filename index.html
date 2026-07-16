@@ -2274,7 +2274,11 @@ function connectRealtime(){
   });
 
   _socket.on('proposal:update', function(){
-    loadAndRenderProposals(false);
+    loadAndRenderProposals(false).then(function(){
+      if(document.getElementById('view-agenda').classList.contains('active')){
+        loadManualEvents().then(renderCalendar);
+      }
+    });
   });
 
   _socket.on('message:new', function(payload){
