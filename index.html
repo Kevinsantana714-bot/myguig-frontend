@@ -1128,6 +1128,23 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .chat-msg.mine .chat-bubble{background:linear-gradient(135deg,var(--primary-hover),var(--primary));color:#fff;border-radius:18px 18px 4px 18px}
 .chat-msg.theirs .chat-bubble{background:#232328;color:#eee;border-radius:18px 18px 18px 4px}
 .chat-ts{font-size:10px;color:#555;margin-top:3px;padding:0 4px}
+.chat-msg.system{align-self:center;max-width:92%;align-items:center;width:100%}
+.chat-proposal-card{
+  width:100%;display:flex;gap:12px;align-items:center;
+  background:linear-gradient(135deg,#1a1230,#161619);
+  border:1px solid #2e1f55;border-radius:16px;
+  padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.3);
+}
+.chat-proposal-icon{
+  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--primary-hover),var(--primary));
+  display:flex;align-items:center;justify-content:center;color:#fff;
+}
+.chat-proposal-body{flex:1;min-width:0}
+.chat-proposal-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--primary-light);margin-bottom:3px}
+.chat-proposal-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-proposal-meta{display:flex;gap:14px;font-size:12px;color:#999}
+.chat-proposal-cache{color:#4ade80;font-weight:700}
 .chat-footer{
   display:flex;gap:8px;padding:12px;align-items:center;
   border-top:1px solid #1e1e2a;flex-shrink:0;background:#161619;
@@ -4879,11 +4896,31 @@ async function fetchMessages(){
     }
     el.innerHTML='';
     msgs.forEach(function(m){
-      var mine=(_currentUserId&&m.sender_id===_currentUserId);
       var div=document.createElement('div');
-      div.className='chat-msg '+(mine?'mine':'theirs');
       var ts=_convTimestamp(m.created_at);
-      div.innerHTML='<div class="chat-bubble">'+m.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div><div class="chat-ts">'+ts+'</div>';
+      var propMatch = m.body.match(/^Proposta enviada: (.+) em (\d{4}-\d{2}-\d{2})\. Cachê: € (\d+(?:\.\d{2})?)$/);
+      if(propMatch){
+        var evento = propMatch[1].replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        var dp = propMatch[2].split('-');
+        var dateObj = new Date(parseInt(dp[0]), parseInt(dp[1])-1, parseInt(dp[2]));
+        var dataFmt = dateObj.getDate()+' '+MONTHS_SHORT[dateObj.getMonth()]+' '+dateObj.getFullYear();
+        var cacheFmt = parseFloat(propMatch[3]).toLocaleString('pt-PT',{minimumFractionDigits:2,maximumFractionDigits:2});
+        div.className='chat-msg system';
+        div.innerHTML=
+          '<div class="chat-proposal-card">'+
+            '<div class="chat-proposal-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"></rect><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path></svg></div>'+
+            '<div class="chat-proposal-body">'+
+              '<div class="chat-proposal-label">Proposta enviada</div>'+
+              '<div class="chat-proposal-title">'+evento+'</div>'+
+              '<div class="chat-proposal-meta"><span>'+dataFmt+'</span><span class="chat-proposal-cache">€ '+cacheFmt+'</span></div>'+
+            '</div>'+
+          '</div>'+
+          '<div class="chat-ts" style="text-align:center">'+ts+'</div>';
+      } else {
+        var mine=(_currentUserId&&m.sender_id===_currentUserId);
+        div.className='chat-msg '+(mine?'mine':'theirs');
+        div.innerHTML='<div class="chat-bubble">'+m.body.replace(/</g,'&lt;').replace(/>/g,'&gt;')+'</div><div class="chat-ts">'+ts+'</div>';
+      }
       el.appendChild(div);
     });
     el.scrollTop=el.scrollHeight;
