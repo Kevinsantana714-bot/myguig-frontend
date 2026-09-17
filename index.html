@@ -571,6 +571,35 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   justify-content:center;transition:background .15s;
 }
 .pg-cam-badge:hover{background:#5a2dd8}
+.pg-gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;max-width:420px;margin:0 auto 18px}
+.pg-gallery-grid .pg-gallery-slot:nth-child(5){grid-column:1/-1}
+.pg-gallery-slot{display:flex;flex-direction:column;gap:8px}
+.pg-slot-picker-wrap{
+  width:100%;aspect-ratio:4/5;padding:3px;border-radius:16px;
+  background:linear-gradient(135deg,var(--primary-hover),var(--primary-light));
+}
+.pg-gallery-grid .pg-gallery-slot:nth-child(5) .pg-slot-picker-wrap{aspect-ratio:16/9}
+.pg-slot-picker{
+  position:relative;width:100%;height:100%;border-radius:13px;overflow:hidden;
+  background:#0e0e0e;display:flex;align-items:center;justify-content:center;
+}
+.pg-slot-picker.is-empty{cursor:pointer}
+.pg-slot-picker img{width:100%;height:100%;object-fit:cover;display:block}
+.pg-slot-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);pointer-events:none}
+.pg-slot-del{
+  position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;
+  background:#3a1515;border:2px solid #141414;display:flex;align-items:center;
+  justify-content:center;cursor:pointer;transition:background .15s;
+}
+.pg-slot-del:hover{background:#4a1c1c}
+.pg-slot-reorder{display:flex;gap:6px;justify-content:center}
+.pg-slot-reorder button{
+  width:30px;height:26px;border-radius:7px;background:#1a1a1a;border:1px solid #2a2a2a;
+  color:#888;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;
+}
+.pg-slot-reorder button:hover:not(:disabled){border-color:#555;color:#fff}
+.pg-slot-reorder button:disabled{opacity:.3;cursor:default}
+.pg-slot-err{font-size:11px;color:#f87171;text-align:center;min-height:14px}
 .prf-edit-btn{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid #2e1f55;color:var(--primary-light);border-radius:9px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;margin-bottom:4px}
 .prf-edit-btn:hover{background:#1e1535;border-color:var(--primary);color:var(--primary-lighter)}
 .prf-identity{padding:14px 4px 0}
@@ -1857,6 +1886,10 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
           </div>
 
           <div class="prf-stats-row" id="prf-stats-row"></div>
+
+          <div class="prf-section-title">Galeria</div>
+          <input type="file" id="gallery-file-input" style="display:none" onchange="handleGalleryFileSelected(event)">
+          <div class="pg-gallery-grid" id="pg-gallery-grid"></div>
 
           <div class="prf-section-title">Estilos musicais</div>
           <div class="prf-tags-row" id="prf-estilos-row">
@@ -4030,6 +4063,155 @@ function renderPerfil(){
   _renderProfileStats(conf, pend);
   // Actualiza com valores reais da API (assíncrono)
   loadProfileStats();
+  loadGallery();
+}
+
+/* ── GALERIA (Meu Perfil) ── */
+var TRASH_ICON_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
+
+var _galleryMedia = [];
+var _galleryPendingType  = null;
+var _galleryPendingIndex = null;
+
+function _galleryPhotos(){ return _galleryMedia.filter(function(m){ return m.type==='photo'; }); }
+function _galleryVideo(){ return _galleryMedia.filter(function(m){ return m.type==='video'; })[0] || null; }
+
+async function loadGallery(){
+  if(!_currentUserId) return;
+  try {
+    var data = await apiCall('GET', '/api/users/'+_currentUserId);
+    _galleryMedia = (data.user && data.user.media) || [];
+    renderGallery();
+  } catch(e){
+    console.warn('loadGallery: erro ao carregar galeria', e.message);
+  }
+}
+
+function videoPosterUrl(url){
+  return url.replace(/\.(mp4|mov|webm)(\?.*)?$/i, '.jpg');
+}
+
+function renderGallery(){
+  var grid = document.getElementById('pg-gallery-grid');
+  if(!grid) return;
+  var photos = _galleryPhotos();
+  var video  = _galleryVideo();
+  var html = '';
+  for(var i=0;i<4;i++) html += _gallerySlotHtml('photo', photos[i]||null, i, photos.length);
+  html += _gallerySlotHtml('video', video, 0, video?1:0);
+  grid.innerHTML = html;
+}
+
+function _gallerySlotHtml(type, item, index, siblingCount){
+  var errId = 'pg-slot-err-'+type+'-'+index;
+  var inner;
+  if(!item){
+    inner =
+      '<div class="pg-slot-picker is-empty" onclick="triggerGalleryUpload(\''+type+'\','+index+')">'+
+        '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'+
+      '</div>';
+  } else if(type==='video'){
+    inner =
+      '<div class="pg-slot-picker">'+
+        '<img src="'+videoPosterUrl(item.url)+'" onerror="this.style.display=\'none\'">'+
+        '<div class="pg-slot-play"><svg width="34" height="34" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>'+
+        '<div class="pg-slot-del" onclick="deleteGalleryItem('+item.id+')">'+TRASH_ICON_SVG+'</div>'+
+      '</div>';
+  } else {
+    inner =
+      '<div class="pg-slot-picker">'+
+        '<img src="'+item.url+'">'+
+        '<div class="pg-slot-del" onclick="deleteGalleryItem('+item.id+')">'+TRASH_ICON_SVG+'</div>'+
+      '</div>';
+  }
+  var reorder = '';
+  if(item && type==='photo'){
+    reorder =
+      '<div class="pg-slot-reorder">'+
+        '<button onclick="moveGalleryPhoto('+index+',-1)" '+(index===0?'disabled':'')+'>&#8249;</button>'+
+        '<button onclick="moveGalleryPhoto('+index+',1)" '+(index===siblingCount-1?'disabled':'')+'>&#8250;</button>'+
+      '</div>';
+  }
+  return '<div class="pg-gallery-slot">'+
+           '<div class="pg-slot-picker-wrap">'+inner+'</div>'+
+           reorder+
+           '<div class="pg-slot-err" id="'+errId+'"></div>'+
+         '</div>';
+}
+
+function triggerGalleryUpload(type, index){
+  _galleryPendingType  = type;
+  _galleryPendingIndex = index;
+  document.getElementById('gallery-file-input').accept = type==='video' ? 'video/*' : 'image/*';
+  document.getElementById('gallery-file-input').click();
+}
+
+async function handleGalleryFileSelected(evt){
+  var file = evt.target.files && evt.target.files[0];
+  evt.target.value = '';
+  if(!file) return;
+  var type  = _galleryPendingType;
+  var index = _galleryPendingIndex;
+  var errEl = document.getElementById('pg-slot-err-'+type+'-'+index);
+  if(errEl) errEl.textContent = '';
+  try {
+    var formData = new FormData();
+    formData.append('type', type);
+    formData.append('file', file);
+    var res  = await fetch(API + '/api/users/me/media', {
+      method:  'POST',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+      body:    formData,
+    });
+    var data = await res.json().catch(function(){ return {}; });
+    if(!res.ok) throw new Error(data.error || 'Erro ao enviar ficheiro.');
+    _galleryMedia.push(data.media);
+    renderGallery();
+  } catch(e){
+    if(errEl) errEl.textContent = e.message;
+  }
+}
+
+async function deleteGalleryItem(id){
+  var item = _galleryMedia.find(function(m){ return m.id === id; });
+  if(!item) return;
+  var idx = item.type==='photo' ? _galleryPhotos().indexOf(item) : 0;
+  var errEl = document.getElementById('pg-slot-err-'+item.type+'-'+idx);
+  if(errEl) errEl.textContent = '';
+  try {
+    var res  = await fetch(API + '/api/users/me/media/'+id, {
+      method:  'DELETE',
+      headers: { 'Authorization': 'Bearer ' + getToken() },
+    });
+    var data = await res.json().catch(function(){ return {}; });
+    if(!res.ok) throw new Error(data.error || 'Erro ao apagar.');
+    _galleryMedia = _galleryMedia.filter(function(m){ return m.id !== id; });
+    renderGallery();
+  } catch(e){
+    if(errEl) errEl.textContent = e.message;
+  }
+}
+
+async function moveGalleryPhoto(index, direction){
+  var photos = _galleryPhotos();
+  var other  = index + direction;
+  if(other < 0 || other >= photos.length) return;
+  var a = photos[index], b = photos[other];
+  var errEl = document.getElementById('pg-slot-err-photo-'+index);
+  if(errEl) errEl.textContent = '';
+  try {
+    var res  = await fetch(API + '/api/users/me/media/reorder', {
+      method:  'PUT',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
+      body:    JSON.stringify([{ id: a.id, position: b.position }, { id: b.id, position: a.position }]),
+    });
+    var data = await res.json().catch(function(){ return {}; });
+    if(!res.ok) throw new Error(data.error || 'Erro ao reordenar.');
+    var posA = a.position; a.position = b.position; b.position = posA;
+    renderGallery();
+  } catch(e){
+    if(errEl) errEl.textContent = e.message;
+  }
 }
 
 function _renderProfileStats(confirmed, pending){
