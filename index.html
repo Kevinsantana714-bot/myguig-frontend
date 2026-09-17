@@ -571,35 +571,30 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   justify-content:center;transition:background .15s;
 }
 .pg-cam-badge:hover{background:#5a2dd8}
-.pg-gallery-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;max-width:420px;margin:0 auto 18px}
-.pg-gallery-grid .pg-gallery-slot:nth-child(5){grid-column:1/-1}
-.pg-gallery-slot{display:flex;flex-direction:column;gap:8px}
-.pg-slot-picker-wrap{
-  width:100%;aspect-ratio:4/5;padding:3px;border-radius:16px;
-  background:linear-gradient(135deg,var(--primary-hover),var(--primary-light));
-}
-.pg-gallery-grid .pg-gallery-slot:nth-child(5) .pg-slot-picker-wrap{aspect-ratio:16/9}
+.pg-gallery-grid{display:grid;grid-template-columns:repeat(3,104px);gap:9px;margin-bottom:18px}
+.pg-gallery-slot{display:flex;flex-direction:column;gap:2px}
 .pg-slot-picker{
-  position:relative;width:100%;height:100%;border-radius:13px;overflow:hidden;
-  background:#0e0e0e;display:flex;align-items:center;justify-content:center;
+  position:relative;width:104px;height:139px;border-radius:10px;overflow:hidden;
+  background:#141414;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;
 }
 .pg-slot-picker.is-empty{cursor:pointer}
 .pg-slot-picker img{width:100%;height:100%;object-fit:cover;display:block}
 .pg-slot-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);pointer-events:none}
 .pg-slot-del{
-  position:absolute;top:6px;right:6px;width:26px;height:26px;border-radius:50%;
-  background:#3a1515;border:2px solid #141414;display:flex;align-items:center;
-  justify-content:center;cursor:pointer;transition:background .15s;
+  position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;
+  background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;cursor:pointer;
 }
-.pg-slot-del:hover{background:#4a1c1c}
-.pg-slot-reorder{display:flex;gap:6px;justify-content:center}
-.pg-slot-reorder button{
-  width:30px;height:26px;border-radius:7px;background:#1a1a1a;border:1px solid #2a2a2a;
-  color:#888;cursor:pointer;font-family:inherit;transition:all .15s;display:flex;align-items:center;justify-content:center;
+.pg-slot-del:hover{background:rgba(0,0,0,.75)}
+.pg-slot-reorder-overlay{
+  position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
+  display:flex;gap:2px;background:rgba(0,0,0,.55);border-radius:10px;padding:2px 3px;
 }
-.pg-slot-reorder button:hover:not(:disabled){border-color:#555;color:#fff}
-.pg-slot-reorder button:disabled{opacity:.3;cursor:default}
-.pg-slot-err{font-size:11px;color:#f87171;text-align:center;min-height:14px}
+.pg-slot-reorder-overlay button{
+  width:16px;height:16px;border-radius:50%;background:transparent;border:none;
+  color:#fff;font-size:12px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;
+}
+.pg-slot-reorder-overlay button:disabled{opacity:.3;cursor:default}
+.pg-slot-err{font-size:10px;color:#f87171;text-align:center;line-height:1.3}
 .prf-edit-btn{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid #2e1f55;color:var(--primary-light);border-radius:9px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;margin-bottom:4px}
 .prf-edit-btn:hover{background:#1e1535;border-color:var(--primary);color:var(--primary-lighter)}
 .prf-identity{padding:14px 4px 0}
@@ -4067,7 +4062,7 @@ function renderPerfil(){
 }
 
 /* ── GALERIA (Meu Perfil) ── */
-var TRASH_ICON_SVG = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
+var TRASH_ICON_SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#f87171" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path><path d="M10 11v6"></path><path d="M14 11v6"></path><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"></path></svg>';
 
 var _galleryMedia = [];
 var _galleryPendingType  = null;
@@ -4105,16 +4100,24 @@ function renderGallery(){
 function _gallerySlotHtml(type, item, index, siblingCount){
   var errId = 'pg-slot-err-'+type+'-'+index;
   var inner;
+  var reorderOverlay = '';
+  if(item && type==='photo'){
+    reorderOverlay =
+      '<div class="pg-slot-reorder-overlay">'+
+        '<button onclick="event.stopPropagation();moveGalleryPhoto('+index+',-1)" '+(index===0?'disabled':'')+'>&#8249;</button>'+
+        '<button onclick="event.stopPropagation();moveGalleryPhoto('+index+',1)" '+(index===siblingCount-1?'disabled':'')+'>&#8250;</button>'+
+      '</div>';
+  }
   if(!item){
     inner =
       '<div class="pg-slot-picker is-empty" onclick="triggerGalleryUpload(\''+type+'\','+index+')">'+
-        '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'+
+        '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'+
       '</div>';
   } else if(type==='video'){
     inner =
       '<div class="pg-slot-picker">'+
         '<img src="'+videoPosterUrl(item.url)+'" onerror="this.style.display=\'none\'">'+
-        '<div class="pg-slot-play"><svg width="34" height="34" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>'+
+        '<div class="pg-slot-play"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>'+
         '<div class="pg-slot-del" onclick="deleteGalleryItem('+item.id+')">'+TRASH_ICON_SVG+'</div>'+
       '</div>';
   } else {
@@ -4122,19 +4125,11 @@ function _gallerySlotHtml(type, item, index, siblingCount){
       '<div class="pg-slot-picker">'+
         '<img src="'+item.url+'">'+
         '<div class="pg-slot-del" onclick="deleteGalleryItem('+item.id+')">'+TRASH_ICON_SVG+'</div>'+
-      '</div>';
-  }
-  var reorder = '';
-  if(item && type==='photo'){
-    reorder =
-      '<div class="pg-slot-reorder">'+
-        '<button onclick="moveGalleryPhoto('+index+',-1)" '+(index===0?'disabled':'')+'>&#8249;</button>'+
-        '<button onclick="moveGalleryPhoto('+index+',1)" '+(index===siblingCount-1?'disabled':'')+'>&#8250;</button>'+
+        reorderOverlay+
       '</div>';
   }
   return '<div class="pg-gallery-slot">'+
-           '<div class="pg-slot-picker-wrap">'+inner+'</div>'+
-           reorder+
+           inner+
            '<div class="pg-slot-err" id="'+errId+'"></div>'+
          '</div>';
 }
