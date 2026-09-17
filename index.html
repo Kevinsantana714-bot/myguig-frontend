@@ -572,28 +572,23 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 }
 .pg-cam-badge:hover{background:#5a2dd8}
 .pg-gallery-grid{display:grid;grid-template-columns:repeat(3,104px);gap:9px;margin-bottom:18px}
-.pg-gallery-slot{display:flex;flex-direction:column;gap:2px}
+.pg-gallery-slot{display:flex;flex-direction:column}
 .pg-slot-picker{
   position:relative;width:104px;height:139px;border-radius:10px;overflow:hidden;
-  background:#141414;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;
+  background:#141414;border:1px solid #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;
 }
 .pg-slot-picker.is-empty{cursor:pointer}
-.pg-slot-picker img{width:100%;height:100%;object-fit:cover;display:block}
+.pg-slot-picker.is-empty-video{border-color:#3a2f5c;background:#14102a}
+.pg-slot-picker img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none}
 .pg-slot-play{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,.25);pointer-events:none}
 .pg-slot-del{
   position:absolute;top:3px;right:3px;width:20px;height:20px;border-radius:50%;
-  background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2;
 }
 .pg-slot-del:hover{background:rgba(0,0,0,.75)}
-.pg-slot-reorder-overlay{
-  position:absolute;bottom:3px;left:50%;transform:translateX(-50%);
-  display:flex;gap:2px;background:rgba(0,0,0,.55);border-radius:10px;padding:2px 3px;
-}
-.pg-slot-reorder-overlay button{
-  width:16px;height:16px;border-radius:50%;background:transparent;border:none;
-  color:#fff;font-size:12px;line-height:1;cursor:pointer;padding:0;display:flex;align-items:center;justify-content:center;
-}
-.pg-slot-reorder-overlay button:disabled{opacity:.3;cursor:default}
+.pg-draggable{cursor:grab;touch-action:none}
+.pg-draggable:active{cursor:grabbing}
+.pg-drag-ghost{position:fixed;z-index:9998;pointer-events:none;box-shadow:0 12px 28px rgba(0,0,0,.55);transform:scale(1.06)}
 .pg-slot-err{font-size:10px;color:#f87171;text-align:center;line-height:1.3}
 .prf-edit-btn{display:inline-flex;align-items:center;gap:7px;background:transparent;border:1px solid #2e1f55;color:var(--primary-light);border-radius:9px;padding:9px 18px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;transition:all .15s;margin-bottom:4px}
 .prf-edit-btn:hover{background:#1e1535;border-color:var(--primary);color:var(--primary-lighter)}
@@ -4100,35 +4095,34 @@ function renderGallery(){
 function _gallerySlotHtml(type, item, index, siblingCount){
   var errId = 'pg-slot-err-'+type+'-'+index;
   var inner;
-  var reorderOverlay = '';
-  if(item && type==='photo'){
-    reorderOverlay =
-      '<div class="pg-slot-reorder-overlay">'+
-        '<button onclick="event.stopPropagation();moveGalleryPhoto('+index+',-1)" '+(index===0?'disabled':'')+'>&#8249;</button>'+
-        '<button onclick="event.stopPropagation();moveGalleryPhoto('+index+',1)" '+(index===siblingCount-1?'disabled':'')+'>&#8250;</button>'+
-      '</div>';
-  }
   if(!item){
-    inner =
-      '<div class="pg-slot-picker is-empty" onclick="triggerGalleryUpload(\''+type+'\','+index+')">'+
-        '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'+
-      '</div>';
+    if(type==='video'){
+      inner =
+        '<div class="pg-slot-picker is-empty is-empty-video" onclick="triggerGalleryUpload(\'video\',0)">'+
+          '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--primary-light)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"></polygon><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>'+
+          '<span style="font-size:9px;color:var(--primary-light);margin-top:3px">Vídeo</span>'+
+        '</div>';
+    } else {
+      inner =
+        '<div class="pg-slot-picker is-empty" onclick="triggerGalleryUpload(\'photo\','+index+')">'+
+          '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>'+
+        '</div>';
+    }
   } else if(type==='video'){
     inner =
       '<div class="pg-slot-picker">'+
         '<img src="'+videoPosterUrl(item.url)+'" onerror="this.style.display=\'none\'">'+
         '<div class="pg-slot-play"><svg width="20" height="20" viewBox="0 0 24 24" fill="#fff"><path d="M8 5v14l11-7z"/></svg></div>'+
-        '<div class="pg-slot-del" onclick="deleteGalleryItem('+item.id+')">'+TRASH_ICON_SVG+'</div>'+
+        '<div class="pg-slot-del" onclick="deleteGalleryItem('+item.id+')" onpointerdown="event.stopPropagation()">'+TRASH_ICON_SVG+'</div>'+
       '</div>';
   } else {
     inner =
-      '<div class="pg-slot-picker">'+
-        '<img src="'+item.url+'">'+
-        '<div class="pg-slot-del" onclick="deleteGalleryItem('+item.id+')">'+TRASH_ICON_SVG+'</div>'+
-        reorderOverlay+
+      '<div class="pg-slot-picker pg-draggable" onpointerdown="startGalleryDrag(event,'+index+')">'+
+        '<img src="'+item.url+'" draggable="false">'+
+        '<div class="pg-slot-del" onclick="deleteGalleryItem('+item.id+')" onpointerdown="event.stopPropagation()">'+TRASH_ICON_SVG+'</div>'+
       '</div>';
   }
-  return '<div class="pg-gallery-slot">'+
+  return '<div class="pg-gallery-slot" data-kind="'+type+'">'+
            inner+
            '<div class="pg-slot-err" id="'+errId+'"></div>'+
          '</div>';
@@ -4187,25 +4181,138 @@ async function deleteGalleryItem(id){
   }
 }
 
-async function moveGalleryPhoto(index, direction){
+/* ── DRAG AND DROP DA GALERIA ── */
+var _drag = null; // estado do arraste em curso (null quando nenhum)
+
+function startGalleryDrag(evt, index){
+  if(_drag) return;
+  if(evt.button !== undefined && evt.button !== 0) return; // só botão esquerdo do mouse
+  evt.preventDefault();
+
   var photos = _galleryPhotos();
-  var other  = index + direction;
-  if(other < 0 || other >= photos.length) return;
-  var a = photos[index], b = photos[other];
-  var errEl = document.getElementById('pg-slot-err-photo-'+index);
-  if(errEl) errEl.textContent = '';
+  var srcEl  = evt.currentTarget;
+  var rect   = srcEl.getBoundingClientRect();
+
+  var cellEls = Array.prototype.slice.call(
+    document.querySelectorAll('#pg-gallery-grid .pg-gallery-slot[data-kind="photo"] .pg-slot-picker')
+  );
+  var cellRects = cellEls.map(function(el){ return el.getBoundingClientRect(); });
+
+  var ghost = srcEl.cloneNode(true);
+  ghost.className = 'pg-slot-picker pg-drag-ghost';
+  ghost.style.left   = rect.left+'px';
+  ghost.style.top    = rect.top+'px';
+  ghost.style.width  = rect.width+'px';
+  ghost.style.height = rect.height+'px';
+  var delBtn = ghost.querySelector('.pg-slot-del');
+  if(delBtn) delBtn.remove();
+  document.body.appendChild(ghost);
+
+  srcEl.style.visibility = 'hidden';
+
+  _drag = {
+    fromIndex: index,
+    order:     photos.map(function(p){ return p.id; }), // ordem visual ao vivo
+    cellRects: cellRects,
+    cellEls:   cellEls,
+    ghost:     ghost,
+    srcEl:     srcEl,
+    offsetX:   evt.clientX - rect.left,
+    offsetY:   evt.clientY - rect.top,
+  };
+
+  document.addEventListener('pointermove', onGalleryDragMove);
+  document.addEventListener('pointerup', onGalleryDragEnd);
+}
+
+function _galleryCellIndexAtPoint(x, y){
+  var rects = _drag.cellRects, best = 0, bestDist = Infinity;
+  for(var i=0;i<rects.length;i++){
+    var r = rects[i], cx = r.left+r.width/2, cy = r.top+r.height/2;
+    var d = Math.pow(x-cx,2) + Math.pow(y-cy,2);
+    if(d < bestDist){ bestDist = d; best = i; }
+  }
+  return best;
+}
+
+function onGalleryDragMove(evt){
+  if(!_drag) return;
+  evt.preventDefault();
+  _drag.ghost.style.left = (evt.clientX - _drag.offsetX)+'px';
+  _drag.ghost.style.top  = (evt.clientY - _drag.offsetY)+'px';
+
+  var photos    = _galleryPhotos();
+  var draggedId = photos[_drag.fromIndex].id;
+  var hoverIdx  = Math.min(_galleryCellIndexAtPoint(evt.clientX, evt.clientY), photos.length-1);
+  var curIdx    = _drag.order.indexOf(draggedId);
+
+  if(hoverIdx !== curIdx){
+    _drag.order.splice(curIdx, 1);
+    _drag.order.splice(hoverIdx, 0, draggedId);
+    photos.forEach(function(p, homeIdx){
+      if(p.id === draggedId) return;
+      var visualIdx = _drag.order.indexOf(p.id);
+      var el     = _drag.cellEls[homeIdx];
+      var home   = _drag.cellRects[homeIdx];
+      var target = _drag.cellRects[visualIdx];
+      el.style.transition = 'transform .18s ease';
+      el.style.transform   = 'translate('+(target.left-home.left)+'px,'+(target.top-home.top)+'px)';
+    });
+  }
+}
+
+async function onGalleryDragEnd(evt){
+  if(!_drag) return;
+  document.removeEventListener('pointermove', onGalleryDragMove);
+  document.removeEventListener('pointerup', onGalleryDragEnd);
+
+  var drag      = _drag;
+  var photos    = _galleryPhotos();
+  var draggedId = photos[drag.fromIndex].id;
+  var finalIdx  = drag.order.indexOf(draggedId);
+  var targetRect = drag.cellRects[finalIdx];
+
+  // Anima o tile arrastado até encaixar na célula final (snap)
+  drag.ghost.style.transition = 'left .18s ease,top .18s ease';
+  drag.ghost.style.left = targetRect.left+'px';
+  drag.ghost.style.top  = targetRect.top+'px';
+  await new Promise(function(resolve){ setTimeout(resolve, 190); });
+  drag.ghost.remove();
+
+  if(finalIdx === drag.fromIndex){
+    drag.cellEls.forEach(function(el){ el.style.transform=''; el.style.transition=''; });
+    drag.srcEl.style.visibility = '';
+    _drag = null;
+    return;
+  }
+
+  // Reaproveita os mesmos valores de position já existentes entre as fotos,
+  // só reatribuindo na nova ordem — evita colidir com o position do vídeo.
+  var sortedPositions = photos.map(function(p){ return p.position; }).sort(function(a,b){ return a-b; });
+  var newOrderPhotos  = drag.order.map(function(id){ return photos.find(function(p){ return p.id===id; }); });
+  var payload = newOrderPhotos.map(function(p,i){ return { id:p.id, position: sortedPositions[i] }; });
+
   try {
     var res  = await fetch(API + '/api/users/me/media/reorder', {
       method:  'PUT',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + getToken() },
-      body:    JSON.stringify([{ id: a.id, position: b.position }, { id: b.id, position: a.position }]),
+      body:    JSON.stringify(payload),
     });
     var data = await res.json().catch(function(){ return {}; });
     if(!res.ok) throw new Error(data.error || 'Erro ao reordenar.');
-    var posA = a.position; a.position = b.position; b.position = posA;
+    newOrderPhotos.forEach(function(p,i){ p.position = sortedPositions[i]; });
+    _drag = null;
     renderGallery();
   } catch(e){
-    if(errEl) errEl.textContent = e.message;
+    // Reverte visualmente para a ordem anterior — os dados nunca chegaram a mudar
+    drag.cellEls.forEach(function(el){ el.style.transition='transform .18s ease'; el.style.transform=''; });
+    drag.srcEl.style.visibility = '';
+    setTimeout(function(){
+      drag.cellEls.forEach(function(el){ el.style.transition=''; });
+      var errEl = document.getElementById('pg-slot-err-photo-'+drag.fromIndex);
+      if(errEl) errEl.textContent = e.message;
+      _drag = null;
+    }, 190);
   }
 }
 
