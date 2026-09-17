@@ -767,56 +767,56 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   font-family:inherit;transition:all .15s;white-space:nowrap;
 }
 .disc-chip.active{border-color:var(--primary-hover);background:#1e1535;color:var(--primary-lighter)}
-.musicians-grid{
-  display:grid;
-  grid-template-columns:repeat(3,1fr);
-  gap:14px;
-  margin-bottom:18px;
-}
-.musician-card{
-  background:#141414;border:1px solid #1e1e1e;
-  border-radius:12px;padding:16px 14px;
-  display:flex;flex-direction:column;align-items:center;
-  gap:10px;transition:border-color .15s,box-shadow .15s,transform .15s;cursor:default;
-  min-height:280px;box-shadow:var(--shadow-sm);
-}
-.musician-card:hover{border-color:#2a2a2a;box-shadow:var(--shadow-hover);transform:translateY(-2px)}
-.mc-avatar{
-  width:54px;height:54px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  font-size:18px;font-weight:700;color:#000;flex-shrink:0;
-}
-.mc-name{font-size:14px;font-weight:600;color:#fff;text-align:center;line-height:1.3}
-.mc-cidade{font-size:12px;color:#666;text-align:center}
-.mc-estilos{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
-.mc-estilo-tag{
-  padding:3px 8px;border-radius:10px;
-  background:#1e1e2e;color:var(--primary-light);
-  font-size:11px;border:1px solid #2a2a3a;
-}
-.mc-cache{font-size:12px;color:#888;text-align:center}
-.mc-cache span{color:var(--primary-lighter);font-weight:600}
-.btn-mc-proposta{
-  width:100%;padding:9px 0;border-radius:8px;
-  background:var(--primary-hover);border:none;
-  color:#fff;font-size:12px;font-weight:600;
-  cursor:pointer;font-family:inherit;
-  transition:background .15s;
-  margin-top:auto;
-}
-.btn-mc-proposta:hover{background:var(--primary-dark)}
 .disc-empty{
   text-align:center;padding:40px 20px;color:#555;
   grid-column:1/-1;
 }
 .disc-empty-icon{font-size:40px;margin-bottom:10px}
-.disc-load-more{
-  width:100%;padding:12px;border-radius:10px;
-  background:transparent;border:1px solid #2a2a2a;
-  color:#888;font-size:13px;font-weight:500;
+
+.disc-feed{margin-bottom:18px}
+.disc-feed-card{
+  position:relative;width:100%;max-width:420px;
+  aspect-ratio:9/16;max-height:70vh;margin:0 auto;
+  border-radius:16px;overflow:hidden;
+  background:#141414;border:1px solid #1e1e1e;box-shadow:var(--shadow-md);
+}
+.disc-feed-media{position:absolute;inset:0;background:#0e0e0e}
+.disc-feed-media img,.disc-feed-media video{width:100%;height:100%;object-fit:cover;display:block}
+.disc-feed-dots{
+  position:absolute;top:10px;left:10px;right:10px;
+  display:flex;gap:4px;z-index:3;
+}
+.disc-feed-dot{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.35)}
+.disc-feed-dot.active{background:#fff}
+.disc-feed-zone{position:absolute;top:0;bottom:0;width:35%;cursor:pointer;z-index:2}
+.disc-feed-zone-prev{left:0}
+.disc-feed-zone-next{right:0}
+.disc-feed-overlay{
+  position:absolute;left:0;right:0;bottom:0;z-index:3;
+  padding:40px 16px 16px;
+  background:linear-gradient(to bottom,transparent,rgba(0,0,0,.85) 70%);
+  display:flex;flex-direction:column;gap:8px;
+}
+.disc-feed-name{font-size:19px;font-weight:700;color:#fff}
+.disc-feed-sub{font-size:13px;color:var(--primary-lighter)}
+.disc-feed-btn-perfil{
+  align-self:flex-start;padding:9px 18px;border-radius:9px;
+  background:var(--primary-hover);border:none;color:#fff;font-size:13px;font-weight:600;
+  cursor:pointer;font-family:inherit;transition:background .15s;
+}
+.disc-feed-btn-perfil:hover{background:var(--primary-dark)}
+.disc-feed-nav{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:12px;margin-top:14px;max-width:420px;margin-left:auto;margin-right:auto;
+}
+.disc-feed-nav-btn{
+  padding:10px 16px;border-radius:9px;background:transparent;
+  border:1px solid #2a2a2a;color:#aaa;font-size:13px;font-weight:500;
   cursor:pointer;font-family:inherit;transition:all .15s;
 }
-.disc-load-more:hover{border-color:#555;color:#fff}
+.disc-feed-nav-btn:hover:not(:disabled){border-color:#555;color:#fff}
+.disc-feed-nav-btn:disabled{opacity:.35;cursor:default}
+.disc-feed-counter{font-size:12px;color:#666}
 
 /* ══════════════════════════════════════════
    MODAL: ENVIAR PROPOSTA
@@ -875,7 +875,6 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .btn-sp-confirm:disabled{opacity:.6;cursor:not-allowed}
 
 @media(max-width:768px){
-  .musicians-grid{grid-template-columns:repeat(2,1fr)}
   .sp-row{grid-template-columns:1fr}
   #send-proposal-modal{align-items:flex-end}
   .sp-box{border-radius:16px 16px 0 0;margin:0;max-width:100%;max-height:92vh}
@@ -1673,8 +1672,25 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
           <button class="disc-chip" onclick="setDiscStyle('Funk',this)">Funk</button>
           <button class="disc-chip" onclick="setDiscStyle('Clássico',this)">Clássico</button>
         </div>
-        <div class="musicians-grid" id="musicians-grid"></div>
-        <button class="disc-load-more" id="disc-load-more" style="display:none" onclick="loadMusicians(true)">Carregar mais</button>
+        <div class="disc-feed" id="disc-feed" style="display:none">
+          <div class="disc-feed-card">
+            <div class="disc-feed-dots" id="disc-feed-dots"></div>
+            <div class="disc-feed-media" id="disc-feed-media"></div>
+            <div class="disc-feed-zone disc-feed-zone-prev" onclick="prevMedia()"></div>
+            <div class="disc-feed-zone disc-feed-zone-next" onclick="nextMedia()"></div>
+            <div class="disc-feed-overlay">
+              <div class="disc-feed-name" id="disc-feed-name"></div>
+              <div class="disc-feed-sub" id="disc-feed-sub"></div>
+              <button class="disc-feed-btn-perfil" id="disc-feed-btn-perfil">Ver perfil</button>
+            </div>
+          </div>
+          <div class="disc-feed-nav">
+            <button class="disc-feed-nav-btn" id="disc-feed-prev-musico" onclick="prevMusician()">&#8249; Anterior</button>
+            <div class="disc-feed-counter" id="disc-feed-counter"></div>
+            <button class="disc-feed-nav-btn" id="disc-feed-next-musico" onclick="nextMusician()">Próximo &#8250;</button>
+          </div>
+        </div>
+        <div class="disc-empty" id="disc-feed-empty" style="display:none"></div>
       </div>
 
       <!-- MENSAGENS -->
@@ -4344,6 +4360,8 @@ var _discStyle   = '';
 var _discSearch  = '';
 var _discDebounce = null;
 var _DISC_COLORS = ['#2dd4bf','#f472b6','#fb923c','#818cf8','#facc15','#34d399','#60a5fa'];
+var _discMusicianIdx = 0;   // músico atual em _musiciansList
+var _discMediaIdx    = 0;   // mídia atual dentro do músico atual
 var _musiciansList = [];
 
 function debouncedDiscSearch(){
@@ -4366,13 +4384,7 @@ async function loadMusicians(append){
   if(!append){ _discPage=1; _discTotal=0; }
 
   _discLoading = true;
-  var grid = document.getElementById('musicians-grid');
-  var btn  = document.getElementById('disc-load-more');
-
-  if(!append){
-    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#555">A carregar músicos…</div>';
-    if(btn) btn.style.display='none';
-  }
+  if(!append) showDiscFeedEmpty('A carregar músicos…', DISC_ICON_LOADING);
 
   try {
     var params = new URLSearchParams({
@@ -4387,47 +4399,119 @@ async function loadMusicians(append){
     _discTotal = data.pagination.total;
     var musicians = data.data;
 
-    if(!append){ grid.innerHTML=''; _musiciansList=[]; }
+    if(!append) _musiciansList = [];
 
     if(!musicians.length && !append){
-      grid.innerHTML = '<div class="disc-empty"><div class="disc-empty-icon"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg></div><div>Nenhum músico encontrado.</div></div>';
-      if(btn) btn.style.display='none';
+      showDiscFeedEmpty('Nenhum músico encontrado.', DISC_ICON_EMPTY);
       return;
     }
 
-    musicians.forEach(function(m){
-      _musiciansList.push(m);
-      var initials = (m.name||'').split(' ').filter(function(w){return w;}).slice(0,2).map(function(w){return w[0].toUpperCase();}).join('')||'?';
-      var color    = _DISC_COLORS[m.id % _DISC_COLORS.length];
-      var estilos  = (m.estilos||[]).slice(0,3).map(function(e){return '<span class="mc-estilo-tag">'+e+'</span>';}).join('');
-      var cache    = parseFloat(m.cache_minimo||0);
-      var cacheStr = cache > 0 ? 'A partir de <span>€ '+cache.toLocaleString('pt-PT',{minimumFractionDigits:0})+'</span>' : '<span>A combinar</span>';
-
-      var avatarHtml = m.avatar_url
-        ? '<div class="mc-avatar" style="background:transparent;overflow:hidden;padding:0"><img src="'+m.avatar_url+'" alt="'+m.name+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"></div>'
-        : '<div class="mc-avatar" style="background:'+color+'">'+initials+'</div>';
-
-      var card = document.createElement('div');
-      card.className = 'musician-card';
-      card.innerHTML =
-        avatarHtml+
-        '<div class="mc-name">'+m.name+'</div>'+
-        (m.cidade ? '<div class="mc-cidade"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-1px;margin-right:3px"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>'+m.cidade+'</div>' : '')+
-        (estilos  ? '<div class="mc-estilos">'+estilos+'</div>' : '')+
-        '<div class="mc-cache">'+cacheStr+'</div>'+
-        '<button class="btn-mc-proposta" onclick="openMusicianProfile('+m.id+')">Ver perfil</button>';
-      grid.appendChild(card);
-    });
-
-    var loaded = (_discPage-1)*12 + musicians.length;
-    if(btn) btn.style.display = loaded < _discTotal ? 'block' : 'none';
+    musicians.forEach(function(m){ _musiciansList.push(m); });
+    renderDiscFeed(!append);
     _discPage++;
-
   } catch(e){
-    if(!append) grid.innerHTML = '<div class="disc-empty"><div class="disc-empty-icon"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg></div><div>Erro ao carregar músicos.</div></div>';
+    if(!append) showDiscFeedEmpty('Erro ao carregar músicos.', DISC_ICON_ERROR);
   } finally {
     _discLoading = false;
   }
+}
+
+/* ── ÍCONES SVG PARA ESTADOS DO FEED ── */
+var DISC_ICON_LOADING = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 6v6l4 2"></path></svg>';
+var DISC_ICON_EMPTY = '<svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18V5l12-2v13"></path><circle cx="6" cy="18" r="3"></circle><circle cx="18" cy="16" r="3"></circle></svg>';
+var DISC_ICON_ERROR = '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+
+/* ── FEED ESTILO REELS ── */
+
+function showDiscFeedEmpty(msg, iconSvg){
+  document.getElementById('disc-feed').style.display='none';
+  var empty = document.getElementById('disc-feed-empty');
+  empty.innerHTML = '<div class="disc-empty-icon">'+iconSvg+'</div><div>'+msg+'</div>';
+  empty.style.display='block';
+}
+
+function renderDiscFeed(resetPosition){
+  var feed  = document.getElementById('disc-feed');
+  var empty = document.getElementById('disc-feed-empty');
+
+  if(!_musiciansList.length){
+    feed.style.display='none';
+    empty.style.display='block';
+    return;
+  }
+  empty.style.display='none';
+  feed.style.display='block';
+
+  if(resetPosition){
+    _discMusicianIdx = 0;
+    renderDiscFeedMusician();
+  } else {
+    renderDiscFeedNav();
+  }
+}
+
+function renderDiscFeedMusician(){
+  var m = _musiciansList[_discMusicianIdx];
+  if(!m) return;
+  _discMediaIdx = 0;
+  renderDiscFeedMedia();
+
+  document.getElementById('disc-feed-name').textContent = m.name;
+  var estilos = (m.estilos||[]).slice(0,3).join(' · ');
+  document.getElementById('disc-feed-sub').textContent = [estilos, m.cidade].filter(Boolean).join(' — ');
+  document.getElementById('disc-feed-btn-perfil').onclick = function(){ openMusicianProfile(m.id); };
+
+  renderDiscFeedNav();
+}
+
+function renderDiscFeedNav(){
+  document.getElementById('disc-feed-counter').textContent = (_discMusicianIdx+1)+' / '+_musiciansList.length;
+  document.getElementById('disc-feed-prev-musico').disabled = _discMusicianIdx === 0;
+  var isLastLoaded = _discMusicianIdx === _musiciansList.length-1;
+  document.getElementById('disc-feed-next-musico').disabled = isLastLoaded && _musiciansList.length >= _discTotal;
+}
+
+function renderDiscFeedMedia(){
+  var m     = _musiciansList[_discMusicianIdx];
+  var media = (m && m.media) || [];
+  var item  = media[_discMediaIdx];
+  var mediaEl = document.getElementById('disc-feed-media');
+  if(!item){ mediaEl.innerHTML=''; renderDiscFeedDots(); return; }
+  mediaEl.innerHTML = item.type === 'video'
+    ? '<video src="'+item.url+'" controls playsinline></video>'
+    : '<img src="'+item.url+'" alt="'+m.name+'">';
+  renderDiscFeedDots();
+}
+
+function renderDiscFeedDots(){
+  var media = (_musiciansList[_discMusicianIdx] && _musiciansList[_discMusicianIdx].media) || [];
+  var dotsEl = document.getElementById('disc-feed-dots');
+  dotsEl.innerHTML = media.map(function(_,i){
+    return '<div class="disc-feed-dot'+(i===_discMediaIdx?' active':'')+'"></div>';
+  }).join('');
+  dotsEl.style.display = media.length > 1 ? 'flex' : 'none';
+}
+
+function nextMedia(){
+  var media = (_musiciansList[_discMusicianIdx] && _musiciansList[_discMusicianIdx].media) || [];
+  if(_discMediaIdx < media.length-1){ _discMediaIdx++; renderDiscFeedMedia(); }
+}
+function prevMedia(){
+  if(_discMediaIdx > 0){ _discMediaIdx--; renderDiscFeedMedia(); }
+}
+
+function nextMusician(){
+  if(_discMusicianIdx >= _musiciansList.length-1) return;
+  if(_discMusicianIdx === _musiciansList.length-2 && _musiciansList.length < _discTotal && !_discLoading){
+    loadMusicians(true);
+  }
+  _discMusicianIdx++;
+  renderDiscFeedMusician();
+}
+function prevMusician(){
+  if(_discMusicianIdx <= 0) return;
+  _discMusicianIdx--;
+  renderDiscFeedMusician();
 }
 
 /* ════════════════════════════════════════════
