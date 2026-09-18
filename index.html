@@ -809,12 +809,15 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .disc-empty-icon{font-size:40px;margin-bottom:10px}
 
 .disc-feed{margin-bottom:18px}
-.disc-feed-card{
+.disc-feed-viewport{
   position:relative;width:100%;max-width:420px;
   aspect-ratio:9/16;max-height:70vh;margin:0 auto;
   border-radius:16px;overflow:hidden;
   background:#141414;border:1px solid #1e1e1e;box-shadow:var(--shadow-md);
+  touch-action:none;
 }
+.disc-feed-card{position:absolute;left:0;top:0;width:100%;height:100%;background:#141414}
+.disc-feed-card-preview{pointer-events:none}
 .disc-feed-media{position:absolute;inset:0;background:#0e0e0e}
 .disc-feed-media img,.disc-feed-media video{width:100%;height:100%;object-fit:cover;display:block}
 .disc-feed-dots{
@@ -1738,16 +1741,20 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
           <button class="disc-chip" onclick="setDiscStyle('Clássico',this)">Clássico</button>
         </div>
         <div class="disc-feed" id="disc-feed" style="display:none">
-          <div class="disc-feed-card">
-            <div class="disc-feed-dots" id="disc-feed-dots"></div>
-            <div class="disc-feed-media" id="disc-feed-media"></div>
-            <div class="disc-feed-zone disc-feed-zone-prev" onclick="prevMedia()"></div>
-            <div class="disc-feed-zone disc-feed-zone-next" onclick="nextMedia()"></div>
-            <div class="disc-feed-overlay">
-              <div class="disc-feed-name" id="disc-feed-name"></div>
-              <div class="disc-feed-sub" id="disc-feed-sub"></div>
-              <button class="disc-feed-btn-perfil" id="disc-feed-btn-perfil">Ver perfil</button>
+          <div class="disc-feed-viewport" id="disc-feed-viewport" onpointerdown="startDiscSwipe(event)">
+            <div class="disc-feed-card disc-feed-card-preview" id="disc-feed-card-prev"></div>
+            <div class="disc-feed-card" id="disc-feed-card-current">
+              <div class="disc-feed-dots" id="disc-feed-dots"></div>
+              <div class="disc-feed-media" id="disc-feed-media"></div>
+              <div class="disc-feed-zone disc-feed-zone-prev" onclick="prevMedia()"></div>
+              <div class="disc-feed-zone disc-feed-zone-next" onclick="nextMedia()"></div>
+              <div class="disc-feed-overlay">
+                <div class="disc-feed-name" id="disc-feed-name"></div>
+                <div class="disc-feed-sub" id="disc-feed-sub"></div>
+                <button class="disc-feed-btn-perfil" id="disc-feed-btn-perfil">Ver perfil</button>
+              </div>
             </div>
+            <div class="disc-feed-card disc-feed-card-preview" id="disc-feed-card-next"></div>
           </div>
           <div class="disc-feed-nav">
             <button class="disc-feed-nav-btn" id="disc-feed-prev-musico" onclick="prevMusician()">&#8249; Anterior</button>
@@ -4839,6 +4846,7 @@ function renderDiscFeed(resetPosition){
     renderDiscFeedMusician();
   } else {
     renderDiscFeedNav();
+    _renderDiscPreviews();
   }
 }
 
@@ -4854,6 +4862,8 @@ function renderDiscFeedMusician(){
   document.getElementById('disc-feed-btn-perfil').onclick = function(){ openMusicianProfile(m.id); };
 
   renderDiscFeedNav();
+  _renderDiscPreviews();
+  _layoutDiscCards(0);
 }
 
 function renderDiscFeedNav(){
@@ -4904,6 +4914,124 @@ function prevMusician(){
   if(_discMusicianIdx <= 0) return;
   _discMusicianIdx--;
   renderDiscFeedMusician();
+}
+
+/* ── PREVIEWS (cards anterior/próximo, estáticos) ── */
+function _renderDiscPreviews(){
+  var prevM = _discMusicianIdx > 0 ? _musiciansList[_discMusicianIdx-1] : null;
+  var nextM = _discMusicianIdx < _musiciansList.length-1 ? _musiciansList[_discMusicianIdx+1] : null;
+  _renderDiscCardPreview('prev', prevM);
+  _renderDiscCardPreview('next', nextM);
+}
+function _renderDiscCardPreview(slot, musician){
+  var el = document.getElementById('disc-feed-card-'+slot);
+  if(!musician){ el.innerHTML=''; return; }
+  var item = (musician.media||[])[0];
+  var mediaHtml = !item ? '' : (item.type==='video'
+    ? '<img src="'+videoPosterUrl(item.url)+'" alt="">'
+    : '<img src="'+item.url+'" alt="'+musician.name+'">');
+  el.innerHTML =
+    '<div class="disc-feed-media">'+mediaHtml+'</div>'+
+    '<div class="disc-feed-overlay"><div class="disc-feed-name">'+musician.name+'</div></div>';
+}
+
+/* ── LAYOUT (posição dos 3 cards via transform) ── */
+var DISC_SWIPE_SLOTS = { prev:-1, current:0, next:1 };
+function _layoutDiscCards(dragPx){
+  var vp = document.getElementById('disc-feed-viewport');
+  var h  = vp.offsetHeight;
+  ['prev','current','next'].forEach(function(slot){
+    var el = document.getElementById('disc-feed-card-'+slot);
+    el.style.transform = 'translateY('+(DISC_SWIPE_SLOTS[slot]*h + dragPx)+'px)';
+  });
+}
+
+/* ── GESTO DE SWIPE (Pointer Events) ── */
+var _discSwipe = null;
+var DISC_SWIPE_DECIDE_PX = 10;   // pixels antes de decidir vertical vs horizontal
+var DISC_SWIPE_MIN_PX    = 80;
+var DISC_SWIPE_MAX_PX    = 100;
+var DISC_SWIPE_RATIO     = 0.25; // 25% da altura, limitado a 80–100px
+
+function startDiscSwipe(evt){
+  if(_discSwipe) return;
+  if(evt.button !== undefined && evt.button !== 0) return;
+  var vp = document.getElementById('disc-feed-viewport');
+  _discSwipe = {
+    startX: evt.clientX, startY: evt.clientY, dragY: 0,
+    mode: 'pending', viewportH: vp.offsetHeight,
+  };
+  document.addEventListener('pointermove', onDiscSwipeMove, { passive:false });
+  document.addEventListener('pointerup', onDiscSwipeEnd);
+  document.addEventListener('pointercancel', onDiscSwipeEnd);
+}
+
+function onDiscSwipeMove(evt){
+  if(!_discSwipe) return;
+  var s  = _discSwipe;
+  var dx = evt.clientX - s.startX;
+  var dy = evt.clientY - s.startY;
+
+  if(s.mode === 'pending'){
+    if(Math.abs(dx) < DISC_SWIPE_DECIDE_PX && Math.abs(dy) < DISC_SWIPE_DECIDE_PX) return;
+    if(Math.abs(dy) <= Math.abs(dx)){
+      document.removeEventListener('pointermove', onDiscSwipeMove);
+      document.removeEventListener('pointerup', onDiscSwipeEnd);
+      document.removeEventListener('pointercancel', onDiscSwipeEnd);
+      _discSwipe = null;
+      return;
+    }
+    s.mode = 'vertical';
+  }
+
+  evt.preventDefault();
+  var atStart = _discMusicianIdx === 0;
+  var atEnd   = _discMusicianIdx >= _musiciansList.length-1 && _musiciansList.length >= _discTotal;
+  var resisted = dy;
+  if((dy > 0 && atStart) || (dy < 0 && atEnd)){
+    resisted = Math.sign(dy) * Math.min(Math.abs(dy)*0.35, s.viewportH*0.4);
+  }
+  s.dragY = resisted;
+  _layoutDiscCards(resisted);
+}
+
+function onDiscSwipeEnd(evt){
+  if(!_discSwipe) return;
+  document.removeEventListener('pointermove', onDiscSwipeMove);
+  document.removeEventListener('pointerup', onDiscSwipeEnd);
+  document.removeEventListener('pointercancel', onDiscSwipeEnd);
+  var s = _discSwipe;
+  _discSwipe = null;
+  if(s.mode !== 'vertical') return;
+
+  var threshold = Math.max(DISC_SWIPE_MIN_PX, Math.min(s.viewportH*DISC_SWIPE_RATIO, DISC_SWIPE_MAX_PX));
+  var atStart = _discMusicianIdx === 0;
+  var atEnd   = _discMusicianIdx >= _musiciansList.length-1 && _musiciansList.length >= _discTotal;
+
+  if(s.dragY <= -threshold && !atEnd)       _completeDiscSwipe('next', s.viewportH);
+  else if(s.dragY >= threshold && !atStart) _completeDiscSwipe('prev', s.viewportH);
+  else                                       _cancelDiscSwipe();
+}
+
+function _cancelDiscSwipe(){
+  ['prev','current','next'].forEach(function(slot){
+    document.getElementById('disc-feed-card-'+slot).style.transition = 'transform .32s cubic-bezier(.34,1.4,.64,1)';
+  });
+  _layoutDiscCards(0);
+  setTimeout(function(){
+    ['prev','current','next'].forEach(function(slot){ document.getElementById('disc-feed-card-'+slot).style.transition=''; });
+  }, 330);
+}
+
+function _completeDiscSwipe(direction, viewportH){
+  ['prev','current','next'].forEach(function(slot){
+    document.getElementById('disc-feed-card-'+slot).style.transition = 'transform .28s cubic-bezier(.2,.8,.2,1)';
+  });
+  _layoutDiscCards(direction === 'next' ? -viewportH : viewportH);
+  setTimeout(function(){
+    ['prev','current','next'].forEach(function(slot){ document.getElementById('disc-feed-card-'+slot).style.transition=''; });
+    if(direction === 'next') nextMusician(); else prevMusician();
+  }, 290);
 }
 
 /* ════════════════════════════════════════════
