@@ -559,7 +559,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 
 /* ── PERFIL ── */
 .prf-wrap{max-width:740px}
-.prf-cover{position:relative;height:180px;border-radius:14px;overflow:hidden;background:linear-gradient(135deg,#1a1035 0%,#0e0e1a 50%,#1a2535 100%);border:1px solid #2a2a2a;margin-bottom:0;flex-shrink:0}
+.prf-cover{position:relative;height:180px;border-radius:var(--radius-md);overflow:hidden;background:linear-gradient(135deg,#1a1035 0%,#0e0e1a 50%,#1a2535 100%);border:1px solid var(--border-default);margin-bottom:0;flex-shrink:0}
 .prf-cover-img{width:100%;height:100%;object-fit:cover;display:block}
 .prf-cover-gradient{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,0.6) 100%);pointer-events:none}
 .prf-cover-cam{width:36px;height:36px;border-radius:9px;background:rgba(0,0,0,0.6);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,0.1);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:background .15s,transform .15s}
@@ -592,8 +592,8 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .pg-gallery-grid{display:grid;grid-template-columns:repeat(3,104px);gap:9px;margin-bottom:18px}
 .pg-gallery-slot{display:flex;flex-direction:column}
 .pg-slot-picker{
-  position:relative;width:104px;height:139px;border-radius:10px;overflow:hidden;
-  background:#141414;border:1px solid #2a2a2a;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  position:relative;width:104px;height:139px;border-radius:var(--radius-md);overflow:hidden;
+  background:var(--bg-surface);border:1px solid var(--border-default);display:flex;flex-direction:column;align-items:center;justify-content:center;
 }
 .pg-slot-picker.is-empty{cursor:pointer}
 .pg-slot-picker.is-empty-video{border-color:#3a2f5c;background:#14102a}
@@ -613,18 +613,31 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .prf-identity{padding:14px 4px 0}
 .prf-name{font-size:22px;font-weight:700;color:#fff;line-height:1.2;margin-bottom:5px}
 .prf-role{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--primary-light);background:#1e1535;border:1px solid #2e1f55;border-radius:20px;padding:3px 11px;font-weight:500}
-.prf-bio-card{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:12px;padding:18px 20px;margin-top:18px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
+.prf-bio-card{background:#0d0d0d;border:1px solid var(--border-subtle);border-radius:12px;padding:18px 20px;margin-top:18px;margin-bottom:14px;box-shadow:var(--shadow-sm)}
 .prf-bio-label{font-size:11px;color:#555;text-transform:uppercase;letter-spacing:.5px;font-weight:600;margin-bottom:8px}
 .prf-bio-text{font-size:13px;color:#aaa;line-height:1.75;white-space:pre-wrap;word-break:break-word}
 .prf-bio-empty{font-size:13px;color:#3a3a3a;font-style:italic}
-.prf-stats-row{display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:18px}
-.prf-stat{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:10px;padding:14px 12px;text-align:center;transition:border-color .15s}
-.prf-stat:hover{border-color:#2e1f55}
-.prf-stat-num{font-size:20px;font-weight:700;color:var(--primary-light);margin-bottom:3px}
-.prf-stat-lbl{font-size:11px;color:#555}
+.prf-stats-row{display:flex;margin-bottom:18px}
+.prf-stat{flex:1;text-align:center;padding:0 16px}
+.prf-stat:first-child{padding-left:0}
+.prf-stat:not(:last-child){border-right:1px solid var(--border-subtle)}
+.prf-stat-num{font-family:var(--font-display);font-size:20px;font-weight:700;color:var(--primary-light);margin-bottom:3px}
+.prf-stat-lbl{font-family:var(--font-body);font-size:11px;color:var(--text-tertiary)}
 .prf-section-title{font-size:13px;font-weight:600;color:#888;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px}
 .prf-tags-row{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px}
 .prf-tag{font-size:12px;background:#1e1535;color:var(--primary-light);border:1px solid #2e1f55;padding:5px 14px;border-radius:20px;font-weight:500}
+
+/* ── Etapa 2 (tokens): só Meu Perfil — #view-musico-perfil (view pública)
+   compartilha .prf-avatar/.prf-bio-card/.prf-contact-card/.prf-section-title/
+   .prf-bio-label, por isso essas mudanças ficam escopadas aqui em vez de
+   editar as classes base direto. ── */
+#view-perfil .prf-avatar{border-color:var(--bg-base)}
+#view-perfil .prf-avatar-cam{border-color:var(--bg-base)}
+#view-perfil .prf-bio-card{background:var(--bg-base);border-radius:var(--radius-md)}
+#view-perfil .prf-contact-card{background:var(--bg-base);border-radius:var(--radius-md)}
+#view-perfil .prf-section-title{text-transform:none;letter-spacing:normal;font-weight:700}
+#view-perfil .prf-bio-label{text-transform:none;letter-spacing:normal;font-weight:700}
+#prf-nome-display{font-family:var(--font-display);font-weight:700}
 .avail-block{max-width:100%}
 .avail-subtitle{font-size:11px;color:#555;margin-bottom:8px}
 .avail-cal-wrap{background:#111;border:1px solid #1e1e2e;border-radius:12px;padding:12px;margin-top:0;margin-bottom:6px}
@@ -646,11 +659,11 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .avail-legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
 .avail-loading{text-align:center;color:#555;font-size:13px;padding:20px 0}
 .avail-empty-msg{text-align:center;font-size:12px;color:#4ade80;margin-top:8px}
-.prf-contact-card{background:#0d0d0d;border:1px solid #1e1e1e;border-radius:12px;overflow:hidden;margin-bottom:24px;box-shadow:var(--shadow-sm)}
-.prf-contact-row{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid #141414;transition:background .12s}
+.prf-contact-card{background:#0d0d0d;border:1px solid var(--border-subtle);border-radius:12px;overflow:hidden;margin-bottom:24px;box-shadow:var(--shadow-sm)}
+.prf-contact-row{display:flex;align-items:center;gap:12px;padding:12px 18px;border-bottom:1px solid var(--bg-surface);transition:background .12s}
 .prf-contact-row:last-child{border-bottom:none}
 .prf-contact-row:hover{background:#111}
-.prf-contact-icon{width:30px;height:30px;border-radius:8px;background:#1a1a1a;border:1px solid #2a2a2a;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.prf-contact-icon{width:30px;height:30px;border-radius:8px;background:var(--bg-surface-alt);border:1px solid var(--border-default);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .prf-contact-text{flex:1;min-width:0}
 .prf-contact-lbl{font-size:11px;color:#555;margin-bottom:1px}
 .prf-contact-val{font-size:13px;color:#ccc;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
