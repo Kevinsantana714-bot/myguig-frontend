@@ -171,6 +171,11 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   display:flex;
   flex-direction:column;
   align-items:center;
+  background:var(--bg-surface);
+  border:1px solid var(--border-subtle);
+  border-radius:var(--radius-lg);
+  padding:40px 32px;
+  box-shadow:var(--shadow-lg);
 }
 .login-logo{
   display:flex;
@@ -187,16 +192,16 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 }
 .login-logo-text{font-size:22px;font-weight:600;color:#fff}
 .login-logo-text em{color:var(--primary-light);font-style:normal}
-.login-title{font-size:22px;font-weight:700;color:#fff;text-align:center;margin-bottom:8px}
-.login-sub{font-size:14px;color:#888;text-align:center;line-height:1.6;margin-bottom:32px}
+.login-title{font-family:var(--font-display);font-size:22px;font-weight:700;color:#fff;text-align:center;margin-bottom:8px}
+.login-sub{font-size:14px;color:var(--text-secondary);text-align:center;line-height:1.6;margin-bottom:32px}
 .login-fields{width:100%;display:flex;flex-direction:column;gap:16px}
 .login-field{display:flex;flex-direction:column;gap:6px}
 .login-label{font-size:13px;color:#bbb;font-weight:500}
 .login-input{
   width:100%;padding:14px 16px;
-  background:#1a1a1a;
-  border:1px solid #2e2e2e;
-  border-radius:10px;
+  background:var(--bg-surface-alt);
+  border:1px solid var(--border-default);
+  border-radius:var(--radius-sm);
   color:#fff;font-size:14px;
   outline:none;font-family:inherit;
   transition:border-color .15s;
@@ -222,7 +227,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .btn-login:hover{background:var(--primary-dark)}
 .btn-login:active{transform:scale(.98)}
 .btn-google{
-  width:100%;padding:11px 16px;border-radius:8px;
+  width:100%;padding:11px 16px;border-radius:var(--radius-sm);
   background:#fff;border:1px solid #dadce0;
   color:#3c4043;font-size:14px;font-weight:500;
   cursor:pointer;font-family:inherit;
@@ -235,21 +240,21 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   display:flex;align-items:center;gap:12px;
   margin:4px 0;width:100%;
 }
-.login-divider-line{flex:1;height:1px;background:#2a2a2a}
-.login-divider-txt{font-size:13px;color:#555}
+.login-divider-line{flex:1;height:1px;background:var(--border-default)}
+.login-divider-txt{font-size:13px;color:var(--text-tertiary)}
 .btn-register{
   width:100%;padding:15px;
   background:transparent;
-  border:1px solid #2e2e2e;
+  border:1px solid var(--border-default);
   border-radius:10px;
   color:#ccc;font-size:15px;font-weight:600;
   cursor:pointer;font-family:inherit;
   transition:all .15s;
 }
 .btn-register:hover{border-color:#555;color:#fff}
-.login-terms{font-size:12px;color:#555;text-align:center;margin-top:4px}
+.login-terms{font-size:12px;color:var(--text-tertiary);text-align:center;margin-top:4px}
 .login-terms a{color:var(--primary-light);text-decoration:underline;cursor:pointer}
-.login-forgot{font-size:12px;color:#666;text-align:right;margin-top:-8px;margin-bottom:0}
+.login-forgot{font-size:12px;color:var(--text-tertiary);text-align:right;margin-top:-8px;margin-bottom:0}
 .login-forgot a{color:var(--primary-light);cursor:pointer;text-decoration:none}
 .login-forgot a:hover{text-decoration:underline}
 
@@ -778,21 +783,21 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 #register-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:center;justify-content:center}
 #register-modal.open{display:flex}
 .register-box{
-  background:#141414;border:1px solid #2a2a2a;border-radius:14px;
+  background:var(--bg-surface);border:1px solid var(--border-default);border-radius:var(--radius-md);
   padding:28px;width:100%;max-width:420px;margin:16px;
   animation:fadeInUp .25s ease both;
 }
 .register-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.register-title{font-size:17px;font-weight:700;color:#fff}
-.register-close{width:28px;height:28px;border-radius:7px;background:#1e1e1e;border:1px solid #2a2a2a;color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s;flex-shrink:0}
+.register-title{font-family:var(--font-display);font-size:17px;font-weight:700;color:#fff}
+.register-close{width:28px;height:28px;border-radius:7px;background:var(--border-subtle);border:1px solid var(--border-default);color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s;flex-shrink:0}
 .register-close:hover{background:#2a2a2a;color:#fff}
 .register-fields{display:flex;flex-direction:column;gap:14px}
 .register-field{display:flex;flex-direction:column;gap:5px}
 .register-label{font-size:12px;color:#bbb;font-weight:500}
 .register-input{
   width:100%;padding:13px 14px;
-  background:#1a1a1a;border:1px solid #2e2e2e;
-  border-radius:9px;color:#fff;font-size:14px;
+  background:var(--bg-surface-alt);border:1px solid var(--border-default);
+  border-radius:var(--radius-sm);color:#fff;font-size:14px;
   outline:none;font-family:inherit;transition:border-color .15s;
 }
 .register-input:focus{border-color:var(--primary-hover)}
@@ -814,8 +819,8 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 ══════════════════════════════════════════ */
 .role-selector{display:flex;gap:10px;margin-bottom:2px}
 .role-btn{
-  flex:1;padding:11px 8px;border-radius:9px;
-  border:1px solid #2e2e2e;background:#1a1a1a;
+  flex:1;padding:11px 8px;border-radius:var(--radius-sm);
+  border:1px solid var(--border-default);background:var(--bg-surface-alt);
   color:#aaa;font-size:13px;font-weight:500;
   cursor:pointer;font-family:inherit;
   transition:border-color .15s,color .15s;
@@ -2353,9 +2358,9 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
       <div class="register-error" id="reg-error"></div>
       <button class="btn-register-confirm" id="reg-btn" onclick="submitRegister()">Criar conta</button>
       <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
-        <div style="flex:1;height:1px;background:#2a2a2a"></div>
-        <span style="font-size:12px;color:#555">ou</span>
-        <div style="flex:1;height:1px;background:#2a2a2a"></div>
+        <div style="flex:1;height:1px;background:var(--border-default)"></div>
+        <span style="font-size:12px;color:var(--text-tertiary)">ou</span>
+        <div style="flex:1;height:1px;background:var(--border-default)"></div>
       </div>
       <button class="btn-google" onclick="closeRegisterModal();loginComGoogle()">
         <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
