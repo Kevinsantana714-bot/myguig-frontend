@@ -787,19 +787,34 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .btn-cancel-confirm:hover{background:#e74c3c}
 
 /* ══════════════════════════════════════════
-   MODAL DE CADASTRO
+   PÁGINA DE CADASTRO (tela cheia, 2 colunas)
 ══════════════════════════════════════════ */
-#register-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:300;align-items:center;justify-content:center}
-#register-modal.open{display:flex}
-.register-box{
-  background:var(--bg-surface);border:1px solid var(--border-default);border-radius:var(--radius-md);
-  padding:28px;width:100%;max-width:420px;margin:16px;
-  animation:fadeInUp .25s ease both;
+#register-screen{display:none;min-height:100vh;background:var(--bg-base);padding:2.5rem 1.5rem}
+.reg-page{max-width:960px;margin:0 auto}
+.reg-back{display:inline-flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:13px;cursor:pointer;margin-bottom:20px;text-decoration:none;background:none;border:none;font-family:inherit;padding:0}
+.reg-back:hover{color:#fff}
+.reg-panel{
+  background:var(--bg-surface);border:1px solid var(--border-subtle);
+  border-radius:var(--radius-lg);padding:44px 40px;box-shadow:var(--shadow-lg);
 }
-.register-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px}
-.register-title{font-family:var(--font-display);font-size:17px;font-weight:700;color:#fff}
-.register-close{width:28px;height:28px;border-radius:7px;background:var(--border-subtle);border:1px solid var(--border-default);color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:15px;transition:all .15s;flex-shrink:0}
-.register-close:hover{background:#2a2a2a;color:#fff}
+.reg-cols{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:start}
+.reg-col-form{max-width:400px}
+.reg-col-media{display:flex;flex-direction:column;align-items:center;padding-top:6px}
+.reg-media-hint{font-size:13px;color:var(--text-secondary);margin-bottom:14px;text-align:center}
+.reg-media-wrap{position:relative;min-height:288px;display:flex;align-items:center;justify-content:center}
+.reg-media-lock{
+  display:flex;flex-direction:column;align-items:center;gap:10px;
+  color:var(--text-tertiary);font-size:12px;text-align:center;line-height:1.5;
+  padding:32px 24px;border:1px dashed var(--border-default);border-radius:var(--radius-md);
+  max-width:280px;
+}
+#reg-finish-btn{margin-top:20px;max-width:320px}
+@media(max-width:768px){
+  .reg-panel{padding:28px 20px}
+  .reg-cols{grid-template-columns:1fr;gap:32px}
+  .reg-col-form{max-width:100%}
+}
+.register-title{font-family:var(--font-display);font-size:24px;font-weight:700;color:#fff;margin-bottom:26px}
 .register-fields{display:flex;flex-direction:column;gap:14px}
 .register-field{display:flex;flex-direction:column;gap:5px}
 .register-label{font-size:12px;color:#bbb;font-weight:500}
@@ -1141,15 +1156,6 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
     border-radius: 16px 16px 0 0 !important;
     width: 100%;
     max-height: 90vh;
-  }
-
-  /* ── Modal de registo ── */
-  #register-modal { align-items: flex-end; }
-  .register-box {
-    max-width: 100% !important;
-    margin: 0 !important;
-    border-radius: 16px 16px 0 0;
-    width: 100%;
   }
 
   /* ── Toast ── */
@@ -1712,7 +1718,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
     </div>
 
     <div id="photo-gate-banner" class="pg-banner" style="display:none">
-      <span class="pg-banner-text">O teu perfil não aparece na busca até adicionares uma foto.</span>
+      <span class="pg-banner-text">Adiciona pelo menos uma foto para completares o teu perfil.</span>
       <button class="pg-banner-cta" onclick="goToGalleryFromBanner()">Completar agora</button>
       <button class="pg-banner-close" onclick="dismissPhotoGateBanner()" aria-label="Fechar">&times;</button>
     </div>
@@ -2326,56 +2332,72 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   </div>
 </div>
 
-<div id="register-modal">
-  <div class="register-box">
-    <div class="register-header">
-      <div class="register-title">Criar conta gratuita</div>
-      <button class="register-close" onclick="closeRegisterModal()">&#10005;</button>
-    </div>
-    <div class="register-fields">
-      <div class="register-field">
-        <label class="register-label">Você é…</label>
-        <div class="role-selector">
-          <button class="role-btn active" id="role-musician" onclick="selectRole('musician')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>Sou Músico / Cantor</button>
-          <button class="role-btn" id="role-contractor" onclick="selectRole('contractor')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path><line x1="9" y1="9" x2="9" y2="9.01"></line><line x1="9" y1="12" x2="9" y2="12.01"></line><line x1="9" y1="15" x2="9" y2="15.01"></line></svg>Sou Contratante / Bar</button>
+<div id="register-screen">
+  <div class="reg-page">
+    <button class="reg-back" id="reg-back-link" onclick="closeRegisterScreen()">&#8592; Voltar</button>
+    <div class="reg-panel">
+      <div class="reg-cols">
+        <div class="reg-col-form">
+          <div class="register-title">Criar conta gratuita</div>
+          <div class="register-fields">
+            <div class="register-field">
+              <label class="register-label">Você é…</label>
+              <div class="role-selector">
+                <button class="role-btn active" id="role-musician" onclick="selectRole('musician')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>Sou Músico / Cantor</button>
+                <button class="role-btn" id="role-contractor" onclick="selectRole('contractor')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path><line x1="9" y1="9" x2="9" y2="9.01"></line><line x1="9" y1="12" x2="9" y2="12.01"></line><line x1="9" y1="15" x2="9" y2="15.01"></line></svg>Sou Contratante / Bar</button>
+              </div>
+            </div>
+            <div class="register-field">
+              <label class="register-label">Nome completo</label>
+              <input class="register-input" id="reg-name" type="text" placeholder="Seu nome"
+                onkeydown="if(event.key==='Enter')document.getElementById('reg-email').focus()">
+            </div>
+            <div class="register-field">
+              <label class="register-label">E-mail</label>
+              <input class="register-input" id="reg-email" type="email" placeholder="seu@email.com"
+                onkeydown="if(event.key==='Enter')document.getElementById('reg-cidade').focus()">
+            </div>
+            <div class="register-field">
+              <label class="register-label">Cidade</label>
+              <input class="register-input" id="reg-cidade" type="text" placeholder="Ex: Lisboa, Porto, Coimbra..."
+                onkeydown="if(event.key==='Enter')document.getElementById('reg-senha').focus()">
+            </div>
+            <div class="register-field">
+              <label class="register-label">Senha (mín. 8 caracteres)</label>
+              <input class="register-input" id="reg-senha" type="password" placeholder="••••••••"
+                onkeydown="if(event.key==='Enter')document.getElementById('reg-confirma').focus()">
+            </div>
+            <div class="register-field">
+              <label class="register-label">Confirmar senha</label>
+              <input class="register-input" id="reg-confirma" type="password" placeholder="••••••••"
+                onkeydown="if(event.key==='Enter')submitRegisterStep1()">
+            </div>
+            <div class="register-error" id="reg-error"></div>
+            <button class="btn-register-confirm" id="reg-btn" onclick="submitRegisterStep1()">Criar conta</button>
+            <div id="reg-divider" style="display:flex;align-items:center;gap:10px;margin-top:4px">
+              <div style="flex:1;height:1px;background:var(--border-default)"></div>
+              <span style="font-size:12px;color:var(--text-tertiary)">ou</span>
+              <div style="flex:1;height:1px;background:var(--border-default)"></div>
+            </div>
+            <button class="btn-google" id="reg-google-btn" onclick="closeRegisterScreen();loginComGoogle()">
+              <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
+              Registar com Google
+            </button>
+          </div>
+        </div>
+
+        <div class="reg-col-media">
+          <p class="reg-media-hint">Adicione pelo menos uma foto</p>
+          <div class="reg-media-wrap">
+            <div class="pg-gallery-grid" id="reg-gallery-grid" style="display:none"></div>
+            <div class="reg-media-lock" id="reg-media-lock">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-tertiary)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Preenche os dados ao lado primeiro</span>
+            </div>
+          </div>
+          <button class="btn-register-confirm" id="reg-finish-btn" style="display:none" disabled onclick="finishRegistration()">Concluir cadastro</button>
         </div>
       </div>
-      <div class="register-field">
-        <label class="register-label">Nome completo</label>
-        <input class="register-input" id="reg-name" type="text" placeholder="Seu nome"
-          onkeydown="if(event.key==='Enter')document.getElementById('reg-email').focus()">
-      </div>
-      <div class="register-field">
-        <label class="register-label">E-mail</label>
-        <input class="register-input" id="reg-email" type="email" placeholder="seu@email.com"
-          onkeydown="if(event.key==='Enter')document.getElementById('reg-cidade').focus()">
-      </div>
-      <div class="register-field">
-        <label class="register-label">Cidade</label>
-        <input class="register-input" id="reg-cidade" type="text" placeholder="Ex: Lisboa, Porto, Coimbra..."
-          onkeydown="if(event.key==='Enter')document.getElementById('reg-senha').focus()">
-      </div>
-      <div class="register-field">
-        <label class="register-label">Senha (mín. 8 caracteres)</label>
-        <input class="register-input" id="reg-senha" type="password" placeholder="••••••••"
-          onkeydown="if(event.key==='Enter')document.getElementById('reg-confirma').focus()">
-      </div>
-      <div class="register-field">
-        <label class="register-label">Confirmar senha</label>
-        <input class="register-input" id="reg-confirma" type="password" placeholder="••••••••"
-          onkeydown="if(event.key==='Enter')submitRegister()">
-      </div>
-      <div class="register-error" id="reg-error"></div>
-      <button class="btn-register-confirm" id="reg-btn" onclick="submitRegister()">Criar conta</button>
-      <div style="display:flex;align-items:center;gap:10px;margin-top:4px">
-        <div style="flex:1;height:1px;background:var(--border-default)"></div>
-        <span style="font-size:12px;color:var(--text-tertiary)">ou</span>
-        <div style="flex:1;height:1px;background:var(--border-default)"></div>
-      </div>
-      <button class="btn-google" onclick="closeRegisterModal();loginComGoogle()">
-        <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
-        Registar com Google
-      </button>
     </div>
   </div>
 </div>
@@ -2524,21 +2546,35 @@ async function handleLogin(){
 
 /* ── Abrir/fechar modal de cadastro ── */
 function handleRegister(){
+  document.getElementById('landing-screen').style.display='none';
   document.getElementById('login-screen').style.display='none';
-  document.getElementById('register-modal').classList.add('open');
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('register-screen').style.display='block';
   setTimeout(function(){ document.getElementById('reg-name').focus(); }, 50);
 }
-function closeRegisterModal(){
-  document.getElementById('register-modal').classList.remove('open');
+function closeRegisterScreen(){
+  document.getElementById('register-screen').style.display='none';
   ['reg-name','reg-email','reg-cidade','reg-senha','reg-confirma'].forEach(function(id){
-    document.getElementById(id).value='';
-    document.getElementById(id).classList.remove('error');
+    var el = document.getElementById(id);
+    el.value='';
+    el.classList.remove('error');
+    el.disabled=false;
   });
   document.getElementById('reg-error').textContent='';
+  document.getElementById('role-musician').disabled=false;
+  document.getElementById('role-contractor').disabled=false;
+  document.getElementById('reg-back-link').style.display='';
+  document.getElementById('reg-google-btn').style.display='';
+  document.getElementById('reg-divider').style.display='';
+  document.getElementById('reg-btn').style.display='';
+  document.getElementById('reg-btn').textContent='Criar conta';
+  document.getElementById('reg-media-lock').style.display='flex';
+  document.getElementById('reg-gallery-grid').style.display='none';
+  document.getElementById('reg-finish-btn').style.display='none';
 }
 
-/* ── Submeter cadastro ── */
-async function submitRegister(){
+/* ── Submeter cadastro (passo 1: dados) ── */
+async function submitRegisterStep1(){
   var name     = document.getElementById('reg-name').value.trim();
   var email    = document.getElementById('reg-email').value.trim();
   var cidade   = document.getElementById('reg-cidade').value.trim();
@@ -2568,18 +2604,43 @@ async function submitRegister(){
     var data = await res.json();
     if(!res.ok){
       errEl.textContent = data.error || 'Erro ao criar conta.';
+      btn.textContent='Criar conta'; btn.disabled=false;
       return;
     }
     saveToken(data.token);
     applyUserToUI(data.user);
-    closeRegisterModal();
-    showApp();
-    showToast('Conta criada com sucesso! Bem-vindo(a).','success');
+    _enterRegisterStep2();
   } catch(e) {
     errEl.textContent='Servidor offline. Certifique-se de que npm run dev está rodando.';
-  } finally {
     btn.textContent='Criar conta'; btn.disabled=false;
   }
+}
+
+/* ── Passo 2: galeria obrigatória (reaproveita o componente de Meu Perfil) ── */
+function _enterRegisterStep2(){
+  document.getElementById('reg-back-link').style.display='none';
+  ['reg-name','reg-email','reg-cidade','reg-senha','reg-confirma'].forEach(function(id){
+    document.getElementById(id).disabled=true;
+  });
+  document.getElementById('role-musician').disabled=true;
+  document.getElementById('role-contractor').disabled=true;
+  document.getElementById('reg-btn').textContent='Conta criada ✓';
+  document.getElementById('reg-google-btn').style.display='none';
+  document.getElementById('reg-divider').style.display='none';
+
+  document.getElementById('reg-media-lock').style.display='none';
+  document.getElementById('reg-gallery-grid').style.display='grid';
+  _activeGalleryGridId = 'reg-gallery-grid';
+  _galleryMedia = [];
+  renderGallery();
+  document.getElementById('reg-finish-btn').style.display='block';
+}
+
+function finishRegistration(){
+  document.getElementById('register-screen').style.display='none';
+  _activeGalleryGridId = 'pg-gallery-grid';
+  showApp();
+  showToast('Conta criada com sucesso! Bem-vindo(a).','success');
 }
 
 /* ── Logout ── */
@@ -4127,6 +4188,7 @@ var TRASH_ICON_SVG = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none
 var _galleryMedia = [];
 var _galleryPendingType  = null;
 var _galleryPendingIndex = null;
+var _activeGalleryGridId = 'pg-gallery-grid'; // troca pra 'reg-gallery-grid' durante o cadastro
 
 function _galleryPhotos(){ return _galleryMedia.filter(function(m){ return m.type==='photo'; }); }
 function _galleryVideo(){ return _galleryMedia.filter(function(m){ return m.type==='video'; })[0] || null; }
@@ -4147,7 +4209,7 @@ function videoPosterUrl(url){
 }
 
 function renderGallery(){
-  var grid = document.getElementById('pg-gallery-grid');
+  var grid = document.getElementById(_activeGalleryGridId);
   if(!grid) return;
   var photos = _galleryPhotos();
   var video  = _galleryVideo();
@@ -4155,6 +4217,12 @@ function renderGallery(){
   for(var i=0;i<4;i++) html += _gallerySlotHtml('photo', photos[i]||null, i, photos.length);
   html += _gallerySlotHtml('video', video, 0, video?1:0);
   grid.innerHTML = html;
+  _syncRegFinishButton();
+}
+
+function _syncRegFinishButton(){
+  var btn = document.getElementById('reg-finish-btn');
+  if(btn) btn.disabled = _galleryMedia.length === 0;
 }
 
 function _gallerySlotHtml(type, item, index, siblingCount){
@@ -4259,7 +4327,7 @@ function startGalleryDrag(evt, index){
   var rect   = srcEl.getBoundingClientRect();
 
   var cellEls = Array.prototype.slice.call(
-    document.querySelectorAll('#pg-gallery-grid .pg-gallery-slot[data-kind="photo"] .pg-slot-picker')
+    document.querySelectorAll('#'+_activeGalleryGridId+' .pg-gallery-slot[data-kind="photo"] .pg-slot-picker')
   );
   var cellRects = cellEls.map(function(el){ return el.getBoundingClientRect(); });
 
@@ -4613,7 +4681,6 @@ async function uploadCoverBlob(blob){
 var PHOTO_GATE_DISMISS_KEY = 'myguig_photo_gate_dismissed';
 
 async function checkPhotoGate(){
-  if(userProfile.role !== 'musician') return;
   if(sessionStorage.getItem(PHOTO_GATE_DISMISS_KEY)) return;
   try {
     var data  = await apiCall('GET', '/api/users/'+_currentUserId);
