@@ -1178,11 +1178,11 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .conv-list{display:flex;flex-direction:column;gap:2px}
 .conv-item{
   display:flex;align-items:center;gap:12px;
-  padding:12px;border-radius:10px;
-  background:#0d0d0d;border:1px solid #1a1a1a;
+  padding:12px;border-radius:var(--radius-md);
+  background:var(--bg-base);border:1px solid var(--border-subtle);
   cursor:pointer;transition:background .15s;
 }
-.conv-item:hover{background:#141414;border-color:#2a2a2a}
+.conv-item:hover{background:var(--bg-surface);border-color:var(--border-default)}
 .conv-avatar{
   width:42px;height:42px;border-radius:50%;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
@@ -1194,8 +1194,8 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .chat-header-avatar{width:34px;height:34px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#000;overflow:hidden}
 .chat-header-avatar img{width:100%;height:100%;object-fit:cover;display:block}
 .conv-info{flex:1;min-width:0}
-.conv-name{font-size:13px;font-weight:600;color:#e0e0e0;margin-bottom:2px}
-.conv-preview{font-size:12px;color:#555;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.conv-name{font-family:var(--font-body);font-size:13px;font-weight:600;color:#e0e0e0;margin-bottom:2px}
+.conv-preview{font-size:12px;color:var(--text-secondary);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
 .conv-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
 .conv-time{font-size:11px;color:#444}
 .conv-unread{background:var(--primary);color:#fff;font-size:10px;font-weight:700;min-width:18px;height:18px;border-radius:9px;display:flex;align-items:center;justify-content:center;padding:0 4px}
@@ -1203,11 +1203,11 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .conv-empty-icon{font-size:36px;margin-bottom:10px}
 .conv-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px}
 .conv-toolbar-actions{display:flex;gap:8px}
-.btn-conv-select{background:transparent;border:1px solid #2e2e2e;border-radius:8px;color:#aaa;font-size:13px;font-weight:500;padding:7px 14px;cursor:pointer;font-family:inherit;transition:all .15s}
+.btn-conv-select{background:transparent;border:1px solid var(--border-default);border-radius:var(--radius-sm);color:#aaa;font-size:13px;font-weight:500;padding:7px 14px;cursor:pointer;font-family:inherit;transition:all .15s}
 .btn-conv-select:active{transform:scale(.95)}
 .btn-conv-select:hover{border-color:#555;color:#fff}
 .btn-conv-select.active{border-color:var(--primary-hover);color:var(--primary-light)}
-.btn-conv-delete{background:#c0392b;border:none;border-radius:8px;color:#fff;font-size:13px;font-weight:600;padding:7px 14px;cursor:pointer;font-family:inherit;transition:background .15s,transform .15s;display:none}
+.btn-conv-delete{background:#c0392b;border:none;border-radius:var(--radius-sm);color:#fff;font-size:13px;font-weight:600;padding:7px 14px;cursor:pointer;font-family:inherit;transition:background .15s,transform .15s;display:none}
 .btn-conv-delete:active{transform:scale(.95)}
 .btn-conv-delete:hover{background:#e74c3c}
 .conv-checkbox{display:none;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;border:2px solid #333;background:transparent;flex-shrink:0;transition:all .15s}
@@ -1222,7 +1222,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 #chat-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:500;align-items:center;justify-content:center}
 #chat-modal.open{display:flex}
 .chat-box{
-  background:#131316;border:1px solid #2e1f55;border-radius:18px;
+  background:var(--bg-surface);border:1px solid #2e1f55;border-radius:var(--radius-lg);
   width:100%;max-width:480px;height:560px;margin:16px;
   display:flex;flex-direction:column;overflow:hidden;
   animation:fadeInUp .22s ease both;
@@ -1248,23 +1248,23 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   padding:10px 14px;font-size:13.5px;line-height:1.45;word-break:break-word;
   box-shadow:0 1px 2px rgba(0,0,0,.3);
 }
-.chat-msg.mine .chat-bubble{background:linear-gradient(135deg,var(--primary-hover),var(--primary));color:#fff;border-radius:18px 18px 4px 18px}
-.chat-msg.theirs .chat-bubble{background:#232328;color:#eee;border-radius:18px 18px 18px 4px}
+.chat-msg.mine .chat-bubble{background:linear-gradient(135deg,var(--primary-hover),var(--primary));color:#fff;border-radius:var(--radius-md) var(--radius-md) 4px var(--radius-md)}
+.chat-msg.theirs .chat-bubble{background:#232328;color:#eee;border-radius:var(--radius-md) var(--radius-md) var(--radius-md) 4px}
 .chat-ts{font-size:10px;color:#555;margin-top:3px;padding:0 4px}
 .chat-msg.system{align-self:center;max-width:92%;align-items:center;width:100%}
 .chat-proposal-card{
   width:100%;display:flex;gap:12px;align-items:center;
   background:linear-gradient(135deg,#1a1230,#161619);
-  border:1px solid #2e1f55;border-radius:16px;
+  border:1px solid #2e1f55;border-radius:var(--radius-md);
   padding:14px 16px;box-shadow:0 1px 2px rgba(0,0,0,.3);
 }
 .chat-proposal-icon{
-  width:38px;height:38px;border-radius:10px;flex-shrink:0;
+  width:38px;height:38px;border-radius:var(--radius-sm);flex-shrink:0;
   background:linear-gradient(135deg,var(--primary-hover),var(--primary));
   display:flex;align-items:center;justify-content:center;color:#fff;
 }
 .chat-proposal-body{flex:1;min-width:0}
-.chat-proposal-label{font-size:10px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--primary-light);margin-bottom:3px}
+.chat-proposal-label{font-size:10px;font-weight:700;letter-spacing:normal;color:var(--primary-light);margin-bottom:3px}
 .chat-proposal-title{font-size:14px;font-weight:700;color:#fff;margin-bottom:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chat-proposal-meta{display:flex;gap:14px;font-size:12px;color:#999}
 .chat-proposal-cache{color:#4ade80;font-weight:700}
