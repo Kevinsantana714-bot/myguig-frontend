@@ -2,7 +2,7 @@
 <html lang="pt-PT">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -163,7 +163,8 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   align-items:center;
   justify-content:center;
   background:rgba(0,0,0,.6);
-  padding:2rem 1rem;
+  padding:2rem 1rem calc(2rem + env(safe-area-inset-bottom, 0px));
+  overflow-y:auto;
 }
 .login-box{
   position:relative;
@@ -789,7 +790,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 /* ══════════════════════════════════════════
    PÁGINA DE CADASTRO (tela cheia, 2 colunas)
 ══════════════════════════════════════════ */
-#register-screen{display:none;min-height:100vh;background:var(--bg-base);padding:2.5rem 1.5rem}
+#register-screen{display:none;min-height:100vh;background:var(--bg-base);padding:2.5rem 1.5rem calc(2.5rem + env(safe-area-inset-bottom, 0px))}
 .reg-page{max-width:960px;margin:0 auto}
 .reg-back{display:inline-flex;align-items:center;gap:6px;color:var(--text-secondary);font-size:13px;cursor:pointer;margin-bottom:20px;text-decoration:none;background:none;border:none;font-family:inherit;padding:0}
 .reg-back:hover{color:#fff}
@@ -2668,6 +2669,7 @@ async function handleLogout(){
   setTimeout(function(){
     document.getElementById('main-app').style.display='none';
     document.getElementById('login-screen').style.display='none';
+    document.getElementById('landing-screen').style.display='block';
   }, 800);
 }
 
