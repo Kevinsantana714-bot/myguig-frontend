@@ -159,13 +159,14 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 }
 #login-screen{
   display:none;
+  position:fixed;inset:0;z-index:250;
   align-items:center;
   justify-content:center;
-  min-height:100vh;
-  background:#000;
+  background:rgba(0,0,0,.6);
   padding:2rem 1rem;
 }
 .login-box{
+  position:relative;
   width:100%;
   max-width:400px;
   display:flex;
@@ -177,6 +178,14 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   padding:40px 32px;
   box-shadow:var(--shadow-lg);
 }
+.login-close{
+  position:absolute;top:14px;right:14px;
+  width:28px;height:28px;border-radius:7px;
+  background:var(--border-subtle);border:1px solid var(--border-default);
+  color:#666;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  font-size:15px;transition:all .15s;flex-shrink:0;
+}
+.login-close:hover{background:#2a2a2a;color:#fff}
 .login-logo{
   display:flex;
   align-items:center;
@@ -1347,6 +1356,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 ══════════════════════════════════════════ -->
 <div id="login-screen">
   <div class="login-box">
+    <button class="login-close" onclick="closeLoginModal()" aria-label="Fechar">&#10005;</button>
     <div class="login-logo">
       <div class="login-logo-icon">G</div>
       <span class="login-logo-text">My<em>GUIG</em></span>
@@ -2402,7 +2412,6 @@ async function showApp(){
 }
 
 function showLogin(){
-  document.getElementById('landing-screen').style.display='none';
   document.getElementById('main-app').style.display='none';
   document.getElementById('login-screen').style.display='flex';
   /* Limpa campos do login */
@@ -2411,6 +2420,9 @@ function showLogin(){
   document.getElementById('login-error').textContent='';
   document.getElementById('login-email').classList.remove('error');
   document.getElementById('login-senha').classList.remove('error');
+}
+function closeLoginModal(){
+  document.getElementById('login-screen').style.display='none';
 }
 
 var API = 'https://myguig-backend-production.up.railway.app';
@@ -2512,6 +2524,7 @@ async function handleLogin(){
 
 /* ── Abrir/fechar modal de cadastro ── */
 function handleRegister(){
+  document.getElementById('login-screen').style.display='none';
   document.getElementById('register-modal').classList.add('open');
   setTimeout(function(){ document.getElementById('reg-name').focus(); }, 50);
 }
@@ -2591,7 +2604,10 @@ async function handleLogout(){
   disconnectRealtime();
   clearToken();
   showToast('Até logo.','info');
-  setTimeout(showLogin, 800);
+  setTimeout(function(){
+    document.getElementById('main-app').style.display='none';
+    document.getElementById('login-screen').style.display='none';
+  }, 800);
 }
 
 /* ── Aplica dados do user à UI ── */
@@ -3065,7 +3081,7 @@ async function reAuthFromToken(){
   var token = getToken();
   if(!token){
     document.getElementById('main-app').style.display = 'none';
-    showLogin();
+    document.getElementById('login-screen').style.display = 'none';
     return;
   }
   try {
