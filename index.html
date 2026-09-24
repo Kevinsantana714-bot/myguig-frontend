@@ -79,7 +79,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 }
 .landing-nav-logo{display:flex;align-items:center;gap:10px}
 .landing-nav-logo-icon{
-  width:34px;height:34px;border-radius:9px;
+  width:34px;height:34px;border-radius:var(--radius-sm);
   background:linear-gradient(135deg,var(--primary-hover),var(--primary-light));
   display:flex;align-items:center;justify-content:center;
   font-weight:800;color:#fff;font-size:16px;
@@ -88,14 +88,14 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .landing-nav-logo-text em{color:var(--primary-light);font-style:normal}
 .landing-nav-actions{display:flex;gap:10px}
 .btn-landing-ghost{
-  background:transparent;color:#ccc;border:1px solid #2a2a2a;border-radius:8px;
+  background:transparent;color:#ccc;border:1px solid var(--border-default);border-radius:var(--radius-sm);
   padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;
   transition:all .15s;
 }
 .btn-landing-ghost:hover{border-color:#444;color:#fff}
 .btn-landing-ghost:active{transform:scale(.97)}
 .btn-landing-primary{
-  background:linear-gradient(135deg,var(--primary-hover),var(--primary));color:#fff;border:none;border-radius:8px;
+  background:linear-gradient(135deg,var(--primary-hover),var(--primary));color:#fff;border:none;border-radius:var(--radius-sm);
   padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;
   transition:all .15s;box-shadow:var(--shadow-sm);
 }
@@ -106,10 +106,10 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   padding:90px 24px 70px;
 }
 .landing-hero-title{
-  font-size:44px;font-weight:800;color:#fff;line-height:1.15;margin-bottom:18px;
+  font-family:var(--font-display);font-size:44px;font-weight:700;color:#fff;line-height:1.15;margin-bottom:18px;
   letter-spacing:-.5px;
 }
-.landing-hero-sub{font-size:17px;color:#999;line-height:1.6;margin-bottom:36px}
+.landing-hero-sub{font-family:var(--font-body);font-size:17px;color:var(--text-secondary);line-height:1.6;margin-bottom:36px}
 .landing-hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
 .landing-cta-lg{padding:13px 26px;font-size:15px}
 .landing-features{
@@ -119,11 +119,11 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   display:grid;grid-template-columns:repeat(3,1fr);gap:20px;
 }
 .landing-feature-card{
-  background:#0d0d0d;border:1px solid #1e1e1e;border-radius:14px;
+  background:var(--bg-base);border:1px solid var(--border-subtle);border-radius:var(--radius-md);
   padding:26px 22px;box-shadow:var(--shadow-sm);
 }
 .landing-feature-icon{
-  width:44px;height:44px;border-radius:10px;
+  width:44px;height:44px;border-radius:var(--radius-sm);
   background:#1a1230;color:var(--primary-light);
   display:flex;align-items:center;justify-content:center;margin-bottom:16px;
 }
@@ -133,15 +133,15 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 }
 .landing-feature-card{position:relative}
 .landing-section-eyebrow{
-  text-align:center;font-size:12px;font-weight:700;letter-spacing:1.2px;
-  color:var(--primary-light);text-transform:uppercase;margin-bottom:8px;
+  text-align:center;font-size:12px;font-weight:700;letter-spacing:normal;
+  color:var(--primary-light);margin-bottom:8px;
 }
 .landing-section-title{
-  text-align:center;font-size:24px;font-weight:800;color:#fff;margin-bottom:36px;
+  font-family:var(--font-display);text-align:center;font-size:24px;font-weight:700;color:#fff;margin-bottom:36px;
 }
 .landing-hero-note{font-size:13px;color:#555;margin-top:18px}
-.landing-feature-title{font-size:16px;font-weight:700;color:#fff;margin-bottom:8px}
-.landing-feature-text{font-size:13.5px;color:#888;line-height:1.55}
+.landing-feature-title{font-family:var(--font-body);font-size:16px;font-weight:600;color:#fff;margin-bottom:8px}
+.landing-feature-text{font-size:13.5px;color:var(--text-secondary);line-height:1.55}
 .landing-footer{
   text-align:center;padding:24px;color:#444;font-size:12.5px;
   border-top:1px solid #161616;
