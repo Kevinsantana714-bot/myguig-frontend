@@ -70,9 +70,23 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
    TELA DE LOGIN
 ══════════════════════════════════════════ */
 #landing-screen{
+  display:none;
   background:#000;
   min-height:100vh;
 }
+#boot-loading{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg-base);
+  display:flex;align-items:center;justify-content:center;
+}
+.boot-spinner{
+  width:32px;height:32px;
+  border:3px solid var(--border-subtle);
+  border-top-color:var(--primary-light);
+  border-radius:50%;
+  animation:boot-spin .7s linear infinite;
+}
+@keyframes boot-spin{to{transform:rotate(360deg)}}
 .landing-nav{
   display:flex;align-items:center;justify-content:space-between;
   padding:20px 32px;max-width:1100px;margin:0 auto;
@@ -1304,6 +1318,8 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 <!-- ══════════════════════════════════════════
      LANDING PAGE (visitantes sem sessão)
 ══════════════════════════════════════════ -->
+<div id="boot-loading"><div class="boot-spinner"></div></div>
+
 <div id="landing-screen">
   <nav class="landing-nav">
     <div class="landing-nav-logo">
@@ -3148,14 +3164,20 @@ async function handleResetPassword(){
 // Reconfirma com o servidor quem está autenticado, usando o token atual do localStorage.
 // Usado tanto no arranque normal como quando o Safari/iOS restaura a página da memória (bfcache)
 // em vez de a recarregar de verdade — sem isto, a app podia continuar a mostrar a conta antiga.
+function hideBootLoading(){
+  var el = document.getElementById('boot-loading');
+  if(el) el.style.display = 'none';
+}
+
 async function reAuthFromToken(){
-  var token = getToken();
-  if(!token){
-    document.getElementById('main-app').style.display = 'none';
-    document.getElementById('login-screen').style.display = 'none';
-    return;
-  }
   try {
+    var token = getToken();
+    if(!token){
+      document.getElementById('main-app').style.display = 'none';
+      document.getElementById('login-screen').style.display = 'none';
+      document.getElementById('landing-screen').style.display = 'block';
+      return;
+    }
     var res = await fetch(API+'/auth/me', { headers: authHeaders(), cache: 'no-store' });
     if(res.ok){
       var data = await res.json();
@@ -3167,12 +3189,20 @@ async function reAuthFromToken(){
         maybeShowCityPrompt(data.user);
       }
     } else {
+      // Sessão expirada/token inválido: mostra a landing por baixo e abre
+      // o modal de login por cima dela, igual ao fluxo normal de "Entrar".
       clearToken();
+      document.getElementById('landing-screen').style.display = 'block';
       showLogin();
     }
   } catch(e) {
-    /* Servidor offline — não tenta auto-login, mostra tela de login */
+    /* Servidor offline — não tenta auto-login, mostra landing */
     clearToken();
+    document.getElementById('main-app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('landing-screen').style.display = 'block';
+  } finally {
+    hideBootLoading();
   }
 }
 
@@ -3203,6 +3233,7 @@ window.addEventListener('pageshow', function(event){
         showApp();
         maybeShowCityPrompt(user);
       }
+      hideBootLoading();
       return;
     } catch(e) { /* JSON inválido — ignora e segue para auto-login normal */ }
   }
