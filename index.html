@@ -5,13 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Unbounded:wght@500;700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.socket.io/4.7.5/socket.io.min.js"></script>
 <title>MyGUIG — Conecte-se à sua música</title>
 <meta name="description" content="Marketplace que liga músicos, artistas e contratantes. Envie e receba propostas, geriras a tua agenda e fecha shows numa única plataforma.">
 
-<link rel="icon" type="image/png" sizes="32x32" href="/myguig-icon-32.png">
-<link rel="icon" type="image/png" sizes="16x16" href="/myguig-icon-16.png">
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 220'%3E%3Crect width='200' height='220' rx='36' fill='%233A1B4F'/%3E%3Cpath d='M100 26 C150 26 180 46 180 82 C180 132 126 190 100 202 C74 190 20 132 20 82 C20 46 50 26 100 26 Z' fill='%23F2B63C'/%3E%3C/svg%3E">
 <link rel="apple-touch-icon" sizes="180x180" href="/myguig-icon-180.png">
 
 <meta property="og:type" content="website">
@@ -60,8 +59,19 @@
   --radius-sm: 8px;
   --radius-md: 14px;
   --radius-lg: 20px;
+
+  /* Nova identidade visual — logo + capa (landing). Não usar ainda
+     no resto do site; o redesign completo é outra tarefa. */
+  --mg-cream:      #F5F0E8;
+  --mg-paper:      #FBF8F2;
+  --mg-plum:       #3A1B4F;
+  --mg-plum-dark:  #1E0F29;
+  --mg-plum-soft:  #4E3A5E;
+  --mg-mustard:    #F2B63C;
+  --font-mg-display: 'Unbounded', 'Space Grotesk', sans-serif;
+  --font-mg-body:     'Instrument Sans', 'Inter', sans-serif;
 }
-html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;font-size:14px;color:#fff}
+html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;font-size:14px;color:#fff;overflow-x:hidden}
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:2px}
@@ -71,7 +81,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 ══════════════════════════════════════════ */
 #landing-screen{
   display:none;
-  background:#000;
+  background:var(--mg-plum-dark);
   min-height:100vh;
 }
 #boot-loading{
@@ -87,45 +97,116 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   animation:boot-spin .7s linear infinite;
 }
 @keyframes boot-spin{to{transform:rotate(360deg)}}
-.landing-nav{
+/* ══════════════════════════════════════════
+   NOVA IDENTIDADE — LOGO + CAPA (landing)
+   Paleta --mg-* escopada a este bloco (logo + hero);
+   resto do site continua nos tokens antigos.
+══════════════════════════════════════════ */
+.mg-logo{display:inline-flex;align-items:center;gap:12px;text-decoration:none;min-height:44px}
+.mg-logo-symbol{width:36px;height:40px;display:block;flex-shrink:0}
+.mg-logo-word{
+  font-family:var(--font-mg-display);font-weight:700;font-size:24px;
+  letter-spacing:-.5px;color:var(--mg-cream);line-height:1;
+}
+.mg-header{
   display:flex;align-items:center;justify-content:space-between;
-  padding:20px 32px;max-width:1100px;margin:0 auto;
+  height:96px;padding:0 80px;background:var(--mg-plum-dark);
 }
-.landing-nav-logo{display:flex;align-items:center;gap:10px}
-.landing-nav-logo-icon{
-  width:34px;height:34px;border-radius:var(--radius-sm);
-  background:linear-gradient(135deg,var(--primary-hover),var(--primary-light));
+.mg-nav{display:flex;align-items:center;gap:32px}
+.mg-nav-link{
+  font-family:var(--font-mg-body);font-size:15px;font-weight:500;
+  color:var(--mg-cream);background:none;border:none;cursor:pointer;
+  padding:8px 0;min-height:44px;display:inline-flex;align-items:center;
+  text-decoration:none;
+}
+.mg-nav-actions{display:flex;align-items:center;gap:24px}
+.mg-btn-outline{
+  font-family:var(--font-mg-body);font-size:15px;font-weight:600;
+  color:var(--mg-cream);background:transparent;
+  border:2px solid var(--mg-cream);border-radius:999px;
+  padding:10px 24px;min-height:44px;cursor:pointer;
+  display:inline-flex;align-items:center;justify-content:center;
+  transition:background .15s,color .15s;
+}
+.mg-btn-outline:hover{background:var(--mg-cream);color:var(--mg-plum-dark)}
+.mg-menu-btn{
+  display:none;width:48px;height:48px;border-radius:50%;
+  border:2px solid var(--mg-cream);background:transparent;
+  align-items:center;justify-content:center;cursor:pointer;
+}
+.mg-mobile-menu{
+  display:none;background:var(--mg-plum-dark);
+  border-top:1px solid rgba(245,240,232,.15);
+  padding:8px 20px 20px;flex-direction:column;gap:4px;
+}
+.mg-mobile-menu.open{display:flex}
+.mg-mobile-menu .mg-nav-link,
+.mg-mobile-menu .mg-btn-outline{width:100%;justify-content:flex-start}
+.mg-mobile-menu .mg-btn-outline{justify-content:center;margin-top:8px}
+
+.mg-hero-section{background:var(--mg-plum-dark);min-height:100vh;display:flex;flex-direction:column}
+.mg-hero-body{
+  flex:1;display:flex;align-items:center;
+  max-width:1280px;margin:0 auto;width:100%;
+  padding:48px 80px;gap:40px;
+}
+.mg-hero-left{max-width:640px;flex-shrink:0}
+.mg-hero-title{
+  font-family:var(--font-mg-display);font-weight:700;
+  font-size:68px;line-height:1.04;letter-spacing:-2.5px;
+  color:var(--mg-cream);margin-bottom:24px;
+}
+.mg-hero-title .mg-mark{box-shadow:inset 0 -22px 0 var(--mg-mustard)}
+.mg-hero-sub{
+  font-family:var(--font-mg-body);font-size:21px;line-height:1.5;
+  color:rgba(245,240,232,.72);max-width:540px;margin-bottom:32px;
+}
+.mg-hero-cta{display:flex;flex-wrap:wrap;gap:16px}
+.mg-btn-pill{
+  font-family:var(--font-mg-body);font-size:18px;font-weight:600;
+  border:none;border-radius:999px;height:60px;padding:0 32px;
+  display:inline-flex;align-items:center;justify-content:center;
+  cursor:pointer;text-decoration:none;
+}
+.mg-btn-pill-plum{background:var(--mg-plum);color:var(--mg-cream)}
+.mg-btn-pill-mustard{background:var(--mg-mustard);color:var(--mg-plum)}
+
+.mg-hero-right{position:relative;width:580px;height:640px;flex-shrink:0}
+.mg-hero-pick{position:absolute;top:0;right:0;width:470px;height:auto;transform:rotate(-12deg)}
+.mg-hero-pick-mobile{display:none}
+.mg-hero-card{
+  position:absolute;left:0;bottom:0;width:320px;
+  background:var(--mg-paper);border:2px solid var(--mg-plum);
+  border-radius:20px;padding:24px;box-shadow:8px 8px 0 var(--mg-plum);
+}
+.mg-hero-card-title{
+  font-family:var(--font-mg-display);font-size:16px;font-weight:700;
+  color:var(--mg-plum);margin-bottom:16px;
+}
+.mg-hero-checklist{display:flex;flex-direction:column;gap:12px}
+.mg-hero-check{
+  display:flex;align-items:center;gap:10px;
+  font-family:var(--font-mg-body);font-size:14px;font-weight:500;color:var(--mg-plum);
+}
+.mg-check-dot{
+  width:22px;height:22px;border-radius:50%;flex-shrink:0;
   display:flex;align-items:center;justify-content:center;
-  font-weight:800;color:#fff;font-size:16px;
+  background:var(--mg-plum);color:var(--mg-cream);
 }
-.landing-nav-logo-text{font-weight:700;font-size:17px;color:#fff}
-.landing-nav-logo-text em{color:var(--primary-light);font-style:normal}
-.landing-nav-actions{display:flex;gap:10px}
-.btn-landing-ghost{
-  background:transparent;color:#ccc;border:1px solid var(--border-default);border-radius:var(--radius-sm);
-  padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;
-  transition:all .15s;
+.mg-hero-check.mg-check-done .mg-check-dot{background:var(--mg-mustard);color:var(--mg-plum)}
+
+.mg-marquee{height:64px;background:var(--mg-plum);overflow:hidden;display:flex;align-items:center}
+.mg-marquee-track{
+  display:flex;align-items:center;white-space:nowrap;
+  font-family:var(--font-mg-display);font-weight:500;font-size:18px;color:var(--mg-cream);
+  animation:mg-marquee 28s linear infinite;
 }
-.btn-landing-ghost:hover{border-color:#444;color:#fff}
-.btn-landing-ghost:active{transform:scale(.97)}
-.btn-landing-primary{
-  background:linear-gradient(135deg,var(--primary-hover),var(--primary));color:#fff;border:none;border-radius:var(--radius-sm);
-  padding:9px 18px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit;
-  transition:all .15s;box-shadow:var(--shadow-sm);
+.mg-marquee-dot{color:var(--mg-mustard);padding:0 14px}
+@keyframes mg-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion: reduce){
+  .mg-marquee-track{animation:none}
 }
-.btn-landing-primary:hover{box-shadow:var(--shadow-hover);transform:translateY(-1px)}
-.btn-landing-primary:active{transform:scale(.97)}
-.landing-hero{
-  max-width:720px;margin:0 auto;text-align:center;
-  padding:90px 24px 70px;
-}
-.landing-hero-title{
-  font-family:var(--font-display);font-size:44px;font-weight:700;color:#fff;line-height:1.15;margin-bottom:18px;
-  letter-spacing:-.5px;
-}
-.landing-hero-sub{font-family:var(--font-body);font-size:17px;color:var(--text-secondary);line-height:1.6;margin-bottom:36px}
-.landing-hero-cta{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
-.landing-cta-lg{padding:13px 26px;font-size:15px}
+
 .landing-features{
   max-width:1000px;margin:0 auto;padding:20px 24px 90px;
 }
@@ -161,15 +242,36 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   border-top:1px solid #161616;
 }
 @media(max-width:768px){
-  .landing-nav{padding:14px 16px}
-  .landing-nav-logo-icon{width:28px;height:28px;font-size:14px;border-radius:8px}
-  .landing-nav-logo-text{font-size:15px}
-  .landing-nav-actions{gap:8px}
-  .landing-nav-actions .btn-landing-ghost{display:none}
-  .landing-nav-actions .btn-landing-primary{padding:8px 14px;font-size:13px;white-space:nowrap}
-  .landing-hero{padding:56px 20px 48px}
-  .landing-hero-title{font-size:30px}
-  .landing-hero-sub{font-size:15px}
+  .mg-header{height:72px;padding:0 20px}
+  .mg-logo-symbol{width:28px;height:31px}
+  .mg-logo-word{font-size:19px}
+  .mg-nav{display:none}
+  .mg-nav-actions .mg-nav-link,
+  .mg-nav-actions .mg-btn-outline{display:none}
+  .mg-menu-btn{display:flex}
+
+  .mg-hero-section{min-height:auto}
+  .mg-hero-body{
+    flex-direction:column;align-items:flex-start;
+    padding:40px 20px 32px;gap:0;
+    position:relative;overflow:hidden;
+  }
+  .mg-hero-left{max-width:none;position:relative;z-index:1}
+  .mg-hero-title{font-size:38px;letter-spacing:-1.5px;margin-bottom:16px}
+  .mg-hero-title .mg-mark{box-shadow:inset 0 -12px 0 var(--mg-mustard)}
+  .mg-hero-sub{font-size:17px;margin-bottom:24px;max-width:none}
+  .mg-hero-cta{flex-direction:column;width:100%}
+  .mg-btn-pill{width:100%;height:56px}
+  .mg-hero-right{display:none}
+  .mg-hero-pick-mobile{
+    display:block;position:absolute;z-index:0;
+    right:-40px;bottom:0;width:250px;height:auto;
+    transform:rotate(-12deg);
+  }
+
+  .mg-marquee{height:52px}
+  .mg-marquee-track{font-size:15px}
+
   .landing-features{padding:10px 20px 60px}
   .landing-features-grid{grid-template-columns:1fr}
 }
@@ -1321,28 +1423,76 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 <div id="boot-loading"><div class="boot-spinner"></div></div>
 
 <div id="landing-screen">
-  <nav class="landing-nav">
-    <div class="landing-nav-logo">
-      <div class="landing-nav-logo-icon">G</div>
-      <span class="landing-nav-logo-text">My<em>GUIG</em></span>
-    </div>
-    <div class="landing-nav-actions">
-      <button class="btn-landing-ghost" onclick="showLogin()">Entrar</button>
-      <button class="btn-landing-primary" onclick="handleRegister()">Criar conta</button>
-    </div>
-  </nav>
+  <svg width="0" height="0" style="position:absolute" aria-hidden="true">
+    <symbol id="mg-pick-symbol" viewBox="0 0 200 220">
+      <path d="M100 8 C160 8 196 30 196 72 C196 130 130 200 100 214 C70 200 4 130 4 72 C4 30 40 8 100 8 Z" fill="#3A1B4F"/>
+      <text x="100" y="118" text-anchor="middle" font-family="Unbounded, sans-serif" font-weight="700" font-size="130" fill="#F2B63C">g</text>
+    </symbol>
+  </svg>
 
-  <section class="landing-hero">
-    <h1 class="landing-hero-title">O lugar onde músicos são contratados.</h1>
-    <p class="landing-hero-sub">Cria o teu perfil e aparece para quem contrata música — bares, casas de show, casamentos e organizadores de eventos.<br>Recebe propostas reais, negoceia e mantém a tua agenda sempre em dia.</p>
-    <div class="landing-hero-cta">
-      <button class="btn-landing-primary landing-cta-lg" onclick="handleRegister()">Criar perfil grátis</button>
-      <button class="btn-landing-ghost landing-cta-lg" onclick="showLogin()">Já tenho conta</button>
+  <header class="mg-header">
+    <a href="/" class="mg-logo" aria-label="MyGUIG, página inicial">
+      <svg class="mg-logo-symbol" aria-hidden="true"><use href="#mg-pick-symbol"></use></svg>
+      <span class="mg-logo-word">myguig</span>
+    </a>
+    <nav class="mg-nav">
+      <a href="#como-funciona" class="mg-nav-link" onclick="event.preventDefault();document.getElementById('como-funciona').scrollIntoView({behavior:'smooth'});">Como funciona</a>
+      <button class="mg-nav-link" onclick="showLogin()">Descobrir</button>
+    </nav>
+    <div class="mg-nav-actions">
+      <button class="mg-btn-outline" onclick="showLogin()">Entrar</button>
+      <button class="mg-menu-btn" aria-label="Abrir menu" onclick="toggleMgMobileMenu()">
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--mg-cream)" stroke-width="2" stroke-linecap="round"><line x1="3" y1="7" x2="17" y2="7"></line><line x1="3" y1="13" x2="17" y2="13"></line></svg>
+      </button>
     </div>
-    <p class="landing-hero-note">Também usado por bares, casas de show e organizadores para encontrar músicos.</p>
+  </header>
+  <div class="mg-mobile-menu" id="mg-mobile-menu">
+    <a href="#como-funciona" class="mg-nav-link" onclick="event.preventDefault();closeMgMobileMenu();document.getElementById('como-funciona').scrollIntoView({behavior:'smooth'});">Como funciona</a>
+    <button class="mg-nav-link" onclick="closeMgMobileMenu();showLogin();">Descobrir</button>
+    <button class="mg-btn-outline" onclick="closeMgMobileMenu();showLogin();">Entrar</button>
+  </div>
+
+  <section class="mg-hero-section">
+    <div class="mg-hero-body">
+      <div class="mg-hero-left">
+        <h1 class="mg-hero-title">O teu próximo <span class="mg-mark">gig</span> começa aqui.</h1>
+        <p class="mg-hero-sub">O MyGUIG liga músicos a bares, restaurantes e organizadores de eventos. Envia propostas, negoceia e marca o concerto, tudo no mesmo sítio.</p>
+        <div class="mg-hero-cta">
+          <button class="mg-btn-pill mg-btn-pill-plum" onclick="handleRegister('musician')">Sou músico</button>
+          <button class="mg-btn-pill mg-btn-pill-mustard" onclick="handleRegister('contractor')">Quero contratar</button>
+        </div>
+      </div>
+      <svg class="mg-hero-pick-mobile" aria-hidden="true"><use href="#mg-pick-symbol"></use></svg>
+      <div class="mg-hero-right">
+        <svg class="mg-hero-pick" aria-hidden="true"><use href="#mg-pick-symbol"></use></svg>
+        <div class="mg-hero-card">
+          <div class="mg-hero-card-title">Do convite ao palco</div>
+          <div class="mg-hero-checklist">
+            <div class="mg-hero-check">
+              <span class="mg-check-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+              Proposta enviada
+            </div>
+            <div class="mg-hero-check">
+              <span class="mg-check-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+              Valor combinado no chat
+            </div>
+            <div class="mg-hero-check mg-check-done">
+              <span class="mg-check-dot"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+              Gig confirmado
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mg-marquee">
+      <div class="mg-marquee-track">
+        <span>música ao vivo</span><span class="mg-marquee-dot">✦</span><span>pagode</span><span class="mg-marquee-dot">✦</span><span>fado</span><span class="mg-marquee-dot">✦</span><span>jazz</span><span class="mg-marquee-dot">✦</span><span>rock</span><span class="mg-marquee-dot">✦</span><span>samba</span><span class="mg-marquee-dot">✦</span><span>acústico</span><span class="mg-marquee-dot">✦</span><span>DJ</span><span class="mg-marquee-dot">✦</span><span>bandas</span><span class="mg-marquee-dot">✦</span><span>cantores</span><span class="mg-marquee-dot">✦</span>
+        <span>música ao vivo</span><span class="mg-marquee-dot">✦</span><span>pagode</span><span class="mg-marquee-dot">✦</span><span>fado</span><span class="mg-marquee-dot">✦</span><span>jazz</span><span class="mg-marquee-dot">✦</span><span>rock</span><span class="mg-marquee-dot">✦</span><span>samba</span><span class="mg-marquee-dot">✦</span><span>acústico</span><span class="mg-marquee-dot">✦</span><span>DJ</span><span class="mg-marquee-dot">✦</span><span>bandas</span><span class="mg-marquee-dot">✦</span><span>cantores</span><span class="mg-marquee-dot">✦</span>
+      </div>
+    </div>
   </section>
 
-  <section class="landing-features">
+  <section class="landing-features" id="como-funciona">
     <div class="landing-section-eyebrow">Como funciona</div>
     <div class="landing-section-title">Da tua primeira proposta ao show marcado.</div>
     <div class="landing-features-grid">
@@ -2567,12 +2717,19 @@ async function handleLogin(){
 }
 
 /* ── Abrir/fechar modal de cadastro ── */
-function handleRegister(){
+function handleRegister(role){
   document.getElementById('landing-screen').style.display='none';
   document.getElementById('login-screen').style.display='none';
   document.getElementById('main-app').style.display='none';
   document.getElementById('register-screen').style.display='block';
+  if(role) selectRole(role);
   setTimeout(function(){ document.getElementById('reg-name').focus(); }, 50);
+}
+function toggleMgMobileMenu(){
+  document.getElementById('mg-mobile-menu').classList.toggle('open');
+}
+function closeMgMobileMenu(){
+  document.getElementById('mg-mobile-menu').classList.remove('open');
 }
 function closeRegisterScreen(){
   document.getElementById('register-screen').style.display='none';
