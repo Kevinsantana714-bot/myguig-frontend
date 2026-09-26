@@ -106,37 +106,37 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .mg-logo-symbol{width:36px;height:40px;display:block;flex-shrink:0}
 .mg-logo-word{
   font-family:var(--font-mg-display);font-weight:700;font-size:24px;
-  letter-spacing:-.5px;color:var(--mg-plum);line-height:1;
+  letter-spacing:-.5px;color:var(--mg-cream);line-height:1;
 }
 .mg-header{
   display:flex;align-items:center;justify-content:space-between;
-  height:96px;padding:0 80px;background:var(--mg-cream);
+  height:96px;padding:0 80px;background:var(--mg-plum-dark);
 }
 .mg-nav{display:flex;align-items:center;gap:32px}
 .mg-nav-link{
   font-family:var(--font-mg-body);font-size:15px;font-weight:500;
-  color:var(--mg-plum);background:none;border:none;cursor:pointer;
+  color:var(--mg-cream);background:none;border:none;cursor:pointer;
   padding:8px 0;min-height:44px;display:inline-flex;align-items:center;
   text-decoration:none;
 }
 .mg-nav-actions{display:flex;align-items:center;gap:24px}
 .mg-btn-outline{
   font-family:var(--font-mg-body);font-size:15px;font-weight:600;
-  color:var(--mg-plum);background:transparent;
-  border:2px solid var(--mg-plum);border-radius:999px;
+  color:var(--mg-cream);background:transparent;
+  border:2px solid var(--mg-cream);border-radius:999px;
   padding:10px 24px;min-height:44px;cursor:pointer;
   display:inline-flex;align-items:center;justify-content:center;
   transition:background .15s,color .15s;
 }
-.mg-btn-outline:hover{background:var(--mg-plum);color:var(--mg-cream)}
+.mg-btn-outline:hover{background:var(--mg-cream);color:var(--mg-plum-dark)}
 .mg-menu-btn{
   display:none;width:48px;height:48px;border-radius:50%;
-  border:2px solid var(--mg-plum);background:transparent;
+  border:2px solid var(--mg-cream);background:transparent;
   align-items:center;justify-content:center;cursor:pointer;
 }
 .mg-mobile-menu{
-  display:none;background:var(--mg-cream);
-  border-top:1px solid rgba(58,27,79,.15);
+  display:none;background:var(--mg-plum-dark);
+  border-top:1px solid rgba(245,240,232,.15);
   padding:8px 20px 20px;flex-direction:column;gap:4px;
 }
 .mg-mobile-menu.open{display:flex}
@@ -144,7 +144,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .mg-mobile-menu .mg-btn-outline{width:100%;justify-content:flex-start}
 .mg-mobile-menu .mg-btn-outline{justify-content:center;margin-top:8px}
 
-.mg-hero-section{background:var(--mg-cream);min-height:100vh;display:flex;flex-direction:column}
+.mg-hero-section{background:var(--mg-plum-dark);min-height:100vh;display:flex;flex-direction:column}
 .mg-hero-body{
   flex:1;display:flex;align-items:center;
   max-width:1280px;margin:0 auto;width:100%;
@@ -154,12 +154,12 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .mg-hero-title{
   font-family:var(--font-mg-display);font-weight:700;
   font-size:68px;line-height:1.04;letter-spacing:-2.5px;
-  color:var(--mg-plum);margin-bottom:24px;
+  color:var(--mg-cream);margin-bottom:24px;
 }
 .mg-hero-title .mg-mark{box-shadow:inset 0 -22px 0 var(--mg-mustard)}
 .mg-hero-sub{
   font-family:var(--font-mg-body);font-size:21px;line-height:1.5;
-  color:var(--mg-plum-soft);max-width:540px;margin-bottom:32px;
+  color:rgba(245,240,232,.72);max-width:540px;margin-bottom:32px;
 }
 .mg-hero-cta{display:flex;flex-wrap:wrap;gap:16px}
 .mg-btn-pill{
@@ -1442,7 +1442,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
     <div class="mg-nav-actions">
       <button class="mg-btn-outline" onclick="showLogin()">Entrar</button>
       <button class="mg-menu-btn" aria-label="Abrir menu" onclick="toggleMgMobileMenu()">
-        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="#3A1B4F" stroke-width="2" stroke-linecap="round"><line x1="3" y1="7" x2="17" y2="7"></line><line x1="3" y1="13" x2="17" y2="13"></line></svg>
+        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="var(--mg-cream)" stroke-width="2" stroke-linecap="round"><line x1="3" y1="7" x2="17" y2="7"></line><line x1="3" y1="13" x2="17" y2="13"></line></svg>
       </button>
     </div>
   </header>
