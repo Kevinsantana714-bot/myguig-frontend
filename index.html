@@ -855,6 +855,14 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   .reg-next-btn:hover:not(:disabled){background:var(--primary-dark)}
   .reg-next-btn:disabled{opacity:.5;cursor:not-allowed}
 }
+/* Galeria do cadastro: .pg-gallery-grid/.pg-slot-picker usam colunas de
+   largura fixa (104px×3 + gaps = 330px), que estoura em telas de iPhone
+   estreitas (viewport − padding do painel ≈ 300px). Escopado só ao
+   #reg-gallery-grid pra não alterar a galeria do Meu Perfil. */
+@media(max-width:420px){
+  #reg-gallery-grid{grid-template-columns:repeat(3,88px);gap:7px}
+  #reg-gallery-grid .pg-slot-picker{width:88px;height:117px}
+}
 .register-title{font-family:var(--font-display);font-size:24px;font-weight:700;color:#fff;margin-bottom:26px}
 .register-fields{display:flex;flex-direction:column;gap:14px}
 .register-field{display:flex;flex-direction:column;gap:5px}
