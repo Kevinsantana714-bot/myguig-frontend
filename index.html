@@ -901,6 +901,29 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   text-align:center;
 }
 .role-btn.active{border-color:var(--primary);color:var(--primary-lighter)}
+.reg-toggle-card{
+  position:relative;display:flex;flex-direction:column;gap:3px;
+  padding:12px 40px 12px 14px;border-radius:var(--radius-sm);
+  background:var(--bg-surface);border:1px solid var(--border-default);
+  cursor:pointer;transition:border-color .15s,background .15s;
+}
+.reg-toggle-card:hover{border-color:#555}
+.reg-toggle-card:active{transform:scale(.98)}
+.reg-toggle-input{position:absolute;opacity:0;width:1px;height:1px;pointer-events:none}
+.reg-toggle-title{font-size:13px;font-weight:600;color:var(--text-secondary);transition:color .15s}
+.reg-toggle-desc{font-size:11px;color:var(--text-secondary);line-height:1.4}
+.reg-toggle-dot{
+  position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:50%;
+  border:1.5px solid var(--border-default);background:transparent;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .15s,background .15s,transform .15s;
+}
+.reg-toggle-dot svg{opacity:0;transform:scale(.5);transition:opacity .15s,transform .15s}
+.reg-toggle-input:checked ~ .reg-toggle-dot{background:var(--primary);border-color:var(--primary);transform:scale(1.05)}
+.reg-toggle-input:checked ~ .reg-toggle-dot svg{opacity:1;transform:scale(1)}
+.reg-toggle-card:has(.reg-toggle-input:checked){border-color:var(--primary);background:rgba(139,92,246,.09)}
+.reg-toggle-card:has(.reg-toggle-input:checked) .reg-toggle-title{color:var(--primary-light)}
+.reg-toggle-input:focus-visible ~ .reg-toggle-dot{outline:2px solid var(--primary-light);outline-offset:2px}
 
 /* ══════════════════════════════════════════
    DESCOBRIR MÚSICOS
@@ -2400,57 +2423,73 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
         <div class="reg-col-form">
           <div class="register-title">Criar conta gratuita</div>
           <div class="register-fields">
-            <div class="register-field" data-step="1">
+            <div class="register-field" data-step="role">
               <label class="register-label">Você é…</label>
               <div class="role-selector">
                 <button class="role-btn active" id="role-musician" onclick="selectRole('musician')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path><path d="M19 10v2a7 7 0 0 1-14 0v-2"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>Sou Músico / Cantor</button>
                 <button class="role-btn" id="role-contractor" onclick="selectRole('contractor')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-3px;margin-right:6px"><path d="M3 21h18"></path><path d="M5 21V7l8-4v18"></path><path d="M19 21V11l-6-4"></path><line x1="9" y1="9" x2="9" y2="9.01"></line><line x1="9" y1="12" x2="9" y2="12.01"></line><line x1="9" y1="15" x2="9" y2="15.01"></line></svg>Sou Contratante / Bar</button>
               </div>
             </div>
-            <button class="reg-next-btn" data-step="1" onclick="regWizardNext(1)">Próxima</button>
-            <div class="register-field" data-step="2">
+            <button class="reg-next-btn" data-step="role" onclick="regWizardNext('role')">Próxima</button>
+            <div class="register-field" data-step="subtype" id="reg-subtype-section">
+              <label class="register-label">Você também é…</label>
+              <label class="reg-toggle-card">
+                <input type="checkbox" id="reg-is-artista" class="reg-toggle-input">
+                <span class="reg-toggle-dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+                <span class="reg-toggle-title">Artista / Cantor</span>
+                <small class="reg-toggle-desc">Quero ser contratado por casas de show</small>
+              </label>
+              <label class="reg-toggle-card">
+                <input type="checkbox" id="reg-is-freelancer" class="reg-toggle-input">
+                <span class="reg-toggle-dot"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+                <span class="reg-toggle-title">Músico freelancer</span>
+                <small class="reg-toggle-desc">Quero prestar serviço pra outros artistas</small>
+              </label>
+            </div>
+            <button class="reg-next-btn" data-step="subtype" onclick="regWizardNext('subtype')">Próxima</button>
+            <div class="register-field" data-step="nome">
               <label class="register-label">Nome completo</label>
               <input class="register-input" id="reg-name" type="text" placeholder="Seu nome"
                 onkeydown="if(event.key==='Enter')document.getElementById('reg-email').focus()">
             </div>
-            <button class="reg-next-btn" data-step="2" onclick="regWizardNext(2)" disabled>Próxima</button>
-            <div class="register-field" data-step="3">
+            <button class="reg-next-btn" data-step="nome" onclick="regWizardNext('nome')" disabled>Próxima</button>
+            <div class="register-field" data-step="email">
               <label class="register-label">E-mail</label>
               <input class="register-input" id="reg-email" type="email" placeholder="seu@email.com"
                 onkeydown="if(event.key==='Enter')document.getElementById('reg-cidade').focus()">
             </div>
-            <button class="reg-next-btn" data-step="3" onclick="regWizardNext(3)" disabled>Próxima</button>
-            <div class="register-field" data-step="4">
+            <button class="reg-next-btn" data-step="email" onclick="regWizardNext('email')" disabled>Próxima</button>
+            <div class="register-field" data-step="cidade">
               <label class="register-label">Cidade</label>
               <input class="register-input" id="reg-cidade" type="text" placeholder="Ex: Lisboa, Porto, Coimbra..."
                 onkeydown="if(event.key==='Enter')document.getElementById('reg-senha').focus()">
             </div>
-            <button class="reg-next-btn" data-step="4" onclick="regWizardNext(4)" disabled>Próxima</button>
-            <div class="register-field" data-step="5">
+            <button class="reg-next-btn" data-step="cidade" onclick="regWizardNext('cidade')" disabled>Próxima</button>
+            <div class="register-field" data-step="senha">
               <label class="register-label">Senha (mín. 8 caracteres)</label>
               <input class="register-input" id="reg-senha" type="password" placeholder="••••••••"
                 onkeydown="if(event.key==='Enter')document.getElementById('reg-confirma').focus()">
             </div>
-            <div class="register-field" data-step="5">
+            <div class="register-field" data-step="senha">
               <label class="register-label">Confirmar senha</label>
               <input class="register-input" id="reg-confirma" type="password" placeholder="••••••••"
                 onkeydown="if(event.key==='Enter')submitRegisterStep1()">
             </div>
             <div class="register-error" id="reg-error"></div>
-            <button class="btn-register-confirm" id="reg-btn" data-step="5" onclick="submitRegisterStep1()">Criar conta</button>
-            <div id="reg-divider" class="reg-divider-row" data-step="1">
+            <button class="btn-register-confirm" id="reg-btn" data-step="senha" onclick="submitRegisterStep1()">Criar conta</button>
+            <div id="reg-divider" class="reg-divider-row" data-step="role">
               <div style="flex:1;height:1px;background:var(--border-default)"></div>
               <span style="font-size:12px;color:var(--text-tertiary)">ou</span>
               <div style="flex:1;height:1px;background:var(--border-default)"></div>
             </div>
-            <button class="btn-google" id="reg-google-btn" data-step="1" onclick="closeRegisterScreen();loginComGoogle()">
+            <button class="btn-google" id="reg-google-btn" data-step="role" onclick="closeRegisterScreen();loginComGoogle()">
               <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google">
               Registar com Google
             </button>
           </div>
         </div>
 
-        <div class="reg-col-media" data-step="6">
+        <div class="reg-col-media" data-step="fotos">
           <p class="reg-media-hint">Adicione pelo menos uma foto</p>
           <div class="reg-media-wrap">
             <div class="pg-gallery-grid" id="reg-gallery-grid" style="display:none"></div>
@@ -2614,6 +2653,7 @@ function handleRegister(){
   document.getElementById('login-screen').style.display='none';
   document.getElementById('main-app').style.display='none';
   document.getElementById('register-screen').style.display='block';
+  selectRole(_selectedRole);
   _regResetWizard();
   setTimeout(function(){ document.getElementById('reg-name').focus(); }, 50);
 }
@@ -2629,6 +2669,10 @@ function closeRegisterScreen(){
     el.disabled=false;
   });
   document.getElementById('reg-error').textContent='';
+  document.getElementById('reg-is-artista').checked=false;
+  document.getElementById('reg-is-artista').disabled=false;
+  document.getElementById('reg-is-freelancer').checked=false;
+  document.getElementById('reg-is-freelancer').disabled=false;
   document.getElementById('role-musician').disabled=false;
   document.getElementById('role-contractor').disabled=false;
   document.getElementById('reg-back-link').style.display='';
@@ -2646,52 +2690,67 @@ function closeRegisterScreen(){
    breakpoint do grid desktop/mobile do formulário). No desktop estas
    funções não alteram nada visível: todos os campos continuam
    simultaneamente visíveis via o CSS padrão de .register-field. ── */
-var _regStep = 1;
+/* Passos identificados por nome (não número) — permite incluir/excluir
+   o passo "subtype" dinamicamente conforme o papel escolhido, sem
+   precisar renumerar os passos seguintes. */
+var REG_STEPS_MUSICIAN   = ['role','subtype','nome','email','cidade','senha','fotos'];
+var REG_STEPS_CONTRACTOR = ['role','nome','email','cidade','senha','fotos'];
+var _regStepIdx = 0;
 function _isRegWizardMobile(){
   return window.matchMedia('(max-width:768px)').matches;
 }
-function _regShowStep(n){
-  _regStep = n;
+function _regActiveSequence(){
+  return _selectedRole==='musician' ? REG_STEPS_MUSICIAN : REG_STEPS_CONTRACTOR;
+}
+function _regRenderStep(){
+  var seq = _regActiveSequence();
+  var name = seq[_regStepIdx];
   var bar = document.getElementById('reg-wizard-progress');
   if(bar){
+    while(bar.children.length < seq.length){ var s=document.createElement('div'); s.className='reg-wizard-seg'; bar.appendChild(s); }
+    while(bar.children.length > seq.length){ bar.removeChild(bar.lastChild); }
     Array.from(bar.children).forEach(function(seg, i){
-      seg.classList.toggle('filled', i < n);
+      seg.classList.toggle('filled', i<=_regStepIdx);
     });
   }
   document.querySelectorAll('[data-step]').forEach(function(el){
-    el.classList.toggle('reg-step-visible', parseInt(el.getAttribute('data-step'), 10) === n);
+    el.classList.toggle('reg-step-visible', el.getAttribute('data-step')===name);
   });
   _regSyncNextButtons();
 }
-function _regResetWizard(){
-  _regShowStep(1);
+function _regShowStepByName(name){
+  var seq = _regActiveSequence();
+  var idx = seq.indexOf(name);
+  _regStepIdx = idx===-1 ? 0 : idx;
+  _regRenderStep();
 }
-function regWizardNext(fromStep){
-  if(fromStep===1){
-    _regShowStep(2);
-  } else if(fromStep===2){
-    if(!document.getElementById('reg-name').value.trim()) return;
-    _regShowStep(3);
-  } else if(fromStep===3){
-    if(!document.getElementById('reg-email').value.trim()) return;
-    _regShowStep(4);
-  } else if(fromStep===4){
-    if(!document.getElementById('reg-cidade').value.trim()) return;
-    _regShowStep(5);
-  }
+function _regResetWizard(){
+  _regStepIdx = 0;
+  _regRenderStep();
+}
+function regWizardNext(fromName){
+  if(fromName==='nome'   && !document.getElementById('reg-name').value.trim())   return;
+  if(fromName==='email'  && !document.getElementById('reg-email').value.trim())  return;
+  if(fromName==='cidade' && !document.getElementById('reg-cidade').value.trim()) return;
+  var seq = _regActiveSequence();
+  var idx = seq.indexOf(fromName);
+  if(idx===-1 || idx+1>=seq.length) return;
+  _regStepIdx = idx+1;
+  _regRenderStep();
 }
 function regBackArrowClick(){
-  if(_isRegWizardMobile() && _regStep>1){
-    _regShowStep(_regStep-1);
+  if(_isRegWizardMobile() && _regStepIdx>0){
+    _regStepIdx -= 1;
+    _regRenderStep();
   } else {
     closeRegisterScreen();
   }
 }
 function _regSyncNextButtons(){
   if(!_isRegWizardMobile()) return;
-  var nameBtn    = document.querySelector('.reg-next-btn[data-step="2"]');
-  var emailBtn   = document.querySelector('.reg-next-btn[data-step="3"]');
-  var cidadeBtn  = document.querySelector('.reg-next-btn[data-step="4"]');
+  var nameBtn    = document.querySelector('.reg-next-btn[data-step="nome"]');
+  var emailBtn   = document.querySelector('.reg-next-btn[data-step="email"]');
+  var cidadeBtn  = document.querySelector('.reg-next-btn[data-step="cidade"]');
   if(nameBtn)   nameBtn.disabled   = !document.getElementById('reg-name').value.trim();
   if(emailBtn)  emailBtn.disabled  = !document.getElementById('reg-email').value.trim();
   if(cidadeBtn) cidadeBtn.disabled = !document.getElementById('reg-cidade').value.trim();
@@ -2728,10 +2787,12 @@ async function submitRegisterStep1(){
 
   btn.textContent='Criando conta...'; btn.disabled=true;
   try {
+    var isArtista    = document.getElementById('reg-is-artista').checked;
+    var isFreelancer = document.getElementById('reg-is-freelancer').checked;
     var res  = await fetch(API+'/auth/register', {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({name, email, password: senha, role: _selectedRole, cidade: cidade})
+      body: JSON.stringify({name, email, password: senha, role: _selectedRole, cidade: cidade, is_artista: isArtista, is_freelancer: isFreelancer})
     });
     var data = await res.json();
     if(!res.ok){
@@ -2750,13 +2811,15 @@ async function submitRegisterStep1(){
 
 /* ── Passo 2: galeria obrigatória (reaproveita o componente de Meu Perfil) ── */
 function _enterRegisterStep2(){
-  _regShowStep(6);
+  _regShowStepByName('fotos');
   document.getElementById('reg-back-link').style.display='none';
   ['reg-name','reg-email','reg-cidade','reg-senha','reg-confirma'].forEach(function(id){
     document.getElementById(id).disabled=true;
   });
   document.getElementById('role-musician').disabled=true;
   document.getElementById('role-contractor').disabled=true;
+  document.getElementById('reg-is-artista').disabled=true;
+  document.getElementById('reg-is-freelancer').disabled=true;
   document.getElementById('reg-btn').textContent='Conta criada ✓';
   document.getElementById('reg-google-btn').style.display='none';
   document.getElementById('reg-divider').style.display='none';
@@ -4995,6 +5058,8 @@ function selectRole(role){
   _selectedRole = role;
   document.getElementById('role-musician').classList.toggle('active', role==='musician');
   document.getElementById('role-contractor').classList.toggle('active', role==='contractor');
+  var subtypeEl = document.getElementById('reg-subtype-section');
+  if(subtypeEl) subtypeEl.style.display = (role==='musician') ? '' : 'none';
 }
 
 /* ════════════════════════════════════════════
