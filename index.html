@@ -828,9 +828,18 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
 .reg-wizard-progress{display:none}
 .reg-next-btn{display:none}
 @media(max-width:768px){
-  .reg-panel{padding:28px 20px}
-  .reg-cols{grid-template-columns:1fr;gap:32px}
+  /* Wizard em tela cheia: altura real do viewport (100dvh, com fallback
+     100vh) em vez de min-height, pra o passo ativo poder rolar sozinho
+     (.reg-cols) sem depender do scroll da página — evita conteúdo ou
+     o botão "Concluir cadastro" ficarem fora da tela em telas baixas
+     (ex. iPhone SE, 568px de altura). */
+  #register-screen{height:100vh;height:100dvh;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+  .reg-page{flex:1;min-height:0;display:flex;flex-direction:column;width:100%}
+  .reg-panel{padding:28px 20px;flex:1;min-height:0;display:flex;flex-direction:column}
+  .reg-cols{grid-template-columns:1fr;gap:32px;flex:1;min-height:0;overflow-y:auto}
   .reg-col-form{max-width:100%}
+  .reg-media-wrap{display:block;min-height:0}
+  #reg-finish-btn{position:sticky;bottom:0;max-width:none;background:var(--bg-surface);padding-bottom:env(safe-area-inset-bottom)}
 
   /* ── Wizard passo-a-passo (mobile only) ── */
   .reg-wizard-progress{display:flex;gap:6px;margin-bottom:22px}
@@ -845,7 +854,7 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   #reg-btn[data-step]{display:none}
   #reg-btn[data-step].reg-step-visible{display:block}
   .reg-col-media[data-step]{display:none}
-  .reg-col-media[data-step].reg-step-visible{display:flex}
+  .reg-col-media[data-step].reg-step-visible{display:flex;flex-direction:column;align-items:stretch}
   .reg-next-btn{
     display:none;width:100%;padding:14px;background:var(--primary-hover);border:none;
     border-radius:10px;color:#fff;font-size:15px;font-weight:600;
@@ -855,13 +864,14 @@ html,body{background:#000;height:100%;font-family:'Inter','Roboto',sans-serif;fo
   .reg-next-btn:hover:not(:disabled){background:var(--primary-dark)}
   .reg-next-btn:disabled{opacity:.5;cursor:not-allowed}
 }
-/* Galeria do cadastro: .pg-gallery-grid/.pg-slot-picker usam colunas de
-   largura fixa (104px×3 + gaps = 330px), que estoura em telas de iPhone
-   estreitas (viewport − padding do painel ≈ 300px). Escopado só ao
-   #reg-gallery-grid pra não alterar a galeria do Meu Perfil. */
-@media(max-width:420px){
-  #reg-gallery-grid{grid-template-columns:repeat(3,88px);gap:7px}
-  #reg-gallery-grid .pg-slot-picker{width:88px;height:117px}
+/* Galeria do cadastro: grelha fluida em vez de colunas fixas em px, pra
+   caber em qualquer largura de tela (320–390px+) sem vazar pra fora do
+   painel. Escopado só ao #reg-gallery-grid pra não alterar a galeria
+   do Meu Perfil (.pg-gallery-grid/.pg-slot-picker continuam com os
+   104px fixos de sempre fora do cadastro). */
+@media(max-width:768px){
+  #reg-gallery-grid{grid-template-columns:repeat(3,1fr);gap:8px;padding:0 16px}
+  #reg-gallery-grid .pg-slot-picker{width:auto;height:auto;aspect-ratio:3/4}
 }
 .register-title{font-family:var(--font-display);font-size:24px;font-weight:700;color:#fff;margin-bottom:26px}
 .register-fields{display:flex;flex-direction:column;gap:14px}
